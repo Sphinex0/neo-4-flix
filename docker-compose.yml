@@ -1,0 +1,80 @@
+services:
+
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+    ports:
+      - "7474:7474"   # Neo4j browser
+      - "7687:7687"   # Bolt (Neo4j browser login)
+    volumes:
+      - neo4j_data:/data
+
+  discovery-service:
+    build: ./backend/discovery-service
+    ports:
+      - "8761:8761"   # Eureka dashboard (for testing)
+
+  api-gateway:
+    build: ./backend/api-gateway
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-service
+
+  user-service:
+    build: ./backend/user-service
+    environment:
+      SPRING_NEO4J_URI: bolt://neo4j:7687
+      SPRING_NEO4J_AUTHENTICATION_USERNAME: neo4j
+      SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+    depends_on:
+      - neo4j
+      - discovery-service
+
+  movie-service:
+    build: ./backend/movie-service
+    environment:
+      SPRING_NEO4J_URI: bolt://neo4j:7687
+      SPRING_NEO4J_AUTHENTICATION_USERNAME: neo4j
+      SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+    depends_on:
+      - neo4j
+      - discovery-service
+
+  rating-service:
+    build: ./backend/rating-service
+    environment:
+      SPRING_NEO4J_URI: bolt://neo4j:7687
+      SPRING_NEO4J_AUTHENTICATION_USERNAME: neo4j
+      SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+    depends_on:
+      - neo4j
+      - discovery-service
+
+  recommendation-service:
+    build: ./backend/recommendation-service
+    environment:
+      SPRING_NEO4J_URI: bolt://neo4j:7687
+      SPRING_NEO4J_AUTHENTICATION_USERNAME: neo4j
+      SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+    depends_on:
+      - neo4j
+      - discovery-service
+
+  # ---------- Angular frontend ----------
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:4000"
+    depends_on:
+      - api-gateway
+
+volumes:
+  neo4j_data:
