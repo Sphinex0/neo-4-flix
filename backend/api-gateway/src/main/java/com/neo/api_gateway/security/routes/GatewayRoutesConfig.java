@@ -1,0 +1,72 @@
+package com.neo.api_gateway.security.routes;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.ServerResponse;
+import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
+import static org.springframework.cloud.gateway.server.mvc.filter.LoadBalancerFilterFunctions.lb;
+import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
+
+
+import com.neo.api_gateway.security.securityConfig.UserClaimsGatewayFilter;
+
+public class GatewayRoutesConfig {
+    private final UserClaimsGatewayFilter userClaimsGatewayFilter;
+
+        public GatewayRoutesConfig(
+                        UserClaimsGatewayFilter userClaimsGatewayFilter) {
+                this.userClaimsGatewayFilter = userClaimsGatewayFilter;
+        }
+
+        @Bean
+        public RouterFunction<ServerResponse> gatewayRoutes() {
+
+                RouterFunction<ServerResponse> userServiceRoute = route("user-service-route")
+                                .route(
+                                                request -> request.path().startsWith("/auth/") ||
+                                                                request.path().equals("/MyProfile"),
+                                                http())
+                                .before(userClaimsGatewayFilter::apply)
+                                .filter(lb("user-service"))
+                                .build();
+
+                RouterFunction<ServerResponse> productServiceRoute = route("product-service-route")
+                                .route(
+                                                request -> request.path().startsWith("/products"),
+                                                http())
+                                .before(userClaimsGatewayFilter::apply)
+                                .filter(lb("product-service"))
+                                .build();
+
+                RouterFunction<ServerResponse> mediaServiceRoute = route("media-service-route")
+                                .route(
+                                                request -> request.path().startsWith("/media"),
+                                                http())
+                                .before(userClaimsGatewayFilter::apply)
+                                .filter(lb("media-service"))
+                                .build();
+
+                RouterFunction<ServerResponse> orderServiceRoute = route("order-service-route")
+                                .route(
+                                                request -> request.path().startsWith("/orders") ||
+                                                                request.path().startsWith("/profile"),
+                                                http())
+                                .before(userClaimsGatewayFilter::apply)
+                                .filter(lb("order-service"))
+                                .build();
+
+                RouterFunction<ServerResponse> cartServiceRoute = route("cart-service-route")
+                                .route(
+                                                request -> request.path().startsWith("/cart"),
+                                                http())
+                                .before(userClaimsGatewayFilter::apply)
+                                .filter(lb("cart-service"))
+                                .build();
+
+                return userServiceRoute
+                                .and(productServiceRoute)
+                                .and(orderServiceRoute)
+                                .and(mediaServiceRoute)
+                                .and(cartServiceRoute);
+        }
+}

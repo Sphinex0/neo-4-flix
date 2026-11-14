@@ -20,6 +20,9 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    public static final String USER_ID_ATTRIBUTE = "userId";
+    public static final String USER_ROLE_ATTRIBUTE = "role";
+
     private final JwtService jwtService;
 
     @Override
@@ -40,11 +43,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String role = jwtService.extractRole(token);
 
                 List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userId, null,
+                        authorities);
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                request.setAttribute("userId", userId);
-                request.setAttribute("role", role);
+                request.setAttribute(USER_ID_ATTRIBUTE, userId);
+                request.setAttribute(USER_ROLE_ATTRIBUTE, role);
             }
         } catch (JwtException ex) {
             SecurityContextHolder.clearContext();
