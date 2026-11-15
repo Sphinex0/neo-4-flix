@@ -2,7 +2,6 @@ package com.neo.user_service.models;
 
 import java.time.Instant;
 
-import org.apache.commons.lang3.builder.ToStringExclude;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
@@ -35,7 +34,7 @@ public class User {
 
     private String email;
 
-    @ToStringExclude
+    @ToString.Exclude
     private String password;
 
     @Builder.Default
@@ -43,7 +42,7 @@ public class User {
 
     private boolean twoFactorEnabled;
 
-    @ToStringExclude
+    @ToString.Exclude
     private String twoFactorSecret;
 
     private Instant createdAt;
