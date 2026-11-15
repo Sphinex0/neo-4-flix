@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.neo.user_service.common.ResponseData;
 import com.neo.user_service.dtos.request.ProfileRequest;
 import com.neo.user_service.dtos.response.FriendResponse;
+import com.neo.user_service.dtos.response.TwoFactorSetupResponse;
 import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.services.UserService;
 
@@ -50,5 +52,11 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseData<List<FriendResponse>>> getMyFriends(@AuthenticationPrincipal String userId) {
         return ResponseEntity.ok(userService.getMyFriends(userId));
+    }
+
+    @PostMapping("/me/2fa/enable")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<TwoFactorSetupResponse>> enableTwoFactor(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(userService.enableTwoFactor(userId));
     }
 }
