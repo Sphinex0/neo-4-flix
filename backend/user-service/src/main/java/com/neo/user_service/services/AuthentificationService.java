@@ -2,7 +2,24 @@ package com.neo.user_service.services;
 
 import org.springframework.stereotype.Service;
 
+import com.neo.user_service.dtos.request.LoginRequest;
+import com.neo.user_service.dtos.request.RegisterRequest;
+import com.neo.user_service.dtos.request.TwoFactorAuthRequest;
+import com.neo.user_service.dtos.response.AuthResponse;
+import com.neo.user_service.dtos.response.UserResponse;
+
 @Service
 public class AuthentificationService {
-    
+
+    public UserResponse register(RegisterRequest request) {
+        return null;
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        return null;
+    }
+
+    public AuthResponse verifyTwoFactor(TwoFactorAuthRequest request) {
+        return null;
+    }
 }
