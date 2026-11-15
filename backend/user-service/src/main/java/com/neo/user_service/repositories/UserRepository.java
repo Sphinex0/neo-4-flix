@@ -1,4 +1,4 @@
-package com.neo.user_service.repository;
+package com.neo.user_service.repositories;
 
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
