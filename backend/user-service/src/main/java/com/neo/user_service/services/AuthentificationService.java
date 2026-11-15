@@ -13,6 +13,7 @@ import com.neo.user_service.dtos.request.TwoFactorAuthRequest;
 import com.neo.user_service.dtos.response.AuthResponse;
 import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.exceptions.auth.InvalidCredentialsException;
+import com.neo.user_service.exceptions.auth.InvalidTwoFactorCodeException;
 import com.neo.user_service.exceptions.user.EmailAlreadyExistsException;
 import com.neo.user_service.exceptions.user.UsernameAlreadyExistsException;
 import com.neo.user_service.exceptions.user.UsernameNotFoundException;
@@ -27,6 +28,7 @@ public class AuthentificationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TwoFactorAuthService twoFactorAuthService;
 
     public ResponseData<UserResponse> register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
@@ -93,6 +95,24 @@ public class AuthentificationService {
     }
 
     public ResponseData<AuthResponse> verifyTwoFactor(TwoFactorAuthRequest request) {
-        return null;
+        User user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+
+        if (!user.isTwoFactorEnabled()) {
+            throw new InvalidTwoFactorCodeException("Two-factor authentication is not enabled for this account");
+        }
+
+        if (!twoFactorAuthService.isCodeValid(user.getTwoFactorSecret(), request.code())) {
+            throw new InvalidTwoFactorCodeException("Invalid or expired code");
+        }
+
+        String token = jwtService.generateToken(user.getId(), user.getRole().name());
+
+        AuthResponse response = AuthResponse.builder()
+                .token(token)
+                .twoFactorRequired(false)
+                .build();
+
+        return ResponseData.success("Login successful", response);
     }
 }
