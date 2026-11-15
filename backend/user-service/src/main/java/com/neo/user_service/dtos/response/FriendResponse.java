@@ -1,5 +1,12 @@
 package com.neo.user_service.dtos.response;
 
-public record FriendResponse() {
-    
+import lombok.Builder;
+
+@Builder
+public record FriendResponse(
+        String id,
+        String firstName,
+        String lastName,
+        String username
+) {
 }
