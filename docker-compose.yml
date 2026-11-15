@@ -33,6 +33,7 @@ services:
       SPRING_NEO4J_AUTHENTICATION_USERNAME: neo4j
       SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     depends_on:
       - neo4j
       - discovery-service
