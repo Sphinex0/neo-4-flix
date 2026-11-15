@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.neo.user_service.common.ResponseData;
 import com.neo.user_service.dtos.request.LoginRequest;
 import com.neo.user_service.dtos.request.RegisterRequest;
 import com.neo.user_service.dtos.request.TwoFactorAuthRequest;
@@ -26,19 +27,19 @@ public class AuthentificationController {
 
     @PostMapping("/register")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ResponseData<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authentificationService.register(request));
     }
 
     @PostMapping("/login")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ResponseData<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authentificationService.login(request));
     }
 
     @PostMapping("/2fa/verify")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<AuthResponse> verifyTwoFactor(@Valid @RequestBody TwoFactorAuthRequest request) {
+    public ResponseEntity<ResponseData<AuthResponse>> verifyTwoFactor(@Valid @RequestBody TwoFactorAuthRequest request) {
         return ResponseEntity.ok(authentificationService.verifyTwoFactor(request));
     }
 }

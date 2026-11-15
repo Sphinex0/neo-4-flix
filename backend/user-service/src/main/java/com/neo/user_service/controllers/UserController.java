@@ -1,13 +1,54 @@
 package com.neo.user_service.controllers;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.neo.user_service.common.ResponseData;
+import com.neo.user_service.dtos.request.ProfileRequest;
+import com.neo.user_service.dtos.response.FriendResponse;
+import com.neo.user_service.dtos.response.UserResponse;
+import com.neo.user_service.services.UserService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
-    
+    private final UserService userService;
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<UserResponse>> getMe(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(userService.getMe(userId));
+    }
+
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<UserResponse>> updateMe(@AuthenticationPrincipal String userId,
+            @Valid @RequestBody ProfileRequest request) {
+        return ResponseEntity.ok(userService.updateMe(userId, request));
+    }
+
+    @DeleteMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<String>> deleteMe(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(userService.deleteMe(userId));
+    }
+
+    @GetMapping("/me/friends")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<List<FriendResponse>>> getMyFriends(@AuthenticationPrincipal String userId) {
+        return ResponseEntity.ok(userService.getMyFriends(userId));
+    }
 }
