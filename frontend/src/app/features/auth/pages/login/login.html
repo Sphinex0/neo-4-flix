@@ -1,0 +1,93 @@
+<div class="flex min-h-screen flex-wrap bg-[#0D1017] font-sans text-[#EEF1F6]">
+  <!-- Branding panel -->
+  <section
+    class="box-border flex flex-1 basis-[480px] flex-col justify-center gap-7 border-r border-[#2A3140] bg-gradient-to-b from-[#121826] to-[#0D1017] px-14 py-16"
+  >
+    <div class="flex items-center gap-2.5 font-display text-[26px] font-bold">
+      <svg width="30" height="30" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <path d="M9.8 10L12 18M18.5 9.5L15.5 18M10.5 8h7" stroke="#6B7587" stroke-width="1.5" />
+        <circle cx="7" cy="8" r="3.5" fill="#38D0B9" />
+        <circle cx="21" cy="7" r="3.5" fill="#FF5A5F" />
+        <circle cx="14" cy="21" r="3.5" fill="#EEF1F6" />
+      </svg>
+      <span>Neo4<span class="text-[#FF5A5F]">flix</span></span>
+    </div>
+
+    <h1 class="m-0 font-display text-[52px] font-bold leading-[1.05] tracking-[-0.02em]">
+      Movies, matched by a graph.
+    </h1>
+
+    <p class="m-0 max-w-[460px] text-lg leading-[1.55] text-[#C9D0DC]">
+      We find viewers with taste like yours and show you what they loved.
+    </p>
+
+    <svg
+      viewBox="0 0 520 260"
+      class="w-full max-w-[520px]"
+      role="img"
+      aria-label="Graph: you are linked to movies you rated, and those movies are linked to other viewers and new picks"
+    >
+      <g stroke="#4B5568" stroke-width="1.5" fill="none">
+        <path d="M80 130L200 60M80 130L200 200M200 60L340 40M200 60L340 120M200 200L340 120M200 200L340 220M340 120L450 130" />
+      </g>
+      <g stroke="#38D0B9" stroke-width="2" stroke-dasharray="5 5" fill="none">
+        <path d="M340 120L450 130" />
+      </g>
+      <circle cx="80" cy="130" r="30" fill="#FF5A5F" />
+      <text x="80" y="135" text-anchor="middle" font-size="14" font-weight="700" fill="#0D1017" font-family="Inter, sans-serif">You</text>
+      <circle cx="200" cy="60" r="12" fill="#2A5388" />
+      <text x="200" y="36" text-anchor="middle" font-size="13" fill="#C9D0DC" font-family="Inter, sans-serif">Inception</text>
+      <circle cx="200" cy="200" r="12" fill="#6A4423" />
+      <text x="200" y="232" text-anchor="middle" font-size="13" fill="#C9D0DC" font-family="Inter, sans-serif">Interstellar</text>
+      <circle cx="340" cy="40" r="9" fill="#6B7587" />
+      <circle cx="340" cy="120" r="14" fill="#38D0B9" />
+      <text x="340" y="150" text-anchor="middle" font-size="13" fill="#C9D0DC" font-family="Inter, sans-serif">Similar viewer</text>
+      <circle cx="340" cy="220" r="9" fill="#6B7587" />
+      <circle cx="450" cy="130" r="22" fill="#151A23" stroke="#38D0B9" stroke-width="2" />
+      <text x="450" y="135" text-anchor="middle" font-size="12" font-weight="600" fill="#38D0B9" font-family="Inter, sans-serif">New</text>
+    </svg>
+  </section>
+
+  <!-- Auth card -->
+  <section class="box-border flex flex-1 basis-[420px] items-center justify-center px-8 py-12">
+    <div class="box-border flex w-full max-w-[440px] flex-col gap-6 rounded-2xl border border-[#2A3140] bg-[#151A23] p-10">
+      <div class="flex flex-col gap-2">
+        <h2 class="m-0 font-display text-[30px] font-bold">Welcome back</h2>
+        <p class="m-0 text-[15px] text-[#A0A9B8]">Sign in to see your picks.</p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="login" class="text-sm font-medium">Email or username</label>
+        <input
+          id="login"
+          type="text"
+          autocomplete="username"
+          placeholder="you@example.com or moviefan42"
+          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="pw" class="text-sm font-medium">Password</label>
+        <input
+          id="pw"
+          type="password"
+          placeholder="Your password"
+          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+        />
+      </div>
+
+      <button
+        type="button"
+        class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017]"
+      >
+        Sign in
+      </button>
+
+      <p class="m-0 text-center text-sm text-[#A0A9B8]">
+        New here?
+        <a href="#" class="font-semibold text-[#FF8A8E] hover:text-white">Create an account</a>
+      </p>
+    </div>
+  </section>
+</div>
