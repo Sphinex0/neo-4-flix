@@ -1,8 +1,11 @@
 package com.neo.user_service.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.neo4j.repository.query.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.neo.user_service.models.User;
@@ -11,7 +14,15 @@ import com.neo.user_service.models.User;
 public interface UserRepository extends Neo4jRepository<User, String> {
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByEmail(String email);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    @Query("MATCH (:User {id: $userId})-[:FRIEND_OF]->(friend:User) RETURN friend")
+    List<User> findFriends(@Param("userId") String userId);
+
+    @Query("MATCH (u:User {id: $userId}), (f:User {id: $friendId}) MERGE (u)-[:FRIEND_OF]->(f)")
+    void addFriend(@Param("userId") String userId, @Param("friendId") String friendId);
 }

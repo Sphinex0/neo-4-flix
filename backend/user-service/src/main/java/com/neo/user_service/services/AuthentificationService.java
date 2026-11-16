@@ -15,6 +15,7 @@ import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.exceptions.auth.InvalidCredentialsException;
 import com.neo.user_service.exceptions.auth.InvalidTwoFactorCodeException;
 import com.neo.user_service.exceptions.user.EmailAlreadyExistsException;
+import com.neo.user_service.exceptions.user.EmailNotFoundException;
 import com.neo.user_service.exceptions.user.UsernameAlreadyExistsException;
 import com.neo.user_service.exceptions.user.UsernameNotFoundException;
 import com.neo.user_service.models.User;
@@ -53,24 +54,11 @@ public class AuthentificationService {
 
         User savedUser = userRepository.save(user);
 
-        UserResponse response = UserResponse.builder()
-                .id(savedUser.getId())
-                .firstName(savedUser.getFirstName())
-                .lastName(savedUser.getLastName())
-                .username(savedUser.getUsername())
-                .email(savedUser.getEmail())
-                .role(savedUser.getRole())
-                .twoFactorEnabled(savedUser.isTwoFactorEnabled())
-                .createdAt(savedUser.getCreatedAt())
-                .updatedAt(savedUser.getUpdatedAt())
-                .build();
-
-        return ResponseData.success("Account created successfully", response);
+        return ResponseData.success("Account created successfully", UserResponse.from(savedUser));
     }
 
     public ResponseData<AuthResponse> login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = findUserByIdentifier(request.usernameOrEmail());
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new InvalidCredentialsException("Invalid username or password");
@@ -95,8 +83,7 @@ public class AuthentificationService {
     }
 
     public ResponseData<AuthResponse> verifyTwoFactor(TwoFactorAuthRequest request) {
-        User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = findUserByIdentifier(request.usernameOrEmail());
 
         if (!user.isTwoFactorEnabled()) {
             throw new InvalidTwoFactorCodeException("Two-factor authentication is not enabled for this account");
@@ -114,5 +101,15 @@ public class AuthentificationService {
                 .build();
 
         return ResponseData.success("Login successful", response);
+    }
+
+    private User findUserByIdentifier(String identifier) {
+        if (identifier.contains("@")) {
+            return userRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new EmailNotFoundException("Email not found"));
+        }
+
+        return userRepository.findByUsername(identifier)
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
     }
 }
