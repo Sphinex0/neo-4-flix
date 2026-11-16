@@ -1,0 +1,125 @@
+<div class="flex min-h-screen flex-col items-center gap-8 bg-[#0D1017] px-6 py-12 font-sans text-[#EEF1F6]">
+  <a routerLink="/" class="flex items-center gap-2.5 font-display text-[26px] font-bold text-[#EEF1F6]">
+    <svg width="30" height="30" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <path d="M9.8 10L12 18M18.5 9.5L15.5 18M10.5 8h7" stroke="#6B7587" stroke-width="1.5" />
+      <circle cx="7" cy="8" r="3.5" fill="#38D0B9" />
+      <circle cx="21" cy="7" r="3.5" fill="#FF5A5F" />
+      <circle cx="14" cy="21" r="3.5" fill="#EEF1F6" />
+    </svg>
+    <span>Neo4<span class="text-[#FF5A5F]">flix</span></span>
+  </a>
+
+  <div class="flex items-center gap-3 text-sm font-medium">
+    <span class="inline-flex items-center gap-2">
+      <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#FF5A5F] font-bold text-[#0D1017]">1</span>
+      Account
+    </span>
+    <span class="h-0.5 w-10 bg-[#5B6579]"></span>
+    <span class="inline-flex items-center gap-2 text-[#C9D0DC]">
+      <span class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#5B6579] font-bold">2</span>
+      Secure it
+    </span>
+  </div>
+
+  <div class="box-border flex w-full max-w-[480px] flex-col gap-6 rounded-2xl border border-[#2A3140] bg-[#151A23] p-10">
+    <div class="flex flex-col gap-[22px]">
+      <div class="flex flex-col gap-2">
+        <h1 class="m-0 font-display text-[30px] font-bold">Create your account</h1>
+        <p class="m-0 text-[15px] text-[#A0A9B8]">It takes one minute.</p>
+      </div>
+
+      <div class="flex flex-wrap gap-4">
+        <div class="flex min-w-0 flex-1 basis-[160px] flex-col gap-2">
+          <label for="fname" class="text-sm font-medium">First name</label>
+          <input
+            id="fname"
+            type="text"
+            autocomplete="given-name"
+            placeholder="Hamza"
+            class="box-border h-12 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          />
+        </div>
+        <div class="flex min-w-0 flex-1 basis-[160px] flex-col gap-2">
+          <label for="lname" class="text-sm font-medium">Last name</label>
+          <input
+            id="lname"
+            type="text"
+            autocomplete="family-name"
+            placeholder="Your last name"
+            class="box-border h-12 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="uname" class="text-sm font-medium">Username</label>
+        <input
+          id="uname"
+          type="text"
+          autocomplete="username"
+          placeholder="moviefan42"
+          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+        />
+        <p class="m-0 text-[13px] text-[#A0A9B8]">You can sign in with this or your email.</p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="remail" class="text-sm font-medium">Email</label>
+        <input
+          id="remail"
+          type="email"
+          placeholder="you@example.com"
+          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="rpw" class="text-sm font-medium">Password</label>
+        <input
+          id="rpw"
+          type="password"
+          placeholder="Choose a strong password"
+          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+        />
+        <ul class="m-0 mt-1 grid list-none grid-cols-2 gap-x-4 gap-y-2 p-0 text-[13px] text-[#A0A9B8]">
+          <li class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38D0B9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+            At least 8 characters
+          </li>
+          <li class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38D0B9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+            One capital letter
+          </li>
+          <li class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7587" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+            One number
+          </li>
+          <li class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7587" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+            One symbol
+          </li>
+        </ul>
+      </div>
+
+      <button
+        type="button"
+        class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017]"
+      >
+        Continue
+      </button>
+
+      <p class="m-0 text-center text-sm text-[#A0A9B8]">
+        Already have an account?
+        <a routerLink="/login" class="font-semibold text-[#FF8A8E] hover:text-white">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
