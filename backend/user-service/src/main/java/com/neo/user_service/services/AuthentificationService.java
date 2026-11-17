@@ -61,7 +61,7 @@ public class AuthentificationService {
         User user = findUserByIdentifier(request.usernameOrEmail());
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid credentials !");
         }
 
         if (user.isTwoFactorEnabled()) {
@@ -106,10 +106,10 @@ public class AuthentificationService {
     private User findUserByIdentifier(String identifier) {
         if (identifier.contains("@")) {
             return userRepository.findByEmail(identifier)
-                    .orElseThrow(() -> new EmailNotFoundException("Email not found"));
+                    .orElseThrow(() -> new EmailNotFoundException("Invalid credentials !"));
         }
 
         return userRepository.findByUsername(identifier)
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials !"));
     }
 }

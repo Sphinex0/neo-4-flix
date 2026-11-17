@@ -121,18 +121,38 @@
 
       <div class="flex flex-col gap-2">
         <label for="rpw" class="text-sm font-medium">Password</label>
-        <input
-          id="rpw"
-          name="password"
-          type="password"
-          placeholder="Choose a strong password"
-          required
-          [(ngModel)]="password"
-          #passwordModel="ngModel"
-          [class.border-[#FF5A5F]]="passwordModel.invalid && passwordModel.touched"
-          [class.border-[#5B6579]]="!(passwordModel.invalid && passwordModel.touched)"
-          class="box-border h-12 rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
-        />
+        <div class="relative">
+          <input
+            id="rpw"
+            name="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="Choose a strong password"
+            required
+            [(ngModel)]="password"
+            #passwordModel="ngModel"
+            [class.border-[#FF5A5F]]="passwordModel.invalid && passwordModel.touched"
+            [class.border-[#5B6579]]="!(passwordModel.invalid && passwordModel.touched)"
+            class="box-border h-12 w-full rounded-[10px] border bg-[#0D1017] px-3.5 pr-11 text-[15px] text-[#EEF1F6]"
+          />
+          <button
+            type="button"
+            (click)="showPassword.set(!showPassword())"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            class="absolute right-0 top-0 flex h-12 w-11 items-center justify-center text-[#A0A9B8] hover:text-[#EEF1F6]"
+          >
+            @if (showPassword()) {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                <path d="M1 1l22 22" />
+              </svg>
+            } @else {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            }
+          </button>
+        </div>
         @if (passwordModel.invalid && passwordModel.touched) {
           <p class="m-0 text-xs text-[#FF5A5F]">Password is required</p>
         }

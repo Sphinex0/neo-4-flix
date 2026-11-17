@@ -23,12 +23,12 @@ import com.neo.user_service.exceptions.user.UsernameNotFoundException;
 public class GlobalException {
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ResponseData<Void>> handleUsernameNotFound(UsernameNotFoundException ex) {
-        return buildError(HttpStatus.NOT_FOUND, ex.getMessage());
+        return buildError(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler(EmailNotFoundException.class)
     public ResponseEntity<ResponseData<Void>> handleEmailNotFound(EmailNotFoundException ex) {
-        return buildError(HttpStatus.NOT_FOUND, ex.getMessage());
+        return buildError(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler(UserNotFoundException.class)

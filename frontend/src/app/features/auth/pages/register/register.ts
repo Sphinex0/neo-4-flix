@@ -20,6 +20,7 @@ export class Register {
 
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
+  showPassword = signal(false);
 
   onSubmit(): void {
     this.isSubmitting.set(true);
