@@ -22,21 +22,27 @@
   </div>
 
   <div class="box-border flex w-full max-w-[480px] flex-col gap-6 rounded-2xl border border-[#2A3140] bg-[#151A23] p-10">
-    <div class="flex flex-col gap-[22px]">
+    <form class="flex flex-col gap-[22px]" (ngSubmit)="onSubmit()">
       <div class="flex flex-col gap-2">
         <h1 class="m-0 font-display text-[30px] font-bold">Create your account</h1>
         <p class="m-0 text-[15px] text-[#A0A9B8]">It takes one minute.</p>
       </div>
+
+      @if (errorMessage()) {
+        <p class="m-0 text-sm text-[#FF5A5F]">{{ errorMessage() }}</p>
+      }
 
       <div class="flex flex-wrap gap-4">
         <div class="flex min-w-0 flex-1 basis-[160px] flex-col gap-2">
           <label for="fname" class="text-sm font-medium">First name</label>
           <input
             id="fname"
+            name="firstName"
             type="text"
             autocomplete="given-name"
             placeholder="Hamza"
             required
+            [(ngModel)]="firstName"
             class="box-border h-12 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
           />
         </div>
@@ -44,10 +50,12 @@
           <label for="lname" class="text-sm font-medium">Last name</label>
           <input
             id="lname"
+            name="lastName"
             type="text"
             autocomplete="family-name"
             placeholder="Your last name"
             required
+            [(ngModel)]="lastName"
             class="box-border h-12 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
           />
         </div>
@@ -57,10 +65,12 @@
         <label for="uname" class="text-sm font-medium">Username</label>
         <input
           id="uname"
+          name="username"
           type="text"
           autocomplete="username"
           placeholder="moviefan42"
           required
+          [(ngModel)]="username"
           class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
         />
         <p class="m-0 text-[13px] text-[#A0A9B8]">You can sign in with this or your email.</p>
@@ -70,9 +80,11 @@
         <label for="remail" class="text-sm font-medium">Email</label>
         <input
           id="remail"
+          name="email"
           type="email"
           placeholder="you@example.com"
           required
+          [(ngModel)]="email"
           class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
         />
       </div>
@@ -81,9 +93,11 @@
         <label for="rpw" class="text-sm font-medium">Password</label>
         <input
           id="rpw"
+          name="password"
           type="password"
           placeholder="Choose a strong password"
           required
+          [(ngModel)]="password"
           class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
         />
         <ul class="m-0 mt-1 grid list-none grid-cols-2 gap-x-4 gap-y-2 p-0 text-[13px] text-[#A0A9B8]">
@@ -115,16 +129,17 @@
       </div>
 
       <button
-        type="button"
-        class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017]"
+        type="submit"
+        [disabled]="isSubmitting()"
+        class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Continue
+        {{ isSubmitting() ? 'Creating account...' : 'Continue' }}
       </button>
 
       <p class="m-0 text-center text-sm text-[#A0A9B8]">
         Already have an account?
         <a routerLink="/login" class="font-semibold text-[#FF8A8E] hover:text-white">Sign in</a>
       </p>
-    </div>
+    </form>
   </div>
 </div>
