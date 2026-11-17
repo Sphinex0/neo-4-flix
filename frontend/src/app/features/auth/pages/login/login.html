@@ -51,45 +51,68 @@
   <!-- Auth card -->
   <section class="box-border flex flex-1 basis-[420px] items-center justify-center px-8 py-12">
     <div class="box-border flex w-full max-w-[440px] flex-col gap-6 rounded-2xl border border-[#2A3140] bg-[#151A23] p-10">
-      <div class="flex flex-col gap-2">
-        <h2 class="m-0 font-display text-[30px] font-bold">Welcome back</h2>
-        <p class="m-0 text-[15px] text-[#A0A9B8]">Sign in to see your picks.</p>
-      </div>
+      <form class="flex flex-col gap-6" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <div class="flex flex-col gap-2">
+          <h2 class="m-0 font-display text-[30px] font-bold">Welcome back</h2>
+          <p class="m-0 text-[15px] text-[#A0A9B8]">Sign in to see your picks.</p>
+        </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="login" class="text-sm font-medium">Email or username</label>
-        <input
-          id="login"
-          type="text"
-          autocomplete="username"
-          placeholder="you@example.com or moviefan42"
-          required
-          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
-        />
-      </div>
+        @if (errorMessage()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ errorMessage() }}</p>
+        }
 
-      <div class="flex flex-col gap-2">
-        <label for="pw" class="text-sm font-medium">Password</label>
-        <input
-          id="pw"
-          type="password"
-          placeholder="Your password"
-          required
-          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
-        />
-      </div>
+        <div class="flex flex-col gap-2">
+          <label for="login" class="text-sm font-medium">Email or username</label>
+          <input
+            id="login"
+            name="usernameOrEmail"
+            type="text"
+            autocomplete="username"
+            placeholder="you@example.com or moviefan42"
+            required
+            [(ngModel)]="usernameOrEmail"
+            #usernameOrEmailModel="ngModel"
+            [class.border-[#FF5A5F]]="usernameOrEmailModel.invalid && usernameOrEmailModel.touched"
+            [class.border-[#5B6579]]="!(usernameOrEmailModel.invalid && usernameOrEmailModel.touched)"
+            class="box-border h-12 rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          />
+          @if (usernameOrEmailModel.invalid && usernameOrEmailModel.touched) {
+            <p class="m-0 text-xs text-[#FF5A5F]">Email or username is required</p>
+          }
+        </div>
 
-      <button
-        type="button"
-        class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017]"
-      >
-        Sign in
-      </button>
+        <div class="flex flex-col gap-2">
+          <label for="pw" class="text-sm font-medium">Password</label>
+          <input
+            id="pw"
+            name="password"
+            type="password"
+            placeholder="Your password"
+            required
+            [(ngModel)]="password"
+            #passwordModel="ngModel"
+            [class.border-[#FF5A5F]]="passwordModel.invalid && passwordModel.touched"
+            [class.border-[#5B6579]]="!(passwordModel.invalid && passwordModel.touched)"
+            class="box-border h-12 rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          />
+          @if (passwordModel.invalid && passwordModel.touched) {
+            <p class="m-0 text-xs text-[#FF5A5F]">Password is required</p>
+          }
+        </div>
 
-      <p class="m-0 text-center text-sm text-[#A0A9B8]">
-        New here?
-        <a routerLink="/register" class="font-semibold text-[#FF8A8E] hover:text-white">Create an account</a>
-      </p>
+        <button
+          type="submit"
+          [disabled]="isSubmitting() || loginForm.invalid"
+          class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
+        </button>
+
+        <p class="m-0 text-center text-sm text-[#A0A9B8]">
+          New here?
+          <a routerLink="/register" class="font-semibold text-[#FF8A8E] hover:text-white">Create an account</a>
+        </p>
+      </form>
     </div>
   </section>
 </div>
