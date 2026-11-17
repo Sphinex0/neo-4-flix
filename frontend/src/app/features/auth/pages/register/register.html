@@ -1,0 +1,201 @@
+<div class="flex min-h-screen flex-col items-center gap-8 bg-[#0D1017] px-6 py-12 font-sans text-[#EEF1F6]">
+  <a routerLink="/" class="flex items-center gap-2.5 font-display text-[26px] font-bold text-[#EEF1F6]">
+    <svg width="30" height="30" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <path d="M9.8 10L12 18M18.5 9.5L15.5 18M10.5 8h7" stroke="#6B7587" stroke-width="1.5" />
+      <circle cx="7" cy="8" r="3.5" fill="#38D0B9" />
+      <circle cx="21" cy="7" r="3.5" fill="#FF5A5F" />
+      <circle cx="14" cy="21" r="3.5" fill="#EEF1F6" />
+    </svg>
+    <span>Neo4<span class="text-[#FF5A5F]">flix</span></span>
+  </a>
+
+  <div class="flex items-center gap-3 text-sm font-medium">
+    <span class="inline-flex items-center gap-2">
+      <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#FF5A5F] font-bold text-[#0D1017]">1</span>
+      Account
+    </span>
+    <span class="h-0.5 w-10 bg-[#5B6579]"></span>
+    <span class="inline-flex items-center gap-2 text-[#C9D0DC]">
+      <span class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#5B6579] font-bold">2</span>
+      Secure it
+    </span>
+  </div>
+
+  <div class="box-border flex w-full max-w-[480px] flex-col gap-6 rounded-2xl border border-[#2A3140] bg-[#151A23] p-10">
+    <form class="flex flex-col gap-[22px]" (ngSubmit)="onSubmit()" #registerForm="ngForm">
+      <div class="flex flex-col gap-2">
+        <h1 class="m-0 font-display text-[30px] font-bold">Create your account</h1>
+        <p class="m-0 text-[15px] text-[#A0A9B8]">It takes one minute.</p>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="m-0 text-sm text-[#FF5A5F]">{{ errorMessage() }}</p>
+      }
+
+      <div class="flex flex-wrap gap-4">
+        <div class="flex min-w-0 flex-1 basis-[160px] flex-col gap-2">
+          <label for="fname" class="text-sm font-medium">First name</label>
+          <input
+            id="fname"
+            name="firstName"
+            type="text"
+            placeholder="First Name"
+            required
+            [(ngModel)]="firstName"
+            #firstNameModel="ngModel"
+            [class.border-[#FF5A5F]]="firstNameModel.invalid && firstNameModel.touched"
+            [class.border-[#5B6579]]="!(firstNameModel.invalid && firstNameModel.touched)"
+            class="box-border h-12 w-full rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          />
+          @if (firstNameModel.invalid && firstNameModel.touched) {
+            <p class="m-0 text-xs text-[#FF5A5F]">First name is required</p>
+          }
+        </div>
+        <div class="flex min-w-0 flex-1 basis-[160px] flex-col gap-2">
+          <label for="lname" class="text-sm font-medium">Last name</label>
+          <input
+            id="lname"
+            name="lastName"
+            type="text"
+            autocomplete="family-name"
+            placeholder="Your last name"
+            required
+            [(ngModel)]="lastName"
+            #lastNameModel="ngModel"
+            [class.border-[#FF5A5F]]="lastNameModel.invalid && lastNameModel.touched"
+            [class.border-[#5B6579]]="!(lastNameModel.invalid && lastNameModel.touched)"
+            class="box-border h-12 w-full rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          />
+          @if (lastNameModel.invalid && lastNameModel.touched) {
+            <p class="m-0 text-xs text-[#FF5A5F]">Last name is required</p>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="uname" class="text-sm font-medium">Username</label>
+        <input
+          id="uname"
+          name="username"
+          type="text"
+          autocomplete="username"
+          placeholder="moviefan42"
+          required
+          [(ngModel)]="username"
+          #usernameModel="ngModel"
+          [class.border-[#FF5A5F]]="usernameModel.invalid && usernameModel.touched"
+          [class.border-[#5B6579]]="!(usernameModel.invalid && usernameModel.touched)"
+          class="box-border h-12 rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+        />
+        @if (usernameModel.invalid && usernameModel.touched) {
+          <p class="m-0 text-xs text-[#FF5A5F]">Username is required</p>
+        }
+        <p class="m-0 text-[13px] text-[#A0A9B8]">You can sign in with this or your email.</p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="remail" class="text-sm font-medium">Email</label>
+        <input
+          id="remail"
+          name="email"
+          type="email"
+          email
+          placeholder="you@example.com"
+          required
+          [(ngModel)]="email"
+          #emailModel="ngModel"
+          [class.border-[#FF5A5F]]="emailModel.invalid && emailModel.touched"
+          [class.border-[#5B6579]]="!(emailModel.invalid && emailModel.touched)"
+          class="box-border h-12 rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+        />
+        @if (emailModel.invalid && emailModel.touched) {
+          <p class="m-0 text-xs text-[#FF5A5F]">
+            @if (emailModel.errors?.['required']) {
+              Email is required
+            } @else {
+              Enter a valid email address
+            }
+          </p>
+        }
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="rpw" class="text-sm font-medium">Password</label>
+        <div class="relative">
+          <input
+            id="rpw"
+            name="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            placeholder="Choose a strong password"
+            required
+            [(ngModel)]="password"
+            #passwordModel="ngModel"
+            [class.border-[#FF5A5F]]="passwordModel.invalid && passwordModel.touched"
+            [class.border-[#5B6579]]="!(passwordModel.invalid && passwordModel.touched)"
+            class="box-border h-12 w-full rounded-[10px] border bg-[#0D1017] px-3.5 pr-11 text-[15px] text-[#EEF1F6]"
+          />
+          <button
+            type="button"
+            (click)="showPassword.set(!showPassword())"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            class="absolute right-0 top-0 flex h-12 w-11 items-center justify-center text-[#A0A9B8] hover:text-[#EEF1F6]"
+          >
+            @if (showPassword()) {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                <path d="M1 1l22 22" />
+              </svg>
+            } @else {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            }
+          </button>
+        </div>
+        @if (passwordModel.invalid && passwordModel.touched) {
+          <p class="m-0 text-xs text-[#FF5A5F]">Password is required</p>
+        }
+        <ul class="m-0 mt-1 grid list-none grid-cols-2 gap-x-4 gap-y-2 p-0 text-[13px] text-[#A0A9B8]">
+          <li class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" [attr.stroke]="hasMinLength() ? '#38D0B9' : '#6B7587'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+            At least 8 characters
+          </li>
+          <li class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" [attr.stroke]="hasUppercase() ? '#38D0B9' : '#6B7587'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+            One capital letter
+          </li>
+          <li class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" [attr.stroke]="hasNumber() ? '#38D0B9' : '#6B7587'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+            One number
+          </li>
+          <li class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" [attr.stroke]="hasSymbol() ? '#38D0B9' : '#6B7587'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+            One symbol
+          </li>
+        </ul>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isSubmitting() || !isPasswordValid() || registerForm.invalid"
+        class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {{ isSubmitting() ? 'Creating account...' : 'Continue' }}
+      </button>
+
+      <p class="m-0 text-center text-sm text-[#A0A9B8]">
+        Already have an account?
+        <a routerLink="/login" class="font-semibold text-[#FF8A8E] hover:text-white">Sign in</a>
+      </p>
+    </form>
+  </div>
+</div>

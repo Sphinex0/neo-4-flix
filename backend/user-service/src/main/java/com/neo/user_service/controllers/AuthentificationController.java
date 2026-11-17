@@ -13,7 +13,6 @@ import com.neo.user_service.dtos.request.LoginRequest;
 import com.neo.user_service.dtos.request.RegisterRequest;
 import com.neo.user_service.dtos.request.TwoFactorAuthRequest;
 import com.neo.user_service.dtos.response.AuthResponse;
-import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.services.AuthentificationService;
 
 import jakarta.validation.Valid;
@@ -27,7 +26,7 @@ public class AuthentificationController {
 
     @PostMapping("/register")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<ResponseData<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ResponseData<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authentificationService.register(request));
     }
 

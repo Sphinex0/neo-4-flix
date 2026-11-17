@@ -1,0 +1,79 @@
+<div class="flex min-h-screen flex-col items-center gap-8 bg-[#0D1017] px-6 py-12 font-sans text-[#EEF1F6]">
+  <a routerLink="/" class="flex items-center gap-2.5 font-display text-[26px] font-bold text-[#EEF1F6]">
+    <svg width="30" height="30" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <path d="M9.8 10L12 18M18.5 9.5L15.5 18M10.5 8h7" stroke="#6B7587" stroke-width="1.5" />
+      <circle cx="7" cy="8" r="3.5" fill="#38D0B9" />
+      <circle cx="21" cy="7" r="3.5" fill="#FF5A5F" />
+      <circle cx="14" cy="21" r="3.5" fill="#EEF1F6" />
+    </svg>
+    <span>Neo4<span class="text-[#FF5A5F]">flix</span></span>
+  </a>
+
+  <div class="flex items-center gap-3 text-sm font-medium">
+    <span class="inline-flex items-center gap-2 text-[#C9D0DC]">
+      <span class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#5B6579] font-bold">1</span>
+      Account
+    </span>
+    <span class="h-0.5 w-10 bg-[#5B6579]"></span>
+    <span class="inline-flex items-center gap-2">
+      <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#FF5A5F] font-bold text-[#0D1017]">2</span>
+      Secure it
+    </span>
+  </div>
+
+  <div class="box-border flex w-full max-w-[480px] flex-col gap-6 rounded-2xl border border-[#2A3140] bg-[#151A23] p-10">
+    <div class="flex flex-col gap-[22px]">
+      <div class="flex flex-col gap-2">
+        <h1 class="m-0 font-display text-[30px] font-bold">Add two-step sign in</h1>
+        <p class="m-0 text-[15px] leading-[1.5] text-[#A0A9B8]">
+          Scan this code with Google Authenticator. Then type the 6-digit code it shows.
+        </p>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="m-0 text-center text-sm text-[#FF5A5F]">{{ errorMessage() }}</p>
+      }
+
+      <div
+        class="box-border flex h-[200px] w-[200px] items-center justify-center self-center rounded-xl bg-[#EEF1F6] p-5 text-center text-[13px] font-semibold text-[#0D1017]"
+      >
+        @if (qrCodeUri()) {
+          <qrcode [qrdata]="qrCodeUri()!" [width]="200"></qrcode>
+        } @else {
+          Generating your code...
+        }
+      </div>
+
+      @if (secret()) {
+        <p class="m-0 text-center text-[13px] text-[#A0A9B8]">
+          Can't scan it? Enter this code manually:
+          <span class="break-all font-mono text-[#EEF1F6]">{{ secret() }}</span>
+        </p>
+      }
+
+      <div class="flex flex-col gap-2">
+        <label for="code" class="text-sm font-medium">6-digit code</label>
+        <input
+          id="code"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="123456"
+          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-lg tracking-[0.3em] text-[#EEF1F6]"
+        />
+      </div>
+
+      <a
+        routerLink="/"
+        class="flex min-h-12 items-center justify-center rounded-[10px] bg-[#FF5A5F] text-base font-semibold text-[#0D1017]"
+      >
+        Turn on and finish
+      </a>
+
+      <div class="flex flex-wrap justify-between gap-2">
+        <a routerLink="/register" class="inline-flex min-h-11 items-center text-sm text-[#C9D0DC]">Back</a>
+        <a routerLink="/" class="inline-flex min-h-11 items-center text-sm font-medium">Skip for now</a>
+      </div>
+    </div>
+  </div>
+</div>

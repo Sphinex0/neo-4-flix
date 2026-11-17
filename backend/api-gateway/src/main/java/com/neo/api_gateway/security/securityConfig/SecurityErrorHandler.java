@@ -16,23 +16,22 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
 
-    private static final String ACCESS_DENIED_MESSAGE = "Access denied !";
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException {
-        writeError(response, HttpServletResponse.SC_UNAUTHORIZED);
+        writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid credentials !");
     }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
             AccessDeniedException accessDeniedException) throws IOException {
-        writeError(response, HttpServletResponse.SC_FORBIDDEN);
+        writeError(response, HttpServletResponse.SC_FORBIDDEN, "Access denied !");
     }
 
-    private void writeError(HttpServletResponse response, int status) throws IOException {
+    private void writeError(HttpServletResponse response, int status, String message) throws IOException {
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write("{\"success\":false,\"message\":\"" + ACCESS_DENIED_MESSAGE + "\",\"data\":null}");
+        response.getWriter().write("{\"success\":false,\"message\":\"" + message + "\",\"data\":null}");
     }
 }

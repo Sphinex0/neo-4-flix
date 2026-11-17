@@ -11,7 +11,6 @@ import com.neo.user_service.dtos.request.LoginRequest;
 import com.neo.user_service.dtos.request.RegisterRequest;
 import com.neo.user_service.dtos.request.TwoFactorAuthRequest;
 import com.neo.user_service.dtos.response.AuthResponse;
-import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.exceptions.auth.InvalidCredentialsException;
 import com.neo.user_service.exceptions.auth.InvalidTwoFactorCodeException;
 import com.neo.user_service.exceptions.user.EmailAlreadyExistsException;
@@ -31,7 +30,7 @@ public class AuthentificationService {
     private final JwtService jwtService;
     private final TwoFactorAuthService twoFactorAuthService;
 
-    public ResponseData<UserResponse> register(RegisterRequest request) {
+    public ResponseData<AuthResponse> register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new UsernameAlreadyExistsException("Username is already taken");
         }
@@ -54,14 +53,21 @@ public class AuthentificationService {
 
         User savedUser = userRepository.save(user);
 
-        return ResponseData.success("Account created successfully", UserResponse.from(savedUser));
+        String token = jwtService.generateToken(savedUser.getId(), savedUser.getRole().name());
+
+        AuthResponse response = AuthResponse.builder()
+                .token(token)
+                .twoFactorRequired(false)
+                .build();
+
+        return ResponseData.success("Account created successfully", response);
     }
 
     public ResponseData<AuthResponse> login(LoginRequest request) {
         User user = findUserByIdentifier(request.usernameOrEmail());
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid credentials !");
         }
 
         if (user.isTwoFactorEnabled()) {
@@ -106,10 +112,10 @@ public class AuthentificationService {
     private User findUserByIdentifier(String identifier) {
         if (identifier.contains("@")) {
             return userRepository.findByEmail(identifier)
-                    .orElseThrow(() -> new EmailNotFoundException("Email not found"));
+                    .orElseThrow(() -> new EmailNotFoundException("Invalid credentials !"));
         }
 
         return userRepository.findByUsername(identifier)
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials !"));
     }
 }
