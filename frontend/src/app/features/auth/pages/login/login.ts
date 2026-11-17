@@ -33,7 +33,9 @@ export class Login {
       .subscribe({
         next: (response) => {
           if (response.data.twoFactorRequired) {
-            this.router.navigate(['/verify-2fa']);
+            this.router.navigate(['/verify-2fa'], {
+              queryParams: { usernameOrEmail: this.usernameOrEmail },
+            });
             return;
           }
 

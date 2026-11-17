@@ -51,31 +51,41 @@
   <!-- Auth card -->
   <section class="box-border flex flex-1 basis-[420px] items-center justify-center px-8 py-12">
     <div class="box-border flex w-full max-w-[440px] flex-col gap-6 rounded-2xl border border-[#2A3140] bg-[#151A23] p-10">
-      <div class="flex flex-col gap-2">
-        <h2 class="m-0 font-display text-[30px] font-bold">Check your code</h2>
-        <p class="m-0 text-[15px] leading-[1.5] text-[#A0A9B8]">Open your authenticator app and type the 6-digit code.</p>
-      </div>
+      <form class="flex flex-col gap-6" (ngSubmit)="onSubmit()" #verifyForm="ngForm">
+        <div class="flex flex-col gap-2">
+          <h2 class="m-0 font-display text-[30px] font-bold">Check your code</h2>
+          <p class="m-0 text-[15px] leading-[1.5] text-[#A0A9B8]">Open your authenticator app and type the 6-digit code.</p>
+        </div>
 
-      <div class="grid grid-cols-6 gap-2">
-        <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1" required
-          class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-        <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2" required
-          class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-        <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3" required
-          class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-        <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4" required
-          class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-        <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5" required
-          class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-        <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6" required
-          class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-      </div>
+        <div class="grid grid-cols-6 gap-2">
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1" required name="digit1" [(ngModel)]="digit1"
+            class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2" required name="digit2" [(ngModel)]="digit2"
+            class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3" required name="digit3" [(ngModel)]="digit3"
+            class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4" required name="digit4" [(ngModel)]="digit4"
+            class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5" required name="digit5" [(ngModel)]="digit5"
+            class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6" required name="digit6" [(ngModel)]="digit6"
+            class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
+        </div>
 
-      <a href="#" class="flex min-h-12 items-center justify-center rounded-[10px] bg-[#FF5A5F] text-base font-semibold text-[#0D1017]">
-        Verify and continue
-      </a>
+        @if (errorMessage()) {
+          <p class="m-0 text-center text-sm text-[#FF5A5F]">{{ errorMessage() }}</p>
+        }
 
-      <a routerLink="/login" class="flex min-h-11 items-center justify-center text-sm text-[#C9D0DC]">Back to sign in</a>
+        <button
+          type="submit"
+          [disabled]="isSubmitting() || verifyForm.invalid"
+          class="flex min-h-12 items-center justify-center rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {{ isSubmitting() ? 'Verifying...' : 'Verify and continue' }}
+        </button>
+
+        <a routerLink="/login" class="flex min-h-11 items-center justify-center text-sm text-[#C9D0DC]">Back to sign in</a>
+      </form>
     </div>
   </section>
 </div>
