@@ -38,7 +38,7 @@
         class="box-border flex h-[200px] w-[200px] items-center justify-center self-center rounded-xl bg-[#EEF1F6] p-5 text-center text-[13px] font-semibold text-[#0D1017]"
       >
         @if (qrCodeUri()) {
-          <qrcode [qrdata]="qrCodeUri()!" [width]="200" [margin]="0"></qrcode>
+          <qrcode [qrdata]="qrCodeUri()!" [width]="200"></qrcode>
         } @else {
           Generating your code...
         }

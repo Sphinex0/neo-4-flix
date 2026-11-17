@@ -27,6 +27,18 @@ export class Verify2fa {
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
 
+  onDigitInput(current: HTMLInputElement, next: HTMLInputElement | null): void {
+    if (current.value && next) {
+      next.focus();
+    }
+  }
+
+  onDigitBackspace(current: HTMLInputElement, previous: HTMLInputElement | null): void {
+    if (!current.value && previous) {
+      previous.focus();
+    }
+  }
+
   onSubmit(): void {
     this.isSubmitting.set(true);
     this.errorMessage.set(null);

@@ -58,17 +58,23 @@
         </div>
 
         <div class="grid grid-cols-6 gap-2">
-          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1" required name="digit1" [(ngModel)]="digit1"
+          <input #d1 type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1" required name="digit1" [(ngModel)]="digit1"
+            (input)="onDigitInput(d1, d2)" (keydown.backspace)="onDigitBackspace(d1, null)"
             class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2" required name="digit2" [(ngModel)]="digit2"
+          <input #d2 type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2" required name="digit2" [(ngModel)]="digit2"
+            (input)="onDigitInput(d2, d3)" (keydown.backspace)="onDigitBackspace(d2, d1)"
             class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3" required name="digit3" [(ngModel)]="digit3"
+          <input #d3 type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3" required name="digit3" [(ngModel)]="digit3"
+            (input)="onDigitInput(d3, d4)" (keydown.backspace)="onDigitBackspace(d3, d2)"
             class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4" required name="digit4" [(ngModel)]="digit4"
+          <input #d4 type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4" required name="digit4" [(ngModel)]="digit4"
+            (input)="onDigitInput(d4, d5)" (keydown.backspace)="onDigitBackspace(d4, d3)"
             class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5" required name="digit5" [(ngModel)]="digit5"
+          <input #d5 type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5" required name="digit5" [(ngModel)]="digit5"
+            (input)="onDigitInput(d5, d6)" (keydown.backspace)="onDigitBackspace(d5, d4)"
             class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
-          <input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6" required name="digit6" [(ngModel)]="digit6"
+          <input #d6 type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6" required name="digit6" [(ngModel)]="digit6"
+            (input)="onDigitInput(d6, null)" (keydown.backspace)="onDigitBackspace(d6, d5)"
             class="box-border h-14 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] text-center text-[22px] font-semibold text-[#EEF1F6]" />
         </div>
 
