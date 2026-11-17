@@ -9,6 +9,11 @@ services:
       - "7687:7687"   # Bolt (Neo4j browser login)
     volumes:
       - neo4j_data:/data
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD}", "RETURN 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   neo4j-load:
     image: neo4j:5
@@ -44,8 +49,10 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     depends_on:
-      - neo4j
-      - discovery-service
+      neo4j:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
 
   movie-service:
     build: ./backend/movie-service
@@ -55,8 +62,10 @@ services:
       SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
     depends_on:
-      - neo4j
-      - discovery-service
+      neo4j:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
 
   rating-service:
     build: ./backend/rating-service
@@ -66,8 +75,10 @@ services:
       SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
     depends_on:
-      - neo4j
-      - discovery-service
+      neo4j:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
 
   recommendation-service:
     build: ./backend/recommendation-service
@@ -77,8 +88,10 @@ services:
       SPRING_NEO4J_AUTHENTICATION_PASSWORD: ${NEO4J_PASSWORD}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
     depends_on:
-      - neo4j
-      - discovery-service
+      neo4j:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
 
   # ---------- Angular frontend ----------
   frontend:
