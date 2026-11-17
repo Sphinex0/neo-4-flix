@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,8 +30,6 @@ import com.neo.movie_service.exceptions.movie.MovieNotFoundException;
 import com.neo.movie_service.models.Genre;
 import com.neo.movie_service.models.Movie;
 import com.neo.movie_service.repositories.MovieRepository;
-
-import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class MovieServiceTest {
@@ -56,8 +55,8 @@ class MovieServiceTest {
                 .genres(Set.of("Sci-Fi"))
                 .build();
 
-        Genre scifi = Genre.builder().id("g-1").name("Sci-Fi").build();
-        GenreResponse scifiResponse = GenreResponse.builder().id("g-1").name("Sci-Fi").build();
+        Genre scifi = Genre.builder().name("Sci-Fi").build();
+        GenreResponse scifiResponse = GenreResponse.builder().id("Sci-Fi").name("Sci-Fi").build();
 
         when(movieRepository.existsByTitleIgnoreCase("Inception")).thenReturn(false);
         when(genreService.getOrCreateGenre("Sci-Fi")).thenReturn(scifi);
@@ -94,37 +93,39 @@ class MovieServiceTest {
     @DisplayName("Should retrieve movie by ID")
     void shouldGetMovieById() {
         Movie movie = Movie.builder()
-                .id("m-123")
-                .title("Interstellar")
-                .releaseYear(2014)
-                .durationMinutes(169)
+                .id("1")
+                .title("Toy Story")
+                .releaseYear(1995)
+                .durationMinutes(81)
+                .imdbRating(8.3)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
 
-        when(movieRepository.findByIdWithGenres("m-123")).thenReturn(Optional.of(movie));
+        when(movieRepository.findByIdWithGenres("1")).thenReturn(Optional.of(movie));
 
-        MovieResponse response = movieService.getMovieById("m-123");
+        MovieResponse response = movieService.getMovieById("1");
 
-        assertThat(response.getId()).isEqualTo("m-123");
-        assertThat(response.getTitle()).isEqualTo("Interstellar");
+        assertThat(response.getId()).isEqualTo("1");
+        assertThat(response.getTitle()).isEqualTo("Toy Story");
+        assertThat(response.getImdbRating()).isEqualTo(8.3);
     }
 
     @Test
     @DisplayName("Should throw MovieNotFoundException when ID does not exist")
     void shouldThrowExceptionWhenNotFound() {
-        when(movieRepository.findByIdWithGenres("m-999")).thenReturn(Optional.empty());
+        when(movieRepository.findByIdWithGenres("999999")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> movieService.getMovieById("m-999"))
+        assertThatThrownBy(() -> movieService.getMovieById("999999"))
                 .isInstanceOf(MovieNotFoundException.class)
-                .hasMessageContaining("m-999");
+                .hasMessageContaining("999999");
     }
 
     @Test
     @DisplayName("Should update movie fields")
     void shouldUpdateMovie() {
         Movie existing = Movie.builder()
-                .id("m-123")
+                .id("1")
                 .title("Old Title")
                 .releaseYear(2000)
                 .build();
@@ -134,10 +135,10 @@ class MovieServiceTest {
                 .releaseYear(2001)
                 .build();
 
-        when(movieRepository.findByIdWithGenres("m-123")).thenReturn(Optional.of(existing));
+        when(movieRepository.findByIdWithGenres("1")).thenReturn(Optional.of(existing));
         when(movieRepository.save(any(Movie.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        MovieResponse updated = movieService.updateMovie("m-123", updateReq);
+        MovieResponse updated = movieService.updateMovie("1", updateReq);
 
         assertThat(updated.getTitle()).isEqualTo("New Title");
         assertThat(updated.getReleaseYear()).isEqualTo(2001);
@@ -146,7 +147,7 @@ class MovieServiceTest {
     @Test
     @DisplayName("Should search movies with pagination")
     void shouldSearchMovies() {
-        Movie movie = Movie.builder().id("m-1").title("The Matrix").releaseYear(1999).build();
+        Movie movie = Movie.builder().id("1").title("The Matrix").releaseYear(1999).build();
         when(movieRepository.searchMovies(any(), any(), any(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(movie)));
 

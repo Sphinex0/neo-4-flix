@@ -19,7 +19,7 @@ public interface MovieRepository extends Neo4jRepository<Movie, String> {
     @Query(
         value = "MATCH (m:Movie) " +
                 "WHERE ($title IS NULL OR toLower(m.title) CONTAINS toLower($title)) " +
-                "  AND ($year IS NULL OR m.releaseYear = $year) " +
+                "  AND ($year IS NULL OR m.year = $year) " +
                 "  AND ($genre IS NULL OR EXISTS { " +
                 "      MATCH (m)-[:IN_GENRE]->(g:Genre) " +
                 "      WHERE toLower(g.name) = toLower($genre) " +
@@ -30,7 +30,7 @@ public interface MovieRepository extends Neo4jRepository<Movie, String> {
                 "SKIP $skip LIMIT $limit",
         countQuery = "MATCH (m:Movie) " +
                      "WHERE ($title IS NULL OR toLower(m.title) CONTAINS toLower($title)) " +
-                     "  AND ($year IS NULL OR m.releaseYear = $year) " +
+                     "  AND ($year IS NULL OR m.year = $year) " +
                      "  AND ($genre IS NULL OR EXISTS { " +
                      "      MATCH (m)-[:IN_GENRE]->(g:Genre) " +
                      "      WHERE toLower(g.name) = toLower($genre) " +
@@ -45,7 +45,7 @@ public interface MovieRepository extends Neo4jRepository<Movie, String> {
     );
 
     @Query(
-        value = "MATCH (m:Movie {id: $id}) " +
+        value = "MATCH (m:Movie {movieId: $id}) " +
                 "OPTIONAL MATCH (m)-[r:IN_GENRE]->(g:Genre) " +
                 "RETURN m, collect(r), collect(g)"
     )

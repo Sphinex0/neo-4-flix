@@ -2,7 +2,6 @@ package com.neo.movie_service.services;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,6 @@ public class GenreService {
                 .orElseGet(() -> {
                     log.info("Creating new Genre node in Neo4j: {}", normalizedName);
                     Genre newGenre = Genre.builder()
-                            .id(UUID.randomUUID().toString())
                             .name(normalizedName)
                             .build();
                     return genreRepository.save(newGenre);
@@ -57,7 +55,7 @@ public class GenreService {
 
     public GenreResponse mapToResponse(Genre genre) {
         return GenreResponse.builder()
-                .id(genre.getId())
+                .id(genre.getName())
                 .name(genre.getName())
                 .build();
     }

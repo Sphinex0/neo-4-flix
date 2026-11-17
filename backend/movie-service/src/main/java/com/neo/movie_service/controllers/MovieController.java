@@ -1,7 +1,5 @@
 package com.neo.movie_service.controllers;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,7 +17,6 @@ import com.neo.movie_service.dtos.request.MovieCreateRequest;
 import com.neo.movie_service.dtos.request.MovieUpdateRequest;
 import com.neo.movie_service.dtos.response.MovieResponse;
 import com.neo.movie_service.dtos.response.PageResponse;
-import com.neo.movie_service.services.DataSeederService;
 import com.neo.movie_service.services.MovieService;
 
 import jakarta.validation.Valid;
@@ -31,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 public class MovieController {
 
     private final MovieService movieService;
-    private final DataSeederService dataSeederService;
 
     @PostMapping
     public ResponseEntity<ResponseData<MovieResponse>> createMovie(@Valid @RequestBody MovieCreateRequest request) {
@@ -75,15 +71,5 @@ public class MovieController {
                 title, year, genre, page, size, sortBy, direction
         );
         return ResponseEntity.ok(ResponseData.success("Movies retrieved successfully", result));
-    }
-
-    @PostMapping("/seed")
-    public ResponseEntity<ResponseData<List<MovieResponse>>> seedMovies(
-            @RequestParam(defaultValue = "20") int count
-    ) {
-        int cappedCount = Math.min(Math.max(count, 1), 100);
-        List<MovieResponse> seeded = dataSeederService.seedMovies(cappedCount);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseData.success("Successfully generated " + seeded.size() + " movies", seeded));
     }
 }

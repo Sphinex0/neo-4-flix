@@ -128,9 +128,15 @@ public class MovieService {
             String sortBy,
             String direction
     ) {
+        String cleanSort = (sortBy == null || sortBy.isBlank()) ? "title" : sortBy.trim();
+        if ("releaseYear".equals(cleanSort) || "year".equals(cleanSort)) {
+            cleanSort = "year";
+        }
+        String sortTarget = cleanSort.startsWith("m.") ? cleanSort : "m." + cleanSort;
+
         Sort sort = Sort.by(
                 "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC,
-                (sortBy == null || sortBy.isBlank()) ? "title" : sortBy
+                sortTarget
         );
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), sort);
 
@@ -174,6 +180,7 @@ public class MovieService {
                 .posterUrl(movie.getPosterUrl())
                 .trailerUrl(movie.getTrailerUrl())
                 .director(movie.getDirector())
+                .imdbRating(movie.getImdbRating())
                 .genres(genreResponses)
                 .createdAt(movie.getCreatedAt())
                 .updatedAt(movie.getUpdatedAt())
