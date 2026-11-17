@@ -41,4 +41,24 @@ export class Register {
         },
       });
   }
+
+  hasMinLength(): boolean {
+    return this.password.length >= 8;
+  }
+
+  hasUppercase(): boolean {
+    return /[A-Z]/.test(this.password);
+  }
+
+  hasNumber(): boolean {
+    return /[0-9]/.test(this.password);
+  }
+
+  hasSymbol(): boolean {
+    return /[^A-Za-z0-9]/.test(this.password);
+  }
+
+  isPasswordValid(): boolean {
+    return this.hasMinLength() && this.hasUppercase() && this.hasNumber() && this.hasSymbol();
+  }
 }

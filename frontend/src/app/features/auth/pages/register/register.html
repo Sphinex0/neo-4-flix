@@ -22,7 +22,7 @@
   </div>
 
   <div class="box-border flex w-full max-w-[480px] flex-col gap-6 rounded-2xl border border-[#2A3140] bg-[#151A23] p-10">
-    <form class="flex flex-col gap-[22px]" (ngSubmit)="onSubmit()">
+    <form class="flex flex-col gap-[22px]" (ngSubmit)="onSubmit()" #registerForm="ngForm">
       <div class="flex flex-col gap-2">
         <h1 class="m-0 font-display text-[30px] font-bold">Create your account</h1>
         <p class="m-0 text-[15px] text-[#A0A9B8]">It takes one minute.</p>
@@ -39,12 +39,17 @@
             id="fname"
             name="firstName"
             type="text"
-            autocomplete="given-name"
-            placeholder="Hamza"
+            placeholder="First Name"
             required
             [(ngModel)]="firstName"
-            class="box-border h-12 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+            #firstNameModel="ngModel"
+            [class.border-[#FF5A5F]]="firstNameModel.invalid && firstNameModel.touched"
+            [class.border-[#5B6579]]="!(firstNameModel.invalid && firstNameModel.touched)"
+            class="box-border h-12 w-full rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
           />
+          @if (firstNameModel.invalid && firstNameModel.touched) {
+            <p class="m-0 text-xs text-[#FF5A5F]">First name is required</p>
+          }
         </div>
         <div class="flex min-w-0 flex-1 basis-[160px] flex-col gap-2">
           <label for="lname" class="text-sm font-medium">Last name</label>
@@ -56,8 +61,14 @@
             placeholder="Your last name"
             required
             [(ngModel)]="lastName"
-            class="box-border h-12 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+            #lastNameModel="ngModel"
+            [class.border-[#FF5A5F]]="lastNameModel.invalid && lastNameModel.touched"
+            [class.border-[#5B6579]]="!(lastNameModel.invalid && lastNameModel.touched)"
+            class="box-border h-12 w-full rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
           />
+          @if (lastNameModel.invalid && lastNameModel.touched) {
+            <p class="m-0 text-xs text-[#FF5A5F]">Last name is required</p>
+          }
         </div>
       </div>
 
@@ -71,8 +82,14 @@
           placeholder="moviefan42"
           required
           [(ngModel)]="username"
-          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          #usernameModel="ngModel"
+          [class.border-[#FF5A5F]]="usernameModel.invalid && usernameModel.touched"
+          [class.border-[#5B6579]]="!(usernameModel.invalid && usernameModel.touched)"
+          class="box-border h-12 rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
         />
+        @if (usernameModel.invalid && usernameModel.touched) {
+          <p class="m-0 text-xs text-[#FF5A5F]">Username is required</p>
+        }
         <p class="m-0 text-[13px] text-[#A0A9B8]">You can sign in with this or your email.</p>
       </div>
 
@@ -82,11 +99,24 @@
           id="remail"
           name="email"
           type="email"
+          email
           placeholder="you@example.com"
           required
           [(ngModel)]="email"
-          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          #emailModel="ngModel"
+          [class.border-[#FF5A5F]]="emailModel.invalid && emailModel.touched"
+          [class.border-[#5B6579]]="!(emailModel.invalid && emailModel.touched)"
+          class="box-border h-12 rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
         />
+        @if (emailModel.invalid && emailModel.touched) {
+          <p class="m-0 text-xs text-[#FF5A5F]">
+            @if (emailModel.errors?.['required']) {
+              Email is required
+            } @else {
+              Enter a valid email address
+            }
+          </p>
+        }
       </div>
 
       <div class="flex flex-col gap-2">
@@ -98,29 +128,35 @@
           placeholder="Choose a strong password"
           required
           [(ngModel)]="password"
-          class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          #passwordModel="ngModel"
+          [class.border-[#FF5A5F]]="passwordModel.invalid && passwordModel.touched"
+          [class.border-[#5B6579]]="!(passwordModel.invalid && passwordModel.touched)"
+          class="box-border h-12 rounded-[10px] border bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
         />
+        @if (passwordModel.invalid && passwordModel.touched) {
+          <p class="m-0 text-xs text-[#FF5A5F]">Password is required</p>
+        }
         <ul class="m-0 mt-1 grid list-none grid-cols-2 gap-x-4 gap-y-2 p-0 text-[13px] text-[#A0A9B8]">
           <li class="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38D0B9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" [attr.stroke]="hasMinLength() ? '#38D0B9' : '#6B7587'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M5 12l5 5 9-10" />
             </svg>
             At least 8 characters
           </li>
           <li class="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38D0B9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" [attr.stroke]="hasUppercase() ? '#38D0B9' : '#6B7587'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M5 12l5 5 9-10" />
             </svg>
             One capital letter
           </li>
           <li class="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7587" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" [attr.stroke]="hasNumber() ? '#38D0B9' : '#6B7587'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M5 12l5 5 9-10" />
             </svg>
             One number
           </li>
           <li class="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7587" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" [attr.stroke]="hasSymbol() ? '#38D0B9' : '#6B7587'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M5 12l5 5 9-10" />
             </svg>
             One symbol
@@ -130,7 +166,7 @@
 
       <button
         type="submit"
-        [disabled]="isSubmitting()"
+        [disabled]="isSubmitting() || !isPasswordValid() || registerForm.invalid"
         class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {{ isSubmitting() ? 'Creating account...' : 'Continue' }}
