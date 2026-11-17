@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { AuthApiService } from '../../services/auth-api.service';
 
 @Component({
@@ -9,7 +10,8 @@ import { AuthApiService } from '../../services/auth-api.service';
   templateUrl: './register.html',
 })
 export class Register {
-  private readonly authService = inject(AuthApiService);
+  private readonly authApi = inject(AuthApiService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   firstName = '';
@@ -26,7 +28,7 @@ export class Register {
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
-    this.authService
+    this.authApi
       .register({
         firstName: this.firstName,
         lastName: this.lastName,
@@ -35,7 +37,10 @@ export class Register {
         password: this.password,
       })
       .subscribe({
-        next: () => this.router.navigate(['/secure-account']),
+        next: (response) => {
+          this.authService.setToken(response.data.token!);
+          this.router.navigate(['/secure-account']);
+        },
         error: (err) => {
           this.isSubmitting.set(false);
           this.errorMessage.set(err.error?.message ?? 'Something went wrong. Please try again.');

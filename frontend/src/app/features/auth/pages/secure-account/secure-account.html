@@ -30,10 +30,18 @@
         </p>
       </div>
 
+      @if (errorMessage()) {
+        <p class="m-0 text-center text-sm text-[#FF5A5F]">{{ errorMessage() }}</p>
+      }
+
       <div
         class="box-border flex h-[200px] w-[200px] items-center justify-center self-center rounded-xl bg-[#EEF1F6] p-5 text-center text-[13px] font-semibold text-[#0D1017]"
       >
-        [QR code from the User service]
+        @if (secret()) {
+          <span class="break-all font-mono">{{ secret() }}</span>
+        } @else {
+          Generating your code...
+        }
       </div>
 
       <div class="flex flex-col gap-2">
@@ -44,13 +52,12 @@
           inputmode="numeric"
           maxlength="6"
           placeholder="123456"
-          required
           class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-lg tracking-[0.3em] text-[#EEF1F6]"
         />
       </div>
 
       <a
-        href="#"
+        routerLink="/"
         class="flex min-h-12 items-center justify-center rounded-[10px] bg-[#FF5A5F] text-base font-semibold text-[#0D1017]"
       >
         Turn on and finish
@@ -58,7 +65,7 @@
 
       <div class="flex flex-wrap justify-between gap-2">
         <a routerLink="/register" class="inline-flex min-h-11 items-center text-sm text-[#C9D0DC]">Back</a>
-        <a href="#" class="inline-flex min-h-11 items-center text-sm font-medium">Skip for now</a>
+        <a routerLink="/" class="inline-flex min-h-11 items-center text-sm font-medium">Skip for now</a>
       </div>
     </div>
   </div>
