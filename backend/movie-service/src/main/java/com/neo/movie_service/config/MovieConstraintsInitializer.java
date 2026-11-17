@@ -16,12 +16,9 @@ public class MovieConstraintsInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("Applying Neo4j constraints and indexes for Movie and Genre...");
+        log.info("Ensuring Neo4j indexes and constraints are active...");
 
-        neo4jClient.query("CREATE CONSTRAINT movie_id_unique IF NOT EXISTS FOR (m:Movie) REQUIRE m.id IS UNIQUE")
-                .run();
-
-        neo4jClient.query("CREATE CONSTRAINT genre_id_unique IF NOT EXISTS FOR (g:Genre) REQUIRE g.id IS UNIQUE")
+        neo4jClient.query("CREATE CONSTRAINT movie_id_unique IF NOT EXISTS FOR (m:Movie) REQUIRE m.movieId IS UNIQUE")
                 .run();
 
         neo4jClient.query("CREATE CONSTRAINT genre_name_unique IF NOT EXISTS FOR (g:Genre) REQUIRE g.name IS UNIQUE")
@@ -30,9 +27,9 @@ public class MovieConstraintsInitializer implements CommandLineRunner {
         neo4jClient.query("CREATE INDEX movie_title_index IF NOT EXISTS FOR (m:Movie) ON (m.title)")
                 .run();
 
-        neo4jClient.query("CREATE INDEX movie_year_index IF NOT EXISTS FOR (m:Movie) ON (m.releaseYear)")
+        neo4jClient.query("CREATE INDEX movie_year_index IF NOT EXISTS FOR (m:Movie) ON (m.year)")
                 .run();
 
-        log.info("Neo4j Movie and Genre constraints/indexes applied successfully.");
+        log.info("Neo4j Movie and Genre indexes verified successfully.");
     }
 }

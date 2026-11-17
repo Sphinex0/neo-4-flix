@@ -2,6 +2,7 @@ package com.neo.movie_service.models;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,9 +21,9 @@ import lombok.ToString;
 @Builder
 @ToString
 public class Genre {
-    @Id
-    @EqualsAndHashCode.Include
-    private String id;
 
+    @Id
+    @Property("name")
+    @EqualsAndHashCode.Include
     private String name;
 }

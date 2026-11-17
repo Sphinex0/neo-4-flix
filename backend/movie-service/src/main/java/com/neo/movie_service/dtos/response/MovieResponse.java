@@ -21,6 +21,7 @@ public class MovieResponse {
     private String posterUrl;
     private String trailerUrl;
     private String director;
+    private Double imdbRating;
     private Set<GenreResponse> genres;
     private Instant createdAt;
     private Instant updatedAt;
