@@ -126,9 +126,10 @@
             <button
               type="button"
               (click)="onSave()"
-              class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] px-6 text-[15px] font-semibold text-[#0D1017]"
+              [disabled]="isSaving()"
+              class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] px-6 text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Save changes
+              {{ isSaving() ? 'Saving...' : 'Save changes' }}
             </button>
             @if (saved()) {
               <span role="status" class="inline-flex items-center gap-1.5 text-sm font-medium text-[#38D0B9]">
@@ -139,6 +140,9 @@
               </span>
             }
           </div>
+          @if (saveError()) {
+            <p class="m-0 text-sm text-[#FF5A5F]">{{ saveError() }}</p>
+          }
         </section>
 
         <section class="flex flex-col gap-5 rounded-2xl border border-[#2A3140] bg-[#151A23] p-7">
@@ -257,43 +261,58 @@
             <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">This removes your account, your ratings and your watchlist. You cannot undo it.</p>
           </div>
 
-          @if (!deleting()) {
-            <button
-              type="button"
-              (click)="askDelete()"
-              class="min-h-12 cursor-pointer self-start rounded-[10px] border border-[#FF5A5F] bg-transparent px-[22px] text-[15px] font-semibold text-[#FF8A8E]"
-            >
-              Delete my account
-            </button>
-          } @else {
-            <div class="flex flex-col gap-3.5 rounded-xl border border-[#6B2A2E] bg-[#0D1017] p-[18px]">
-              <span class="text-[15px] font-semibold">Are you sure?</span>
-              <div class="flex flex-col gap-2">
-                <label for="pdel" class="text-sm font-medium">Type your password to confirm</label>
-                <input
-                  id="pdel"
-                  type="password"
-                  autocomplete="current-password"
-                  [(ngModel)]="deleteConfirmPassword"
-                  class="box-border h-12 max-w-[360px] rounded-[10px] border border-[#5B6579] bg-[#151A23] px-3.5 text-[15px] text-[#EEF1F6]"
-                />
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <a routerLink="/login" class="flex min-h-12 items-center justify-center rounded-[10px] bg-[#FF5A5F] px-[22px] text-[15px] font-semibold text-[#0D1017]">
-                  Delete forever
-                </a>
-                <button
-                  type="button"
-                  (click)="cancelDelete()"
-                  class="min-h-12 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-[18px] text-sm text-[#EEF1F6]"
-                >
-                  Keep my account
-                </button>
-              </div>
-            </div>
-          }
+          <button
+            type="button"
+            (click)="askDelete()"
+            class="min-h-12 cursor-pointer self-start rounded-[10px] border border-[#FF5A5F] bg-transparent px-[22px] text-[15px] font-semibold text-[#FF8A8E]"
+          >
+            Delete my account
+          </button>
         </section>
       </div>
     </div>
   </main>
+
+  @if (showDeleteModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <div class="box-border flex w-full max-w-[420px] flex-col gap-4 rounded-2xl border border-[#6B2A2E] bg-[#151A23] p-8">
+        <span id="deleteModalTitle" class="font-display text-xl font-bold">Are you sure?</span>
+        <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">This removes your account, your ratings and your watchlist. You cannot undo it.</p>
+
+        <div class="flex flex-col gap-2">
+          <label for="pdel" class="text-sm font-medium">Type your password to confirm</label>
+          <input
+            id="pdel"
+            type="password"
+            autocomplete="current-password"
+            [(ngModel)]="deleteConfirmPassword"
+            class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+          />
+        </div>
+
+        @if (deleteError()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ deleteError() }}</p>
+        }
+
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            (click)="confirmDelete()"
+            [disabled]="isDeleting()"
+            class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] px-[22px] text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ isDeleting() ? 'Deleting...' : 'Delete forever' }}
+          </button>
+          <button
+            type="button"
+            (click)="cancelDelete()"
+            [disabled]="isDeleting()"
+            class="min-h-12 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-[18px] text-sm text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Keep my account
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>
