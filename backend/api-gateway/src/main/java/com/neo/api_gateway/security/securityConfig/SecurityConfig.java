@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/movies/watchlist", "/api/movies/{id}/watchlist").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/movies/**", "/api/genres/**").permitAll()
                         .requestMatchers("/api/movies/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/ratings/movie/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(securityErrorHandler)
