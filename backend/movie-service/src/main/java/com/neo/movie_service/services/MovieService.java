@@ -22,6 +22,8 @@ import com.neo.movie_service.dtos.response.MovieResponse;
 import com.neo.movie_service.dtos.response.PageResponse;
 import com.neo.movie_service.exceptions.movie.MovieAlreadyExistsException;
 import com.neo.movie_service.exceptions.movie.MovieNotFoundException;
+import com.neo.movie_service.exceptions.watchlist.MovieAlreadyInWatchlistException;
+import com.neo.movie_service.exceptions.watchlist.MovieNotInWatchlistException;
 import com.neo.movie_service.models.Genre;
 import com.neo.movie_service.models.Movie;
 import com.neo.movie_service.repositories.MovieRepository;
@@ -144,6 +146,42 @@ public class MovieService {
         String normalizedGenre = (genre != null && !genre.isBlank()) ? genre.trim() : null;
 
         Page<Movie> moviePage = movieRepository.searchMovies(normalizedTitle, year, normalizedGenre, pageable);
+
+        return PageResponse.<MovieResponse>builder()
+                .content(moviePage.getContent().stream().map(this::mapToResponse).toList())
+                .pageNumber(moviePage.getNumber())
+                .pageSize(moviePage.getSize())
+                .totalElements(moviePage.getTotalElements())
+                .totalPages(moviePage.getTotalPages())
+                .last(moviePage.isLast())
+                .build();
+    }
+
+    @Transactional
+    public void addToWatchlist(String userId, String movieId) {
+        if (!movieRepository.existsById(movieId)) {
+            throw new MovieNotFoundException("Movie not found!");
+        }
+        if (movieRepository.existsInWatchlist(userId, movieId)) {
+            throw new MovieAlreadyInWatchlistException("Movie is already in the watchlist!");
+        }
+        movieRepository.addToWatchlist(userId, movieId);
+        log.info("Added Movie [id={}] to watchlist of User [id={}]", movieId, userId);
+    }
+
+    @Transactional
+    public void removeFromWatchlist(String userId, String movieId) {
+        if (!movieRepository.existsInWatchlist(userId, movieId)) {
+            throw new MovieNotInWatchlistException("Movie is not in the watchlist!");
+        }
+        movieRepository.removeFromWatchlist(userId, movieId);
+        log.info("Removed Movie [id={}] from watchlist of User [id={}]", movieId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<MovieResponse> getWatchlist(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), Sort.by("m.title").ascending());
+        Page<Movie> moviePage = movieRepository.findWatchlistByUserId(userId, pageable);
 
         return PageResponse.<MovieResponse>builder()
                 .content(moviePage.getContent().stream().map(this::mapToResponse).toList())
