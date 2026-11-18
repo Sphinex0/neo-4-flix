@@ -131,7 +131,7 @@
             <button
               type="button"
               (click)="onSave()"
-              [disabled]="isSaving()"
+              [disabled]="isSaving() || !hasProfileChanges()"
               class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] px-6 text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {{ isSaving() ? 'Saving...' : 'Save changes' }}

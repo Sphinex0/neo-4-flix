@@ -52,6 +52,8 @@ export class Profile implements OnInit {
   isDeleting = signal(false);
   deleteError = signal<string | null>(null);
 
+  private savedProfile: { firstName: string; lastName: string; username: string; email: string } | null = null;
+
   ngOnInit(): void {
     this.loadProfile();
   }
@@ -67,6 +69,12 @@ export class Profile implements OnInit {
         this.lastName = user.lastName;
         this.username = user.username;
         this.email = user.email;
+        this.savedProfile = {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          email: user.email,
+        };
         this.twoFactorState.set(user.twoFactorEnabled ? 'on' : 'off');
         this.memberSince.set(this.formatMonthYear(user.createdAt));
         this.updatedAt.set(this.formatDate(user.updatedAt));
@@ -96,7 +104,24 @@ export class Profile implements OnInit {
     this.saved.set(false);
   }
 
+  hasProfileChanges(): boolean {
+    if (!this.savedProfile) {
+      return false;
+    }
+
+    return (
+      this.firstName !== this.savedProfile.firstName ||
+      this.lastName !== this.savedProfile.lastName ||
+      this.username !== this.savedProfile.username ||
+      this.email !== this.savedProfile.email
+    );
+  }
+
   onSave(): void {
+    if (!this.hasProfileChanges()) {
+      return;
+    }
+
     this.isSaving.set(true);
     this.saveError.set(null);
 
@@ -112,6 +137,12 @@ export class Profile implements OnInit {
           this.isSaving.set(false);
           this.saved.set(true);
           this.updatedAt.set(this.formatDate(res.data.updatedAt));
+          this.savedProfile = {
+            firstName: this.firstName,
+            lastName: this.lastName,
+            username: this.username,
+            email: this.email,
+          };
         },
         error: (err) => {
           this.isSaving.set(false);
