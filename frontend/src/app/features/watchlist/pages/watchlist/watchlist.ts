@@ -1,7 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgStyle } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { Navbar } from '../../../../shared/navbar/navbar';
 import { MovieResponse } from '../../../movies/models/movie.models';
+import { MovieApiService } from '../../../movies/services/movie-api.service';
+import { MyRatingResponse } from '../../../ratings/models/rating.models';
+import { RatingApiService } from '../../../ratings/services/rating-api.service';
 import { WatchlistApiService } from '../../services/watchlist-api.service';
 
 interface WatchlistCard {
@@ -12,6 +16,7 @@ interface WatchlistCard {
 }
 
 interface RatedCard {
+  movieId: string;
   title: string;
   meta: string;
   mine: number;
@@ -35,31 +40,67 @@ const FALLBACK_GRADIENTS = [
 })
 export class Watchlist implements OnInit {
   private readonly watchlistApi = inject(WatchlistApiService);
+  private readonly ratingApi = inject(RatingApiService);
+  private readonly movieApi = inject(MovieApiService);
 
   activeTab = signal<Tab>('watch');
   isLoading = signal(true);
   loadError = signal<string | null>(null);
   removeMessage = signal<string | null>(null);
 
-  watch: WatchlistCard[] = [];
+  isRatingsLoading = signal(true);
+  ratingsError = signal<string | null>(null);
+  deleteRatingMessage = signal<string | null>(null);
 
-  rated: RatedCard[] = [
-    { title: 'Inception', meta: '2010 · Sci-Fi', mine: 5, bg: 'linear-gradient(160deg,#2A5388,#0B1220)' },
-    { title: 'The Matrix', meta: '1999 · Sci-Fi', mine: 4, bg: 'linear-gradient(160deg,#15553F,#08130F)' },
-    { title: 'Parasite', meta: '2019 · Thriller', mine: 5, bg: 'linear-gradient(160deg,#4A5E34,#0E130A)' },
-    { title: 'Whiplash', meta: '2014 · Drama', mine: 4, bg: 'linear-gradient(160deg,#7A262C,#130708)' },
-    { title: 'Pulp Fiction', meta: '1994 · Crime', mine: 3, bg: 'linear-gradient(160deg,#6E5A1F,#141005)' },
-  ];
+  watch: WatchlistCard[] = [];
+  rated: RatedCard[] = [];
 
   ngOnInit(): void {
+    this.loadWatchlist();
+    this.loadMyRatings();
+  }
+
+  private loadWatchlist(): void {
     this.watchlistApi.getWatchlist(0, 10).subscribe({
       next: (res) => {
-        this.watch = res.data.content.map((movie, index) => this.toCard(movie, index));
+        this.watch = res.data.content.map((movie, index) => this.toWatchlistCard(movie, index));
         this.isLoading.set(false);
       },
       error: (err) => {
         this.isLoading.set(false);
         this.loadError.set(err.error?.message ?? 'Could not load your watchlist from the server.');
+      },
+    });
+  }
+
+  private loadMyRatings(): void {
+    this.ratingApi.getMyRatings().subscribe({
+      next: (res) => {
+        const ratings = res.data;
+
+        if (ratings.length === 0) {
+          this.rated = [];
+          this.isRatingsLoading.set(false);
+          return;
+        }
+
+        const movieCalls = ratings.map((rating) => this.movieApi.getMovieById(rating.movieId));
+        forkJoin(movieCalls).subscribe({
+          next: (movieResponses) => {
+            this.rated = ratings.map((rating, index) =>
+              this.toRatedCard(rating, movieResponses[index].data, index),
+            );
+            this.isRatingsLoading.set(false);
+          },
+          error: (err) => {
+            this.isRatingsLoading.set(false);
+            this.ratingsError.set(err.error?.message ?? 'Could not load movie details for your ratings.');
+          },
+        });
+      },
+      error: (err) => {
+        this.isRatingsLoading.set(false);
+        this.ratingsError.set(err.error?.message ?? 'Could not load your ratings from the server.');
       },
     });
   }
@@ -77,13 +118,40 @@ export class Watchlist implements OnInit {
     });
   }
 
-  private toCard(movie: MovieResponse, index: number): WatchlistCard {
+  onDeleteRating(movie: RatedCard): void {
+    this.deleteRatingMessage.set(null);
+
+    this.ratingApi.deleteRating(movie.movieId).subscribe({
+      next: () => {
+        this.rated = this.rated.filter((m) => m.movieId !== movie.movieId);
+      },
+      error: (err) => {
+        this.deleteRatingMessage.set(err.error?.message ?? 'Could not delete this rating.');
+      },
+    });
+  }
+
+  private toWatchlistCard(movie: MovieResponse, index: number): WatchlistCard {
     const genreNames = movie.genres.map((g) => g.name).join(', ');
 
     return {
       id: movie.id,
       title: movie.title,
       meta: genreNames ? `${movie.releaseYear} · ${genreNames}` : `${movie.releaseYear}`,
+      bg: movie.posterUrl
+        ? `center / cover url('${movie.posterUrl}')`
+        : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length],
+    };
+  }
+
+  private toRatedCard(rating: MyRatingResponse, movie: MovieResponse, index: number): RatedCard {
+    const genreNames = movie.genres.map((g) => g.name).join(', ');
+
+    return {
+      movieId: rating.movieId,
+      title: movie.title,
+      meta: genreNames ? `${movie.releaseYear} · ${genreNames}` : `${movie.releaseYear}`,
+      mine: rating.score,
       bg: movie.posterUrl
         ? `center / cover url('${movie.posterUrl}')`
         : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length],

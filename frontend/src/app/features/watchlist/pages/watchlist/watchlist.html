@@ -69,41 +69,54 @@
       <section class="flex flex-col gap-4">
         <p class="m-0 text-[15px] text-[#A0A9B8]">Your ratings train your picks. Change them when your taste changes.</p>
 
-        <div class="flex flex-col gap-3">
-          @for (movie of rated; track movie.title) {
-            <div class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5">
-              <div [ngStyle]="{ background: movie.bg }" class="h-21 w-14 flex-none rounded-lg"></div>
+        @if (deleteRatingMessage()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ deleteRatingMessage() }}</p>
+        }
 
-              <div class="flex min-w-0 flex-1 basis-[220px] flex-col gap-1">
-                <span class="font-display text-xl font-bold text-[#EEF1F6]">{{ movie.title }}</span>
-                <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
-              </div>
+        @if (isRatingsLoading()) {
+          <p class="m-0 text-sm text-[#A0A9B8]">Loading your ratings...</p>
+        } @else if (ratingsError()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ ratingsError() }}</p>
+        } @else if (rated.length === 0) {
+          <p class="m-0 text-sm text-[#A0A9B8]">You haven't rated any movies yet.</p>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (movie of rated; track movie.movieId) {
+              <div class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5">
+                <div [ngStyle]="{ background: movie.bg }" class="h-21 w-14 flex-none rounded-lg"></div>
 
-              <div class="flex items-center gap-2">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#FF5A5F" aria-hidden="true">
-                  <path d="M12 3l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 17l-5.6 3 1.3-6.2L3 9.5l6.3-.7z" />
-                </svg>
-                <span class="text-base font-semibold">{{ movie.mine }} of 5</span>
-              </div>
+                <div class="flex min-w-0 flex-1 basis-[220px] flex-col gap-1">
+                  <span class="font-display text-xl font-bold text-[#EEF1F6]">{{ movie.title }}</span>
+                  <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
+                </div>
 
-              <div class="flex gap-2">
-                <button
-                  type="button"
-                  class="inline-flex min-h-11 cursor-pointer items-center rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
-                >
-                  Change
-                </button>
-                <button
-                  type="button"
-                  [attr.aria-label]="'Delete my rating for ' + movie.title"
-                  class="min-h-11 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#C9D0DC] hover:text-white"
-                >
-                  Delete
-                </button>
+                <div class="flex items-center gap-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#FF5A5F" aria-hidden="true">
+                    <path d="M12 3l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 17l-5.6 3 1.3-6.2L3 9.5l6.3-.7z" />
+                  </svg>
+                  <span class="text-base font-semibold">{{ movie.mine }} of 5</span>
+                </div>
+
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    class="inline-flex min-h-11 cursor-pointer items-center rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
+                  >
+                    Change
+                  </button>
+                  <button
+                    type="button"
+                    (click)="onDeleteRating(movie)"
+                    [attr.aria-label]="'Delete my rating for ' + movie.title"
+                    class="min-h-11 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#C9D0DC] hover:text-white"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
       </section>
     }
   </main>
