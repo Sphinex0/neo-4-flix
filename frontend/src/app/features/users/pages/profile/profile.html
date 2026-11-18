@@ -35,6 +35,11 @@
   <main class="flex flex-col gap-7 px-12 py-10 pb-14">
     <h1 class="m-0 font-display text-[40px] font-bold tracking-[-0.01em]">Your profile</h1>
 
+    @if (isLoading()) {
+      <p class="m-0 text-sm text-[#A0A9B8]">Loading your profile...</p>
+    } @else if (loadError()) {
+      <p class="m-0 text-sm text-[#FF5A5F]">{{ loadError() }}</p>
+    } @else {
     <div class="flex flex-wrap items-start gap-8">
       <aside class="box-border flex flex-1 basis-[280px] flex-col items-center gap-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-6 py-8 text-center">
         <div
@@ -59,7 +64,7 @@
           <dt class="text-[#A0A9B8]">Email</dt>
           <dd class="m-0 break-words">{{ email }}</dd>
           <dt class="text-[#A0A9B8]">Member since</dt>
-          <dd class="m-0">March 2026</dd>
+          <dd class="m-0">{{ memberSince() }}</dd>
           <dt class="text-[#A0A9B8]">Last update</dt>
           <dd class="m-0">{{ updatedAt() }}</dd>
         </dl>
@@ -271,6 +276,7 @@
         </section>
       </div>
     </div>
+    }
   </main>
 
   @if (showDeleteModal()) {

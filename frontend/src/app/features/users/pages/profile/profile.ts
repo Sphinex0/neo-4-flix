@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -11,31 +11,62 @@ type TwoFactorState = 'off' | 'setup' | 'on';
   imports: [FormsModule, RouterLink],
   templateUrl: './profile.html',
 })
-export class Profile {
+export class Profile implements OnInit {
   private readonly userApi = inject(UserApiService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  firstName = 'Hamza';
-  lastName = 'El Khawlani';
-  username = 'hamza';
-  email = 'hamza@example.com';
+  firstName = '';
+  lastName = '';
+  username = '';
+  email = '';
 
   currentPassword = '';
   newPassword = '';
   twoFactorCode = '';
   deleteConfirmPassword = '';
 
+  isLoading = signal(true);
+  loadError = signal<string | null>(null);
+
   saved = signal(false);
   isSaving = signal(false);
   saveError = signal<string | null>(null);
 
   twoFactorState = signal<TwoFactorState>('off');
-  updatedAt = signal('Today');
+  memberSince = signal('');
+  updatedAt = signal('');
 
   showDeleteModal = signal(false);
   isDeleting = signal(false);
   deleteError = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.loadProfile();
+  }
+
+  loadProfile(): void {
+    this.isLoading.set(true);
+    this.loadError.set(null);
+
+    this.userApi.getMe().subscribe({
+      next: (res) => {
+        const user = res.data;
+        this.firstName = user.firstName;
+        this.lastName = user.lastName;
+        this.username = user.username;
+        this.email = user.email;
+        this.twoFactorState.set(user.twoFactorEnabled ? 'on' : 'off');
+        this.memberSince.set(this.formatMonthYear(user.createdAt));
+        this.updatedAt.set(this.formatDate(user.updatedAt));
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.loadError.set(err.error?.message ?? 'Could not load your profile. Please try again.');
+      },
+    });
+  }
 
   initials(): string {
     const first = (this.firstName || '').trim();
@@ -66,10 +97,10 @@ export class Profile {
         email: this.email,
       })
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.isSaving.set(false);
           this.saved.set(true);
-          this.updatedAt.set('Just now');
+          this.updatedAt.set(this.formatDate(res.data.updatedAt));
         },
         error: (err) => {
           this.isSaving.set(false);
@@ -114,5 +145,13 @@ export class Profile {
         this.deleteError.set(err.error?.message ?? 'Could not delete your account. Please try again.');
       },
     });
+  }
+
+  private formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  private formatMonthYear(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 }
