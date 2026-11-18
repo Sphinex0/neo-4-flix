@@ -9,6 +9,7 @@ import org.neo4j.driver.Record;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Repository;
 
+import com.neo.rating_service.exceptions.movie.MovieNotFoundException;
 import com.neo.rating_service.models.Rating;
 
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class RatingRepository {
                 .fetchAs(Rating.class)
                 .mappedBy((typeSystem, record) -> toRating(record))
                 .one()
-                .orElseThrow(() -> new IllegalStateException("User or movie not found"));
+                .orElseThrow(() -> new MovieNotFoundException("Movie not found: " + movieId));
     }
 
     public Optional<Rating> findByUserIdAndMovieId(String userId, String movieId) {
