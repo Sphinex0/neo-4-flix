@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
@@ -24,12 +24,22 @@ export class Verify2fa {
   digit5 = '';
   digit6 = '';
 
+  @ViewChild('d1') firstDigitInput?: ElementRef<HTMLInputElement>;
+
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
 
   onDigitInput(current: HTMLInputElement, next: HTMLInputElement | null): void {
     if (current.value && next) {
       next.focus();
+    }
+
+    if (current.value && !next) {
+      const code = this.digit1 + this.digit2 + this.digit3 + this.digit4 + this.digit5 + current.value;
+
+      if (code.length === 6 && !this.isSubmitting()) {
+        this.onSubmit();
+      }
     }
   }
 
@@ -58,6 +68,13 @@ export class Verify2fa {
         error: (err) => {
           this.isSubmitting.set(false);
           this.errorMessage.set(err.error?.message ?? 'Something went wrong. Please try again.');
+          this.digit1 = '';
+          this.digit2 = '';
+          this.digit3 = '';
+          this.digit4 = '';
+          this.digit5 = '';
+          this.digit6 = '';
+          this.firstDigitInput?.nativeElement.focus();
         },
       });
   }

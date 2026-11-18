@@ -10,7 +10,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error) => {
-      if (error.status === 401) {
+      const isAuthEndpoint = req.url.includes('/api/auth/');
+
+      if (error.status === 401 && !isAuthEndpoint) {
         authService.clearToken();
         router.navigate(['/login']);
       }
