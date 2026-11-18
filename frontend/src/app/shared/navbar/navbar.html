@@ -17,7 +17,14 @@
   </nav>
 
   <div class="flex items-center gap-2">
-    <a routerLink="/profile" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">Profile</a>
+    <a
+      routerLink="/profile"
+      aria-label="Your profile"
+      aria-current="page"
+      class="flex h-11 w-11 items-center justify-center rounded-full bg-[#38D0B9] text-[15px] font-bold text-[#0D1017] shadow-[0_0_0_2px_#0D1017,0_0_0_4px_#38D0B9]"
+    >
+      {{ initials() }}
+    </a>
     <a routerLink="/login" (click)="onSignOut()" class="inline-flex min-h-11 items-center rounded-lg border border-[#5B6579] px-4 text-sm font-medium text-[#EEF1F6]">
       Sign out
     </a>
