@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.neo.user_service.common.ResponseData;
 import com.neo.user_service.dtos.request.ChangePasswordRequest;
 import com.neo.user_service.dtos.request.ProfileRequest;
+import com.neo.user_service.dtos.request.VerifyPasswordRequest;
 import com.neo.user_service.dtos.response.FriendResponse;
 import com.neo.user_service.dtos.response.TwoFactorSetupResponse;
 import com.neo.user_service.dtos.response.UserResponse;
@@ -49,6 +50,13 @@ public class UserController {
     public ResponseEntity<ResponseData<String>> changePassword(@AuthenticationPrincipal String userId,
             @Valid @RequestBody ChangePasswordRequest request) {
         return ResponseEntity.ok(userService.changePassword(userId, request));
+    }
+
+    @PostMapping("/me/verify-password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<String>> verifyPassword(@AuthenticationPrincipal String userId,
+            @Valid @RequestBody VerifyPasswordRequest request) {
+        return ResponseEntity.ok(userService.verifyPassword(userId, request));
     }
 
     @DeleteMapping("/me")

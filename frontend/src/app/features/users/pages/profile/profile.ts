@@ -238,19 +238,27 @@ export class Profile implements OnInit {
     this.isTurningOffTwoFactor.set(true);
     this.twoFactorDisableError.set(null);
 
-    this.userApi.disableTwoFactor().subscribe({
+    this.userApi.verifyPassword({ password: this.twoFactorDisablePassword }).subscribe({
       next: () => {
-        this.isTurningOffTwoFactor.set(false);
-        this.showTwoFactorDisableModal.set(false);
-        this.twoFactorDisablePassword = '';
-        this.twoFactorState.set('off');
-        this.twoFactorSecret.set(null);
-        this.twoFactorQrCodeUri.set(null);
-        this.twoFactorCode = '';
+        this.userApi.disableTwoFactor().subscribe({
+          next: () => {
+            this.isTurningOffTwoFactor.set(false);
+            this.showTwoFactorDisableModal.set(false);
+            this.twoFactorDisablePassword = '';
+            this.twoFactorState.set('off');
+            this.twoFactorSecret.set(null);
+            this.twoFactorQrCodeUri.set(null);
+            this.twoFactorCode = '';
+          },
+          error: (err) => {
+            this.isTurningOffTwoFactor.set(false);
+            this.twoFactorDisableError.set(err.error?.message ?? 'Could not turn off two-step sign in. Please try again.');
+          },
+        });
       },
       error: (err) => {
         this.isTurningOffTwoFactor.set(false);
-        this.twoFactorDisableError.set(err.error?.message ?? 'Could not turn off two-step sign in. Please try again.');
+        this.twoFactorDisableError.set(err.error?.message ?? 'Incorrect password.');
       },
     });
   }
@@ -269,14 +277,22 @@ export class Profile implements OnInit {
     this.isDeleting.set(true);
     this.deleteError.set(null);
 
-    this.userApi.deleteMe().subscribe({
+    this.userApi.verifyPassword({ password: this.deleteConfirmPassword }).subscribe({
       next: () => {
-        this.authService.clearToken();
-        this.router.navigate(['/login']);
+        this.userApi.deleteMe().subscribe({
+          next: () => {
+            this.authService.clearToken();
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            this.isDeleting.set(false);
+            this.deleteError.set(err.error?.message ?? 'Could not delete your account. Please try again.');
+          },
+        });
       },
       error: (err) => {
         this.isDeleting.set(false);
-        this.deleteError.set(err.error?.message ?? 'Could not delete your account. Please try again.');
+        this.deleteError.set(err.error?.message ?? 'Incorrect password.');
       },
     });
   }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.neo.user_service.common.ResponseData;
 import com.neo.user_service.dtos.request.ChangePasswordRequest;
 import com.neo.user_service.dtos.request.ProfileRequest;
+import com.neo.user_service.dtos.request.VerifyPasswordRequest;
 import com.neo.user_service.dtos.response.FriendResponse;
 import com.neo.user_service.dtos.response.TwoFactorSetupResponse;
 import com.neo.user_service.dtos.response.UserResponse;
@@ -71,6 +72,17 @@ public class UserService {
         userRepository.save(user);
 
         return ResponseData.success("Password updated successfully", null);
+    }
+
+    public ResponseData<String> verifyPassword(String userId, VerifyPasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new InvalidCredentialsException("Incorrect password");
+        }
+
+        return ResponseData.success("Password verified", null);
     }
 
     public ResponseData<String> deleteMe(String userId) {

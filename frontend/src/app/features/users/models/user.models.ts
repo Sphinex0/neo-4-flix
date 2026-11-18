@@ -15,6 +15,10 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+export interface VerifyPasswordRequest {
+  password: string;
+}
+
 export interface FriendResponse {
   id: string;
   firstName: string;
