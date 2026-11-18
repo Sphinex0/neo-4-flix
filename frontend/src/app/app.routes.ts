@@ -5,6 +5,7 @@ import { Register } from './features/auth/pages/register/register';
 import { SecureAccount } from './features/auth/pages/secure-account/secure-account';
 import { Verify2fa } from './features/auth/pages/verify-2fa/verify-2fa';
 import { Home } from './features/home/pages/home/home';
+import { Profile } from './features/users/pages/profile/profile';
 
 export const routes: Routes = [
   { path: '', component: Home, canActivate: [authGuard] },
@@ -12,4 +13,5 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'secure-account', component: SecureAccount },
   { path: 'verify-2fa', component: Verify2fa },
+  { path: 'profile', component: Profile, canActivate: [authGuard] },
 ];

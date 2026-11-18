@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.neo.user_service.common.ResponseData;
+import com.neo.user_service.exceptions.auth.IncorrectPasswordException;
 import com.neo.user_service.exceptions.auth.InvalidCredentialsException;
 import com.neo.user_service.exceptions.auth.InvalidTwoFactorCodeException;
 import com.neo.user_service.exceptions.user.EmailAlreadyExistsException;
@@ -49,6 +50,11 @@ public class GlobalException {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ResponseData<Void>> handleInvalidCredentials(InvalidCredentialsException ex) {
         return buildError(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(IncorrectPasswordException.class)
+    public ResponseEntity<ResponseData<Void>> handleIncorrectPassword(IncorrectPasswordException ex) {
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(InvalidTwoFactorCodeException.class)
