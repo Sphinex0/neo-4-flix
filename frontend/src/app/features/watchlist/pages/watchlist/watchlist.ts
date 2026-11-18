@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import { Navbar } from '../../../../shared/navbar/navbar';
+import { MovieResponse } from '../../../movies/models/movie.models';
 import { WatchlistApiService } from '../../services/watchlist-api.service';
 
 interface WatchlistCard {
@@ -19,6 +20,14 @@ interface RatedCard {
 
 type Tab = 'watch' | 'ratings';
 
+const FALLBACK_GRADIENTS = [
+  'linear-gradient(160deg,#6A4423,#120B06)',
+  'linear-gradient(160deg,#454C78,#0C0E18)',
+  'linear-gradient(160deg,#6E3560,#150A13)',
+  'linear-gradient(160deg,#5A4128,#0E0A06)',
+  'linear-gradient(160deg,#256270,#08161A)',
+];
+
 @Component({
   selector: 'app-watchlist',
   imports: [Navbar, NgStyle],
@@ -28,16 +37,11 @@ export class Watchlist implements OnInit {
   private readonly watchlistApi = inject(WatchlistApiService);
 
   activeTab = signal<Tab>('watch');
-  loadMessage = signal<string | null>(null);
+  isLoading = signal(true);
+  loadError = signal<string | null>(null);
   removeMessage = signal<string | null>(null);
 
-  watch: WatchlistCard[] = [
-    { id: '1', title: 'Interstellar', meta: '2014 · Sci-Fi', bg: 'linear-gradient(160deg,#6A4423,#120B06)' },
-    { id: '2', title: 'Arrival', meta: '2016 · Sci-Fi', bg: 'linear-gradient(160deg,#454C78,#0C0E18)' },
-    { id: '3', title: 'Spirited Away', meta: '2001 · Animation', bg: 'linear-gradient(160deg,#6E3560,#150A13)' },
-    { id: '4', title: 'The Godfather', meta: '1972 · Crime', bg: 'linear-gradient(160deg,#5A4128,#0E0A06)' },
-    { id: '5', title: 'Blade Runner 2049', meta: '2017 · Sci-Fi', bg: 'linear-gradient(160deg,#256270,#08161A)' },
-  ];
+  watch: WatchlistCard[] = [];
 
   rated: RatedCard[] = [
     { title: 'Inception', meta: '2010 · Sci-Fi', mine: 5, bg: 'linear-gradient(160deg,#2A5388,#0B1220)' },
@@ -50,10 +54,12 @@ export class Watchlist implements OnInit {
   ngOnInit(): void {
     this.watchlistApi.getWatchlist(0, 10).subscribe({
       next: (res) => {
-        this.loadMessage.set(`Loaded ${res.data.totalElements} movie(s) from your real watchlist on the server.`);
+        this.watch = res.data.content.map((movie, index) => this.toCard(movie, index));
+        this.isLoading.set(false);
       },
       error: (err) => {
-        this.loadMessage.set(err.error?.message ?? 'Could not load your watchlist from the server.');
+        this.isLoading.set(false);
+        this.loadError.set(err.error?.message ?? 'Could not load your watchlist from the server.');
       },
     });
   }
@@ -62,13 +68,26 @@ export class Watchlist implements OnInit {
     this.removeMessage.set(null);
 
     this.watchlistApi.removeFromWatchlist(movie.id).subscribe({
-      next: (res) => {
-        this.removeMessage.set(res.message);
+      next: () => {
+        this.watch = this.watch.filter((m) => m.id !== movie.id);
       },
       error: (err) => {
         this.removeMessage.set(err.error?.message ?? 'Could not remove this movie.');
       },
     });
+  }
+
+  private toCard(movie: MovieResponse, index: number): WatchlistCard {
+    const genreNames = movie.genres.map((g) => g.name).join(', ');
+
+    return {
+      id: movie.id,
+      title: movie.title,
+      meta: genreNames ? `${movie.releaseYear} · ${genreNames}` : `${movie.releaseYear}`,
+      bg: movie.posterUrl
+        ? `center / cover url('${movie.posterUrl}')`
+        : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length],
+    };
   }
 
   showWatch(): void {

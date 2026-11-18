@@ -29,36 +29,41 @@
       <section class="flex flex-col gap-5">
         <p class="m-0 text-[15px] text-[#A0A9B8]">Movies you want to watch next.</p>
 
-        @if (loadMessage()) {
-          <p class="m-0 text-sm text-[#38D0B9]">{{ loadMessage() }}</p>
-        }
         @if (removeMessage()) {
           <p class="m-0 text-sm text-[#FF5A5F]">{{ removeMessage() }}</p>
         }
 
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-5 gap-y-6">
-          @for (movie of watch; track movie.id) {
-            <div class="flex flex-col gap-2.5">
-              <div
-                [ngStyle]="{ background: movie.bg }"
-                class="box-border flex aspect-[2/3] items-end rounded-[10px] border border-[#2A3140] p-3.5"
-              >
-                <span class="font-display text-xl font-bold leading-[1.05] text-white">{{ movie.title }}</span>
-              </div>
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
-                <button
-                  type="button"
-                  (click)="onRemove(movie)"
-                  [attr.aria-label]="'Remove ' + movie.title + ' from watchlist'"
-                  class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white"
+        @if (isLoading()) {
+          <p class="m-0 text-sm text-[#A0A9B8]">Loading your watchlist...</p>
+        } @else if (loadError()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ loadError() }}</p>
+        } @else if (watch.length === 0) {
+          <p class="m-0 text-sm text-[#A0A9B8]">You haven't added any movies yet.</p>
+        } @else {
+          <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-5 gap-y-6">
+            @for (movie of watch; track movie.id) {
+              <div class="flex flex-col gap-2.5">
+                <div
+                  [ngStyle]="{ background: movie.bg }"
+                  class="box-border flex aspect-[2/3] items-end rounded-[10px] border border-[#2A3140] p-3.5"
                 >
-                  Remove
-                </button>
+                  <span class="font-display text-xl font-bold leading-[1.05] text-white">{{ movie.title }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
+                  <button
+                    type="button"
+                    (click)="onRemove(movie)"
+                    [attr.aria-label]="'Remove ' + movie.title + ' from watchlist'"
+                    class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
       </section>
     } @else {
       <section class="flex flex-col gap-4">
