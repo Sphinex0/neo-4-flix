@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { QRCodeComponent } from 'angularx-qrcode';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { UserApiService } from '../../services/user-api.service';
 
@@ -8,7 +9,7 @@ type TwoFactorState = 'off' | 'setup' | 'on';
 
 @Component({
   selector: 'app-profile',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, QRCodeComponent],
   templateUrl: './profile.html',
 })
 export class Profile implements OnInit {
@@ -34,6 +35,11 @@ export class Profile implements OnInit {
   saveError = signal<string | null>(null);
 
   twoFactorState = signal<TwoFactorState>('off');
+  twoFactorSecret = signal<string | null>(null);
+  twoFactorQrCodeUri = signal<string | null>(null);
+  twoFactorSetupError = signal<string | null>(null);
+  isStartingTwoFactor = signal(false);
+  isTurningOffTwoFactor = signal(false);
   memberSince = signal('');
   updatedAt = signal('');
 
@@ -110,7 +116,21 @@ export class Profile implements OnInit {
   }
 
   startTwoFactorSetup(): void {
-    this.twoFactorState.set('setup');
+    this.isStartingTwoFactor.set(true);
+    this.twoFactorSetupError.set(null);
+
+    this.userApi.enableTwoFactor().subscribe({
+      next: (res) => {
+        this.isStartingTwoFactor.set(false);
+        this.twoFactorSecret.set(res.data.secret);
+        this.twoFactorQrCodeUri.set(res.data.qrCodeUri);
+        this.twoFactorState.set('setup');
+      },
+      error: (err) => {
+        this.isStartingTwoFactor.set(false);
+        this.twoFactorSetupError.set(err.error?.message ?? 'Could not start two-step sign in. Please try again.');
+      },
+    });
   }
 
   confirmTwoFactorSetup(): void {
@@ -118,7 +138,21 @@ export class Profile implements OnInit {
   }
 
   turnOffTwoFactor(): void {
-    this.twoFactorState.set('off');
+    this.isTurningOffTwoFactor.set(true);
+
+    this.userApi.disableTwoFactor().subscribe({
+      next: () => {
+        this.isTurningOffTwoFactor.set(false);
+        this.twoFactorState.set('off');
+        this.twoFactorSecret.set(null);
+        this.twoFactorQrCodeUri.set(null);
+        this.twoFactorCode = '';
+      },
+      error: (err) => {
+        this.isTurningOffTwoFactor.set(false);
+        this.twoFactorSetupError.set(err.error?.message ?? 'Could not turn off two-step sign in. Please try again.');
+      },
+    });
   }
 
   askDelete(): void {

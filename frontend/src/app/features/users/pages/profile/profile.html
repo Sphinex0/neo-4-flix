@@ -195,23 +195,38 @@
             }
           </div>
 
+          @if (twoFactorSetupError()) {
+            <p class="m-0 text-sm text-[#FF5A5F]">{{ twoFactorSetupError() }}</p>
+          }
+
           @if (twoFactorState() === 'off') {
             <button
               type="button"
               (click)="startTwoFactorSetup()"
-              class="min-h-12 cursor-pointer self-start rounded-[10px] border-0 bg-[#38D0B9] px-6 text-[15px] font-semibold text-[#0D1017]"
+              [disabled]="isStartingTwoFactor()"
+              class="min-h-12 cursor-pointer self-start rounded-[10px] border-0 bg-[#38D0B9] px-6 text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Turn on two-step sign in
+              {{ isStartingTwoFactor() ? 'Starting...' : 'Turn on two-step sign in' }}
             </button>
           }
 
           @if (twoFactorState() === 'setup') {
             <div class="flex flex-wrap items-start gap-6">
               <div class="box-border flex h-[180px] w-[180px] flex-none items-center justify-center rounded-xl bg-[#EEF1F6] p-4 text-center text-[13px] font-semibold text-[#0D1017]">
-                [QR code from the User service]
+                @if (twoFactorQrCodeUri()) {
+                  <qrcode [qrdata]="twoFactorQrCodeUri()!" [width]="180"></qrcode>
+                } @else {
+                  Generating your code...
+                }
               </div>
               <div class="flex min-w-0 flex-1 basis-[240px] flex-col gap-3.5">
                 <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">1. Scan the code with your authenticator app.<br />2. Type the 6-digit code it shows.</p>
+                @if (twoFactorSecret()) {
+                  <p class="m-0 text-xs text-[#A0A9B8]">
+                    Can't scan it? Enter this code manually:
+                    <span class="break-all font-mono text-[#EEF1F6]">{{ twoFactorSecret() }}</span>
+                  </p>
+                }
                 <div class="flex flex-col gap-2">
                   <label for="pcode" class="text-sm font-medium">6-digit code</label>
                   <input
@@ -232,7 +247,12 @@
                   >
                     Confirm and turn on
                   </button>
-                  <button type="button" (click)="turnOffTwoFactor()" class="min-h-12 cursor-pointer border-0 bg-transparent px-[18px] text-sm text-[#C9D0DC]">
+                  <button
+                    type="button"
+                    (click)="turnOffTwoFactor()"
+                    [disabled]="isTurningOffTwoFactor()"
+                    class="min-h-12 cursor-pointer border-0 bg-transparent px-[18px] text-sm text-[#C9D0DC] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
                     Cancel
                   </button>
                 </div>
@@ -252,9 +272,10 @@
               <button
                 type="button"
                 (click)="turnOffTwoFactor()"
-                class="min-h-11 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
+                [disabled]="isTurningOffTwoFactor()"
+                class="min-h-11 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Turn off
+                {{ isTurningOffTwoFactor() ? 'Turning off...' : 'Turn off' }}
               </button>
             </div>
           }
