@@ -59,7 +59,7 @@ public class GlobalException {
 
     @ExceptionHandler(InvalidTwoFactorCodeException.class)
     public ResponseEntity<ResponseData<Void>> handleInvalidTwoFactorCode(InvalidTwoFactorCodeException ex) {
-        return buildError(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

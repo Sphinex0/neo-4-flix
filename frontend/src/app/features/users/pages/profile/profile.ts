@@ -45,6 +45,7 @@ export class Profile implements OnInit {
   twoFactorQrCodeUri = signal<string | null>(null);
   twoFactorSetupError = signal<string | null>(null);
   isStartingTwoFactor = signal(false);
+  isConfirmingTwoFactor = signal(false);
   isTurningOffTwoFactor = signal(false);
   showTwoFactorDisableModal = signal(false);
   twoFactorDisablePassword = '';
@@ -203,7 +204,22 @@ export class Profile implements OnInit {
   }
 
   confirmTwoFactorSetup(): void {
-    this.twoFactorState.set('on');
+    this.isConfirmingTwoFactor.set(true);
+    this.twoFactorSetupError.set(null);
+
+    this.userApi.confirmTwoFactor({ code: this.twoFactorCode }).subscribe({
+      next: () => {
+        this.isConfirmingTwoFactor.set(false);
+        this.twoFactorState.set('on');
+        this.twoFactorSecret.set(null);
+        this.twoFactorQrCodeUri.set(null);
+        this.twoFactorCode = '';
+      },
+      error: (err) => {
+        this.isConfirmingTwoFactor.set(false);
+        this.twoFactorSetupError.set(err.error?.message ?? 'Could not confirm the code. Please try again.');
+      },
+    });
   }
 
   turnOffTwoFactor(): void {

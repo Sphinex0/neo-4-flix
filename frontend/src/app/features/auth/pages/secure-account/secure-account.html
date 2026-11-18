@@ -59,16 +59,19 @@
           inputmode="numeric"
           maxlength="6"
           placeholder="123456"
+          [(ngModel)]="code"
           class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-lg tracking-[0.3em] text-[#EEF1F6]"
         />
       </div>
 
-      <a
-        routerLink="/"
-        class="flex min-h-12 items-center justify-center rounded-[10px] bg-[#FF5A5F] text-base font-semibold text-[#0D1017]"
+      <button
+        type="button"
+        (click)="onConfirm()"
+        [disabled]="isSubmitting() || code.length !== 6"
+        class="flex min-h-12 items-center justify-center rounded-[10px] border-0 bg-[#FF5A5F] text-base font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Turn on and finish
-      </a>
+        {{ isSubmitting() ? 'Turning on...' : 'Turn on and finish' }}
+      </button>
 
       <div class="flex flex-wrap justify-between gap-2">
         <a routerLink="/register" class="inline-flex min-h-11 items-center text-sm text-[#C9D0DC]">Back</a>

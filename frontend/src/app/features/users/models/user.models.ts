@@ -19,6 +19,10 @@ export interface VerifyPasswordRequest {
   password: string;
 }
 
+export interface ConfirmTwoFactorRequest {
+  code: string;
+}
+
 export interface FriendResponse {
   id: string;
   firstName: string;

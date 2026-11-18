@@ -6,6 +6,7 @@ import { ResponseData } from '../../../core/models/response-data';
 import { UserResponse } from '../../auth/models/auth.models';
 import {
   ChangePasswordRequest,
+  ConfirmTwoFactorRequest,
   FriendResponse,
   ProfileRequest,
   TwoFactorSetupResponse,
@@ -46,6 +47,10 @@ export class UserApiService {
 
   enableTwoFactor(): Observable<ResponseData<TwoFactorSetupResponse>> {
     return this.http.post<ResponseData<TwoFactorSetupResponse>>(`${API_BASE_URL}/api/users/me/2fa/enable`, {});
+  }
+
+  confirmTwoFactor(request: ConfirmTwoFactorRequest): Observable<ResponseData<string>> {
+    return this.http.post<ResponseData<string>>(`${API_BASE_URL}/api/users/me/2fa/confirm`, request);
   }
 
   disableTwoFactor(): Observable<ResponseData<string>> {

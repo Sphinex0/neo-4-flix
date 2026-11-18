@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.neo.user_service.common.ResponseData;
 import com.neo.user_service.dtos.request.ChangePasswordRequest;
+import com.neo.user_service.dtos.request.ConfirmTwoFactorRequest;
 import com.neo.user_service.dtos.request.ProfileRequest;
 import com.neo.user_service.dtos.request.VerifyPasswordRequest;
 import com.neo.user_service.dtos.response.FriendResponse;
@@ -82,6 +83,13 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseData<TwoFactorSetupResponse>> enableTwoFactor(@AuthenticationPrincipal String userId) {
         return ResponseEntity.ok(userService.enableTwoFactor(userId));
+    }
+
+    @PostMapping("/me/2fa/confirm")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<String>> confirmTwoFactor(@AuthenticationPrincipal String userId,
+            @Valid @RequestBody ConfirmTwoFactorRequest request) {
+        return ResponseEntity.ok(userService.confirmTwoFactor(userId, request));
     }
 
     @PostMapping("/me/2fa/disable")

@@ -298,9 +298,10 @@
                   <button
                     type="button"
                     (click)="confirmTwoFactorSetup()"
-                    class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#38D0B9] px-[22px] text-[15px] font-semibold text-[#0D1017]"
+                    [disabled]="isConfirmingTwoFactor() || twoFactorCode.length !== 6"
+                    class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#38D0B9] px-[22px] text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Confirm and turn on
+                    {{ isConfirmingTwoFactor() ? 'Confirming...' : 'Confirm and turn on' }}
                   </button>
                   <button
                     type="button"
@@ -308,7 +309,7 @@
                     [disabled]="isTurningOffTwoFactor()"
                     class="min-h-12 cursor-pointer border-0 bg-transparent px-[18px] text-sm text-[#C9D0DC] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Cancel
+                    Skip for now
                   </button>
                 </div>
               </div>
