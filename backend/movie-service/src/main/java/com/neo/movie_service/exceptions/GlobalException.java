@@ -15,6 +15,8 @@ import com.neo.movie_service.common.ResponseData;
 import com.neo.movie_service.exceptions.genre.GenreNotFoundException;
 import com.neo.movie_service.exceptions.movie.MovieAlreadyExistsException;
 import com.neo.movie_service.exceptions.movie.MovieNotFoundException;
+import com.neo.movie_service.exceptions.watchlist.MovieAlreadyInWatchlistException;
+import com.neo.movie_service.exceptions.watchlist.MovieNotInWatchlistException;
 
 @RestControllerAdvice
 public class GlobalException {
@@ -32,6 +34,16 @@ public class GlobalException {
     @ExceptionHandler(MovieAlreadyExistsException.class)
     public ResponseEntity<ResponseData<Void>> handleMovieAlreadyExists(MovieAlreadyExistsException ex) {
         return buildError(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(MovieAlreadyInWatchlistException.class)
+    public ResponseEntity<ResponseData<Void>> handleMovieAlreadyInWatchlist(MovieAlreadyInWatchlistException ex) {
+        return buildError(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(MovieNotInWatchlistException.class)
+    public ResponseEntity<ResponseData<Void>> handleMovieNotInWatchlist(MovieNotInWatchlistException ex) {
+        return buildError(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
