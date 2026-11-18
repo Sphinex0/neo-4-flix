@@ -13,7 +13,7 @@ import com.neo.user_service.dtos.request.VerifyPasswordRequest;
 import com.neo.user_service.dtos.response.FriendResponse;
 import com.neo.user_service.dtos.response.TwoFactorSetupResponse;
 import com.neo.user_service.dtos.response.UserResponse;
-import com.neo.user_service.exceptions.auth.InvalidCredentialsException;
+import com.neo.user_service.exceptions.auth.IncorrectPasswordException;
 import com.neo.user_service.exceptions.user.EmailAlreadyExistsException;
 import com.neo.user_service.exceptions.user.UserNotFoundException;
 import com.neo.user_service.exceptions.user.UsernameAlreadyExistsException;
@@ -64,7 +64,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
-            throw new InvalidCredentialsException("Current password is incorrect");
+            throw new IncorrectPasswordException("Current password is incorrect");
         }
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
@@ -79,7 +79,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new InvalidCredentialsException("Incorrect password");
+            throw new IncorrectPasswordException("Incorrect password");
         }
 
         return ResponseData.success("Password verified", null);
