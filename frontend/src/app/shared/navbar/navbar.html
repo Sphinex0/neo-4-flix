@@ -10,10 +10,31 @@
   </a>
 
   <nav class="flex flex-1 flex-wrap gap-1">
-    <a routerLink="/" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">Home</a>
-    <a routerLink="/search" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">Browse</a>
-    <a routerLink="/recommendations" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">For you</a>
-    <a routerLink="/my-list" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">My list</a>
+    <a
+      routerLink="/"
+      routerLinkActive="bg-[#1C222D] text-white"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white"
+      >Home</a
+    >
+    <a
+      routerLink="/search"
+      routerLinkActive="bg-[#1C222D] text-white"
+      class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white"
+      >Browse</a
+    >
+    <a
+      routerLink="/recommendations"
+      routerLinkActive="bg-[#1C222D] text-white"
+      class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white"
+      >For you</a
+    >
+    <a
+      routerLink="/my-list"
+      routerLinkActive="bg-[#1C222D] text-white"
+      class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white"
+      >My list</a
+    >
   </nav>
 
   <div class="flex items-center gap-4">
