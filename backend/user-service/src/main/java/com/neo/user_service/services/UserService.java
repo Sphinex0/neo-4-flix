@@ -119,7 +119,6 @@ public class UserService {
         String secret = twoFactorAuthService.generateSecret();
 
         user.setTwoFactorSecret(secret);
-        user.setTwoFactorEnabled(true);
         user.setUpdatedAt(Instant.now());
         userRepository.save(user);
 
@@ -128,7 +127,7 @@ public class UserService {
                 .qrCodeUri(twoFactorAuthService.buildQrCodeUri(user.getUsername(), secret))
                 .build();
 
-        return ResponseData.success("Two-factor authentication enabled", response);
+        return ResponseData.success("Scan the code, then confirm with the 6-digit code to turn on two-factor authentication", response);
     }
 
     public ResponseData<String> disableTwoFactor(String userId) {
