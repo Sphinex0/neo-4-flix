@@ -10,6 +10,11 @@ export interface ProfileRequest {
   email: string;
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface FriendResponse {
   id: string;
   firstName: string;

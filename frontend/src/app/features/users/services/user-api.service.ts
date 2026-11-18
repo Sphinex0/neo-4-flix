@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/http/api-config';
 import { ResponseData } from '../../../core/models/response-data';
 import { UserResponse } from '../../auth/models/auth.models';
-import { FriendResponse, ProfileRequest, TwoFactorSetupResponse } from '../models/user.models';
+import { ChangePasswordRequest, FriendResponse, ProfileRequest, TwoFactorSetupResponse } from '../models/user.models';
 
 @Injectable({ providedIn: 'root' })
 export class UserApiService {
@@ -20,6 +20,10 @@ export class UserApiService {
 
   deleteMe(): Observable<ResponseData<string>> {
     return this.http.delete<ResponseData<string>>(`${API_BASE_URL}/api/users/me`);
+  }
+
+  changePassword(request: ChangePasswordRequest): Observable<ResponseData<string>> {
+    return this.http.put<ResponseData<string>>(`${API_BASE_URL}/api/users/me/password`, request);
   }
 
   getMyFriends(): Observable<ResponseData<FriendResponse[]>> {

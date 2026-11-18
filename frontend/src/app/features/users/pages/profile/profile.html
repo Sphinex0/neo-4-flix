@@ -155,31 +155,86 @@
           <div class="flex flex-wrap gap-4">
             <div class="flex min-w-0 flex-1 basis-[200px] flex-col gap-2">
               <label for="pcur" class="text-sm font-medium">Current password</label>
-              <input
-                id="pcur"
-                type="password"
-                autocomplete="current-password"
-                [(ngModel)]="currentPassword"
-                class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
-              />
+              <div class="relative">
+                <input
+                  id="pcur"
+                  [type]="showCurrentPassword() ? 'text' : 'password'"
+                  autocomplete="current-password"
+                  [(ngModel)]="currentPassword"
+                  class="box-border h-12 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 pr-11 text-[15px] text-[#EEF1F6]"
+                />
+                <button
+                  type="button"
+                  (click)="showCurrentPassword.set(!showCurrentPassword())"
+                  [attr.aria-label]="showCurrentPassword() ? 'Hide password' : 'Show password'"
+                  class="absolute right-0 top-0 flex h-12 w-11 items-center justify-center text-[#A0A9B8] hover:text-[#EEF1F6]"
+                >
+                  @if (showCurrentPassword()) {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                      <path d="M1 1l22 22" />
+                    </svg>
+                  } @else {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  }
+                </button>
+              </div>
             </div>
             <div class="flex min-w-0 flex-1 basis-[200px] flex-col gap-2">
               <label for="pnew" class="text-sm font-medium">New password</label>
-              <input
-                id="pnew"
-                type="password"
-                autocomplete="new-password"
-                [(ngModel)]="newPassword"
-                class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
-              />
+              <div class="relative">
+                <input
+                  id="pnew"
+                  [type]="showNewPassword() ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  [(ngModel)]="newPassword"
+                  class="box-border h-12 w-full rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 pr-11 text-[15px] text-[#EEF1F6]"
+                />
+                <button
+                  type="button"
+                  (click)="showNewPassword.set(!showNewPassword())"
+                  [attr.aria-label]="showNewPassword() ? 'Hide password' : 'Show password'"
+                  class="absolute right-0 top-0 flex h-12 w-11 items-center justify-center text-[#A0A9B8] hover:text-[#EEF1F6]"
+                >
+                  @if (showNewPassword()) {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                      <path d="M1 1l22 22" />
+                    </svg>
+                  } @else {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  }
+                </button>
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            class="min-h-12 cursor-pointer self-start rounded-[10px] border border-[#5B6579] bg-transparent px-6 text-[15px] font-semibold text-[#EEF1F6]"
-          >
-            Update password
-          </button>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-3">
+            <button
+              type="button"
+              (click)="onUpdatePassword()"
+              [disabled]="isUpdatingPassword()"
+              class="min-h-12 cursor-pointer self-start rounded-[10px] border border-[#5B6579] bg-transparent px-6 text-[15px] font-semibold text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {{ isUpdatingPassword() ? 'Updating...' : 'Update password' }}
+            </button>
+            @if (passwordUpdated()) {
+              <span role="status" class="inline-flex items-center gap-1.5 text-sm font-medium text-[#38D0B9]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12l5 5 9-10" />
+                </svg>
+                Your password is updated.
+              </span>
+            }
+          </div>
+          @if (passwordError()) {
+            <p class="m-0 text-sm text-[#FF5A5F]">{{ passwordError() }}</p>
+          }
         </section>
 
         <section class="flex flex-col gap-5 rounded-2xl border border-[#2A3140] bg-[#151A23] p-7">

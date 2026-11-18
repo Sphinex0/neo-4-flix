@@ -24,6 +24,11 @@ export class Profile implements OnInit {
 
   currentPassword = '';
   newPassword = '';
+  showCurrentPassword = signal(false);
+  showNewPassword = signal(false);
+  isUpdatingPassword = signal(false);
+  passwordUpdated = signal(false);
+  passwordError = signal<string | null>(null);
   twoFactorCode = '';
   deleteConfirmPassword = '';
 
@@ -111,6 +116,30 @@ export class Profile implements OnInit {
         error: (err) => {
           this.isSaving.set(false);
           this.saveError.set(err.error?.message ?? 'Could not save your profile. Please try again.');
+        },
+      });
+  }
+
+  onUpdatePassword(): void {
+    this.isUpdatingPassword.set(true);
+    this.passwordUpdated.set(false);
+    this.passwordError.set(null);
+
+    this.userApi
+      .changePassword({
+        currentPassword: this.currentPassword,
+        newPassword: this.newPassword,
+      })
+      .subscribe({
+        next: () => {
+          this.isUpdatingPassword.set(false);
+          this.passwordUpdated.set(true);
+          this.currentPassword = '';
+          this.newPassword = '';
+        },
+        error: (err) => {
+          this.isUpdatingPassword.set(false);
+          this.passwordError.set(err.error?.message ?? 'Could not update your password. Please try again.');
         },
       });
   }
