@@ -21,6 +21,7 @@ export class Profile implements OnInit {
   lastName = '';
   username = '';
   email = '';
+  role = signal<'USER' | 'ADMIN'>('USER');
 
   currentPassword = '';
   newPassword = '';
@@ -69,6 +70,7 @@ export class Profile implements OnInit {
         this.lastName = user.lastName;
         this.username = user.username;
         this.email = user.email;
+        this.role.set(user.role);
         this.savedProfile = {
           firstName: user.firstName,
           lastName: user.lastName,
@@ -98,6 +100,10 @@ export class Profile implements OnInit {
   fullName(): string {
     const name = `${this.firstName} ${this.lastName}`.trim();
     return name || this.username;
+  }
+
+  roleLabel(): string {
+    return this.role() === 'ADMIN' ? 'Admin' : 'User';
   }
 
   onFieldChange(): void {
