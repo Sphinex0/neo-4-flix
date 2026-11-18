@@ -50,4 +50,33 @@ public interface MovieRepository extends Neo4jRepository<Movie, String> {
                 "RETURN m, collect(r), collect(g)"
     )
     Optional<Movie> findByIdWithGenres(@Param("id") String id);
+
+    @Query(
+        "MATCH (u:User {id: $userId}), (m:Movie {movieId: $movieId}) " +
+        "MERGE (u)-[:WANTS_TO_WATCH]->(m)"
+    )
+    void addToWatchlist(@Param("userId") String userId, @Param("movieId") String movieId);
+
+    @Query(
+        "MATCH (u:User {id: $userId})-[r:WANTS_TO_WATCH]->(m:Movie {movieId: $movieId}) " +
+        "DELETE r"
+    )
+    void removeFromWatchlist(@Param("userId") String userId, @Param("movieId") String movieId);
+
+    @Query(
+        "MATCH (u:User {id: $userId})-[:WANTS_TO_WATCH]->(m:Movie {movieId: $movieId}) " +
+        "RETURN COUNT(m) > 0"
+    )
+    boolean existsInWatchlist(@Param("userId") String userId, @Param("movieId") String movieId);
+
+    @Query(
+        value = "MATCH (u:User {id: $userId})-[:WANTS_TO_WATCH]->(m:Movie) " +
+                "OPTIONAL MATCH (m)-[r:IN_GENRE]->(g:Genre) " +
+                "RETURN m, collect(r), collect(g) " +
+                ":#{orderBy(#pageable)} " +
+                "SKIP $skip LIMIT $limit",
+        countQuery = "MATCH (u:User {id: $userId})-[:WANTS_TO_WATCH]->(m:Movie) " +
+                     "RETURN count(m)"
+    )
+    Page<Movie> findWatchlistByUserId(@Param("userId") String userId, Pageable pageable);
 }
