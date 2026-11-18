@@ -2,6 +2,7 @@ package com.neo.movie_service.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,7 @@ public class MovieController {
 
     private final MovieService movieService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseData<MovieResponse>> createMovie(@Valid @RequestBody MovieCreateRequest request) {
         MovieResponse created = movieService.createMovie(request);
@@ -43,6 +45,7 @@ public class MovieController {
         return ResponseEntity.ok(ResponseData.success("Movie retrieved successfully", movie));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ResponseData<MovieResponse>> updateMovie(
             @PathVariable String id,
@@ -52,12 +55,14 @@ public class MovieController {
         return ResponseEntity.ok(ResponseData.success("Movie updated successfully", updated));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseData<Void>> deleteMovie(@PathVariable String id) {
         movieService.deleteMovie(id);
         return ResponseEntity.ok(ResponseData.success("Movie deleted successfully", null));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/watchlist")
     public ResponseEntity<ResponseData<Void>> addToWatchlist(
             @PathVariable String id,
@@ -68,6 +73,7 @@ public class MovieController {
                 .body(ResponseData.success("Movie added to watchlist successfully", null));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}/watchlist")
     public ResponseEntity<ResponseData<Void>> removeFromWatchlist(
             @PathVariable String id,
@@ -77,6 +83,7 @@ public class MovieController {
         return ResponseEntity.ok(ResponseData.success("Movie removed from watchlist successfully", null));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/watchlist")
     public ResponseEntity<ResponseData<PageResponse<MovieResponse>>> getWatchlist(
             Authentication authentication,
