@@ -33,6 +33,14 @@ export class Verify2fa {
     if (current.value && next) {
       next.focus();
     }
+
+    if (current.value && !next) {
+      const code = this.digit1 + this.digit2 + this.digit3 + this.digit4 + this.digit5 + current.value;
+
+      if (code.length === 6 && !this.isSubmitting()) {
+        this.onSubmit();
+      }
+    }
   }
 
   onDigitBackspace(current: HTMLInputElement, previous: HTMLInputElement | null): void {
