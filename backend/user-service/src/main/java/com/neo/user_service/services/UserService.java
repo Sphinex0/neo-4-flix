@@ -16,10 +16,12 @@ import com.neo.user_service.dtos.response.TwoFactorSetupResponse;
 import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.exceptions.auth.IncorrectPasswordException;
 import com.neo.user_service.exceptions.auth.InvalidTwoFactorCodeException;
+import com.neo.user_service.exceptions.user.AdminDeletionNotAllowedException;
 import com.neo.user_service.exceptions.user.EmailAlreadyExistsException;
 import com.neo.user_service.exceptions.user.UserNotFoundException;
 import com.neo.user_service.exceptions.user.UsernameAlreadyExistsException;
 import com.neo.user_service.models.User;
+import com.neo.user_service.models.UserRole;
 import com.neo.user_service.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -88,8 +90,11 @@ public class UserService {
     }
 
     public ResponseData<String> deleteMe(String userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User not found");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new AdminDeletionNotAllowedException("Admin accounts cannot be deleted");
         }
 
         userRepository.deleteById(userId);

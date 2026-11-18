@@ -14,6 +14,7 @@ import com.neo.user_service.common.ResponseData;
 import com.neo.user_service.exceptions.auth.IncorrectPasswordException;
 import com.neo.user_service.exceptions.auth.InvalidCredentialsException;
 import com.neo.user_service.exceptions.auth.InvalidTwoFactorCodeException;
+import com.neo.user_service.exceptions.user.AdminDeletionNotAllowedException;
 import com.neo.user_service.exceptions.user.EmailAlreadyExistsException;
 import com.neo.user_service.exceptions.user.EmailNotFoundException;
 import com.neo.user_service.exceptions.user.UserNotFoundException;
@@ -35,6 +36,11 @@ public class GlobalException {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ResponseData<Void>> handleUserNotFound(UserNotFoundException ex) {
         return buildError(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AdminDeletionNotAllowedException.class)
+    public ResponseEntity<ResponseData<Void>> handleAdminDeletionNotAllowed(AdminDeletionNotAllowedException ex) {
+        return buildError(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(UsernameAlreadyExistsException.class)
