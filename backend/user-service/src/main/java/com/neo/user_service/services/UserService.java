@@ -8,12 +8,14 @@ import org.springframework.stereotype.Service;
 
 import com.neo.user_service.common.ResponseData;
 import com.neo.user_service.dtos.request.ChangePasswordRequest;
+import com.neo.user_service.dtos.request.ConfirmTwoFactorRequest;
 import com.neo.user_service.dtos.request.ProfileRequest;
 import com.neo.user_service.dtos.request.VerifyPasswordRequest;
 import com.neo.user_service.dtos.response.FriendResponse;
 import com.neo.user_service.dtos.response.TwoFactorSetupResponse;
 import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.exceptions.auth.IncorrectPasswordException;
+import com.neo.user_service.exceptions.auth.InvalidTwoFactorCodeException;
 import com.neo.user_service.exceptions.user.EmailAlreadyExistsException;
 import com.neo.user_service.exceptions.user.UserNotFoundException;
 import com.neo.user_service.exceptions.user.UsernameAlreadyExistsException;
@@ -128,6 +130,25 @@ public class UserService {
                 .build();
 
         return ResponseData.success("Scan the code, then confirm with the 6-digit code to turn on two-factor authentication", response);
+    }
+
+    public ResponseData<String> confirmTwoFactor(String userId, ConfirmTwoFactorRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (user.getTwoFactorSecret() == null) {
+            throw new InvalidTwoFactorCodeException("Start two-factor setup first");
+        }
+
+        if (!twoFactorAuthService.isCodeValid(user.getTwoFactorSecret(), request.code())) {
+            throw new InvalidTwoFactorCodeException("Invalid or expired code");
+        }
+
+        user.setTwoFactorEnabled(true);
+        user.setUpdatedAt(Instant.now());
+        userRepository.save(user);
+
+        return ResponseData.success("Two-factor authentication enabled", null);
     }
 
     public ResponseData<String> disableTwoFactor(String userId) {
