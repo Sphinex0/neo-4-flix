@@ -46,6 +46,9 @@ export class Profile implements OnInit {
   twoFactorSetupError = signal<string | null>(null);
   isStartingTwoFactor = signal(false);
   isTurningOffTwoFactor = signal(false);
+  showTwoFactorDisableModal = signal(false);
+  twoFactorDisablePassword = '';
+  twoFactorDisableError = signal<string | null>(null);
   memberSince = signal('');
   updatedAt = signal('');
 
@@ -217,6 +220,37 @@ export class Profile implements OnInit {
       error: (err) => {
         this.isTurningOffTwoFactor.set(false);
         this.twoFactorSetupError.set(err.error?.message ?? 'Could not turn off two-step sign in. Please try again.');
+      },
+    });
+  }
+
+  askDisableTwoFactor(): void {
+    this.twoFactorDisableError.set(null);
+    this.showTwoFactorDisableModal.set(true);
+  }
+
+  cancelDisableTwoFactor(): void {
+    this.showTwoFactorDisableModal.set(false);
+    this.twoFactorDisablePassword = '';
+  }
+
+  confirmDisableTwoFactor(): void {
+    this.isTurningOffTwoFactor.set(true);
+    this.twoFactorDisableError.set(null);
+
+    this.userApi.disableTwoFactor().subscribe({
+      next: () => {
+        this.isTurningOffTwoFactor.set(false);
+        this.showTwoFactorDisableModal.set(false);
+        this.twoFactorDisablePassword = '';
+        this.twoFactorState.set('off');
+        this.twoFactorSecret.set(null);
+        this.twoFactorQrCodeUri.set(null);
+        this.twoFactorCode = '';
+      },
+      error: (err) => {
+        this.isTurningOffTwoFactor.set(false);
+        this.twoFactorDisableError.set(err.error?.message ?? 'Could not turn off two-step sign in. Please try again.');
       },
     });
   }
