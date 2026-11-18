@@ -1,0 +1,299 @@
+<div class="flex min-h-screen flex-col bg-[#0D1017] font-sans text-[#EEF1F6]">
+  <header class="flex flex-wrap items-center gap-x-6 gap-y-4 border-b border-[#2A3140] px-12 py-4">
+    <a routerLink="/" class="flex items-center gap-2.5 font-display text-2xl font-bold text-[#EEF1F6]">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <path d="M9.8 10L12 18M18.5 9.5L15.5 18M10.5 8h7" stroke="#6B7587" stroke-width="1.5" />
+        <circle cx="7" cy="8" r="3.5" fill="#38D0B9" />
+        <circle cx="21" cy="7" r="3.5" fill="#FF5A5F" />
+        <circle cx="14" cy="21" r="3.5" fill="#EEF1F6" />
+      </svg>
+      <span>Neo4<span class="text-[#FF5A5F]">flix</span></span>
+    </a>
+
+    <nav class="flex flex-1 flex-wrap gap-1">
+      <a routerLink="/" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">Home</a>
+      <a routerLink="/search" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">Browse</a>
+      <a routerLink="/recommendations" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">For you</a>
+      <a routerLink="/my-list" class="inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-medium text-[#C9D0DC] hover:text-white">My list</a>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a
+        routerLink="/profile"
+        aria-label="Your profile"
+        aria-current="page"
+        class="flex h-11 w-11 items-center justify-center rounded-full bg-[#38D0B9] text-[15px] font-bold text-[#0D1017] shadow-[0_0_0_2px_#0D1017,0_0_0_4px_#38D0B9]"
+      >
+        {{ initials() }}
+      </a>
+      <a routerLink="/login" class="inline-flex min-h-11 items-center rounded-lg border border-[#5B6579] px-4 text-sm font-medium text-[#EEF1F6]">
+        Sign out
+      </a>
+    </div>
+  </header>
+
+  <main class="flex flex-col gap-7 px-12 py-10 pb-14">
+    <h1 class="m-0 font-display text-[40px] font-bold tracking-[-0.01em]">Your profile</h1>
+
+    <div class="flex flex-wrap items-start gap-8">
+      <aside class="box-border flex flex-1 basis-[280px] flex-col items-center gap-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-6 py-8 text-center">
+        <div
+          aria-hidden="true"
+          class="flex h-28 w-28 items-center justify-center rounded-full bg-[#38D0B9] font-display text-[44px] font-bold tracking-[0.02em] text-[#0D1017]"
+        >
+          {{ initials() }}
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="font-display text-2xl font-bold">{{ fullName() }}</span>
+          <span class="text-[15px] text-[#A0A9B8]">&#64;{{ username }}</span>
+        </div>
+        <div class="flex flex-wrap justify-center gap-2">
+          <span class="rounded-full border border-[#5B6579] px-3 py-1 text-xs font-medium text-[#C9D0DC]">User</span>
+          @if (twoFactorState() === 'on') {
+            <span class="rounded-full bg-[#10302C] px-3 py-1 text-xs font-semibold text-[#38D0B9]">2-step on</span>
+          } @else {
+            <span class="rounded-full bg-[#2A3140] px-3 py-1 text-xs font-semibold text-[#C9D0DC]">2-step off</span>
+          }
+        </div>
+        <dl class="mt-2 grid w-full grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2.5 border-t border-[#2A3140] pt-4 text-left text-sm">
+          <dt class="text-[#A0A9B8]">Email</dt>
+          <dd class="m-0 break-words">{{ email }}</dd>
+          <dt class="text-[#A0A9B8]">Member since</dt>
+          <dd class="m-0">March 2026</dd>
+          <dt class="text-[#A0A9B8]">Last update</dt>
+          <dd class="m-0">{{ updatedAt() }}</dd>
+        </dl>
+      </aside>
+
+      <div class="flex min-w-0 flex-[999_1_560px] flex-col gap-6">
+        <section class="flex flex-col gap-5 rounded-2xl border border-[#2A3140] bg-[#151A23] p-7">
+          <div class="flex flex-col gap-1.5">
+            <h2 class="m-0 font-display text-2xl font-bold">Personal info</h2>
+            <p class="m-0 text-sm text-[#A0A9B8]">Your initials come from your first and last name.</p>
+          </div>
+
+          <div class="flex flex-wrap gap-4">
+            <div class="flex min-w-0 flex-1 basis-[200px] flex-col gap-2">
+              <label for="pfirst" class="text-sm font-medium">First name</label>
+              <input
+                id="pfirst"
+                type="text"
+                autocomplete="given-name"
+                [(ngModel)]="firstName"
+                (ngModelChange)="onFieldChange()"
+                class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+              />
+            </div>
+            <div class="flex min-w-0 flex-1 basis-[200px] flex-col gap-2">
+              <label for="plast" class="text-sm font-medium">Last name</label>
+              <input
+                id="plast"
+                type="text"
+                autocomplete="family-name"
+                [(ngModel)]="lastName"
+                (ngModelChange)="onFieldChange()"
+                class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-4">
+            <div class="flex min-w-0 flex-1 basis-[200px] flex-col gap-2">
+              <label for="puser" class="text-sm font-medium">Username</label>
+              <input
+                id="puser"
+                type="text"
+                autocomplete="username"
+                [(ngModel)]="username"
+                (ngModelChange)="onFieldChange()"
+                class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+              />
+            </div>
+            <div class="flex min-w-0 flex-1 basis-[200px] flex-col gap-2">
+              <label for="pemail" class="text-sm font-medium">Email</label>
+              <input
+                id="pemail"
+                type="email"
+                autocomplete="email"
+                [(ngModel)]="email"
+                (ngModelChange)="onFieldChange()"
+                class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-3">
+            <button
+              type="button"
+              (click)="onSave()"
+              class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] px-6 text-[15px] font-semibold text-[#0D1017]"
+            >
+              Save changes
+            </button>
+            @if (saved()) {
+              <span role="status" class="inline-flex items-center gap-1.5 text-sm font-medium text-[#38D0B9]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12l5 5 9-10" />
+                </svg>
+                Your info is saved.
+              </span>
+            }
+          </div>
+        </section>
+
+        <section class="flex flex-col gap-5 rounded-2xl border border-[#2A3140] bg-[#151A23] p-7">
+          <h2 class="m-0 font-display text-2xl font-bold">Password</h2>
+          <div class="flex flex-wrap gap-4">
+            <div class="flex min-w-0 flex-1 basis-[200px] flex-col gap-2">
+              <label for="pcur" class="text-sm font-medium">Current password</label>
+              <input
+                id="pcur"
+                type="password"
+                autocomplete="current-password"
+                [(ngModel)]="currentPassword"
+                class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+              />
+            </div>
+            <div class="flex min-w-0 flex-1 basis-[200px] flex-col gap-2">
+              <label for="pnew" class="text-sm font-medium">New password</label>
+              <input
+                id="pnew"
+                type="password"
+                autocomplete="new-password"
+                [(ngModel)]="newPassword"
+                class="box-border h-12 rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-[15px] text-[#EEF1F6]"
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            class="min-h-12 cursor-pointer self-start rounded-[10px] border border-[#5B6579] bg-transparent px-6 text-[15px] font-semibold text-[#EEF1F6]"
+          >
+            Update password
+          </button>
+        </section>
+
+        <section class="flex flex-col gap-5 rounded-2xl border border-[#2A3140] bg-[#151A23] p-7">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-1 basis-[260px] flex-col gap-1.5">
+              <h2 class="m-0 font-display text-2xl font-bold">Two-step sign in</h2>
+              <p class="m-0 text-sm leading-[1.5] text-[#A0A9B8]">Ask for a 6-digit code from Google Authenticator each time you sign in.</p>
+            </div>
+            @if (twoFactorState() === 'on') {
+              <span class="rounded-full bg-[#10302C] px-3.5 py-1.5 text-xs font-semibold text-[#38D0B9]">2-step on</span>
+            } @else {
+              <span class="rounded-full bg-[#2A3140] px-3.5 py-1.5 text-xs font-semibold text-[#C9D0DC]">2-step off</span>
+            }
+          </div>
+
+          @if (twoFactorState() === 'off') {
+            <button
+              type="button"
+              (click)="startTwoFactorSetup()"
+              class="min-h-12 cursor-pointer self-start rounded-[10px] border-0 bg-[#38D0B9] px-6 text-[15px] font-semibold text-[#0D1017]"
+            >
+              Turn on two-step sign in
+            </button>
+          }
+
+          @if (twoFactorState() === 'setup') {
+            <div class="flex flex-wrap items-start gap-6">
+              <div class="box-border flex h-[180px] w-[180px] flex-none items-center justify-center rounded-xl bg-[#EEF1F6] p-4 text-center text-[13px] font-semibold text-[#0D1017]">
+                [QR code from the User service]
+              </div>
+              <div class="flex min-w-0 flex-1 basis-[240px] flex-col gap-3.5">
+                <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">1. Scan the code with your authenticator app.<br />2. Type the 6-digit code it shows.</p>
+                <div class="flex flex-col gap-2">
+                  <label for="pcode" class="text-sm font-medium">6-digit code</label>
+                  <input
+                    id="pcode"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="123456"
+                    [(ngModel)]="twoFactorCode"
+                    class="box-border h-12 max-w-[220px] rounded-[10px] border border-[#5B6579] bg-[#0D1017] px-3.5 text-lg tracking-[0.3em] text-[#EEF1F6]"
+                  />
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    (click)="confirmTwoFactorSetup()"
+                    class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#38D0B9] px-[22px] text-[15px] font-semibold text-[#0D1017]"
+                  >
+                    Confirm and turn on
+                  </button>
+                  <button type="button" (click)="turnOffTwoFactor()" class="min-h-12 cursor-pointer border-0 bg-transparent px-[18px] text-sm text-[#C9D0DC]">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (twoFactorState() === 'on') {
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#10302C] px-4 py-3.5">
+              <span class="inline-flex items-center gap-2 text-sm font-medium text-[#38D0B9]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                Your account asks for a code at sign in.
+              </span>
+              <button
+                type="button"
+                (click)="turnOffTwoFactor()"
+                class="min-h-11 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
+              >
+                Turn off
+              </button>
+            </div>
+          }
+        </section>
+
+        <section class="flex flex-col gap-4 rounded-2xl border border-[#6B2A2E] bg-[#1E1316] p-7">
+          <div class="flex flex-col gap-1.5">
+            <h2 class="m-0 font-display text-2xl font-bold">Delete account</h2>
+            <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">This removes your account, your ratings and your watchlist. You cannot undo it.</p>
+          </div>
+
+          @if (!deleting()) {
+            <button
+              type="button"
+              (click)="askDelete()"
+              class="min-h-12 cursor-pointer self-start rounded-[10px] border border-[#FF5A5F] bg-transparent px-[22px] text-[15px] font-semibold text-[#FF8A8E]"
+            >
+              Delete my account
+            </button>
+          } @else {
+            <div class="flex flex-col gap-3.5 rounded-xl border border-[#6B2A2E] bg-[#0D1017] p-[18px]">
+              <span class="text-[15px] font-semibold">Are you sure?</span>
+              <div class="flex flex-col gap-2">
+                <label for="pdel" class="text-sm font-medium">Type your password to confirm</label>
+                <input
+                  id="pdel"
+                  type="password"
+                  autocomplete="current-password"
+                  [(ngModel)]="deleteConfirmPassword"
+                  class="box-border h-12 max-w-[360px] rounded-[10px] border border-[#5B6579] bg-[#151A23] px-3.5 text-[15px] text-[#EEF1F6]"
+                />
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <a routerLink="/login" class="flex min-h-12 items-center justify-center rounded-[10px] bg-[#FF5A5F] px-[22px] text-[15px] font-semibold text-[#0D1017]">
+                  Delete forever
+                </a>
+                <button
+                  type="button"
+                  (click)="cancelDelete()"
+                  class="min-h-12 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-[18px] text-sm text-[#EEF1F6]"
+                >
+                  Keep my account
+                </button>
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
