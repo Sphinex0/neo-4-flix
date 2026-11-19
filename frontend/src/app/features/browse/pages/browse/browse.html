@@ -1,7 +1,271 @@
 <div class="flex min-h-screen flex-col bg-[#0D1017] font-sans text-[#EEF1F6]">
   <app-navbar />
-  <main class="flex flex-col gap-2 px-12 py-10">
-    <h1 class="m-0 font-display text-[40px] font-bold">Browse page</h1>
-    <p class="m-0 text-sm text-[#A0A9B8]">This is just a placeholder for now.</p>
+
+  <main class="flex flex-col gap-6 px-12 py-10 pb-16">
+    <!-- Header -->
+    <div class="flex flex-col gap-1">
+      <h1 class="m-0 font-display text-[40px] font-bold tracking-[-0.01em]">Browse Catalog</h1>
+      <p class="m-0 text-[15px] text-[#A0A9B8]">
+        Explore {{ totalElements() }} titles, filter by genre or year, and curate your watchlist.
+      </p>
+    </div>
+
+    <!-- Search & Sort Controls -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#2A3140] pb-5">
+      <div class="flex flex-1 min-w-[260px] max-w-md items-center rounded-xl border border-[#2A3140] bg-[#151A23] px-3.5 py-2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7587" stroke-width="2" class="mr-2.5">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search by movie title..."
+          class="w-full bg-transparent text-sm text-[#EEF1F6] placeholder-[#6B7587] outline-none"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            (click)="searchQuery.set(''); onSearchChange()"
+            class="cursor-pointer text-xs text-[#A0A9B8] hover:text-white"
+          >
+            Clear
+          </button>
+        }
+      </div>
+
+      <div class="flex items-center gap-3">
+        <label for="sortSelect" class="text-xs font-semibold text-[#A0A9B8]">Sort by:</label>
+        <select
+          id="sortSelect"
+          [(ngModel)]="selectedSort"
+          (change)="onSortChange()"
+          class="cursor-pointer rounded-lg border border-[#2A3140] bg-[#151A23] px-3 py-2 text-xs font-medium text-[#EEF1F6] outline-none hover:border-[#5B6579]"
+        >
+          <option value="title-asc">Title (A - Z)</option>
+          <option value="title-desc">Title (Z - A)</option>
+          <option value="year-desc">Year (Newest)</option>
+          <option value="year-asc">Year (Oldest)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Genre Chips -->
+    <div class="flex flex-wrap gap-2 py-1">
+      @for (genre of genres(); track genre) {
+        <button
+          type="button"
+          (click)="selectGenre(genre)"
+          class="cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-medium transition"
+          [ngStyle]="{
+            background: selectedGenre() === genre ? '#FF5A5F' : '#1C222D',
+            color: selectedGenre() === genre ? '#0D1017' : '#C9D0DC',
+            border: selectedGenre() === genre ? '1px solid #FF5A5F' : '1px solid #2A3140'
+          }"
+        >
+          {{ genre }}
+        </button>
+      }
+    </div>
+
+    <!-- Feedback Message -->
+    @if (actionMessage()) {
+      <p class="m-0 text-sm text-[#38D0B9]">{{ actionMessage() }}</p>
+    }
+
+    <!-- Content Area -->
+    @if (isLoading()) {
+      <div class="flex flex-col items-center justify-center py-24 text-[#A0A9B8]">
+        <div class="h-8 w-8 animate-spin rounded-full border-2 border-[#FF5A5F] border-t-transparent"></div>
+        <p class="mt-4 text-sm">Loading movies catalog...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="rounded-xl border border-[#FF5A5F]/30 bg-[#FF5A5F]/10 p-5 text-sm text-[#FF5A5F]">
+        {{ errorMessage() }}
+      </div>
+    } @else if (movies().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20 text-center">
+        <p class="text-lg font-medium text-[#EEF1F6]">No movies matched your search.</p>
+        <p class="text-sm text-[#A0A9B8]">Try adjusting your title search or selected genre filter.</p>
+      </div>
+    } @else {
+      <!-- Movie Cards Grid -->
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-5 gap-y-6">
+        @for (movie of movies(); track movie.id) {
+          <div class="flex flex-col gap-2.5">
+            <!-- Poster Card (clickable) -->
+            <div
+              (click)="openModal(movie.raw)"
+              [ngStyle]="{ background: movie.bg }"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View details for ' + movie.title"
+              class="group relative box-border flex aspect-[2/3] cursor-pointer items-end rounded-[10px] border border-[#2A3140] p-3.5 transition hover:scale-[1.02] hover:border-[#FF5A5F]/60"
+            >
+              <div class="absolute inset-0 rounded-[10px] bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90 transition group-hover:opacity-100"></div>
+              <span class="relative z-10 font-display text-xl font-bold leading-[1.05] text-white">{{ movie.title }}</span>
+
+              @if (movie.raw.imdbRating) {
+                <span class="absolute top-2.5 right-2.5 z-10 rounded bg-black/60 px-1.5 py-0.5 text-[11px] font-bold text-[#E5A93C] backdrop-blur-sm">
+                  ★ {{ movie.raw.imdbRating }}
+                </span>
+              }
+            </div>
+
+            <!-- Footer: Meta & Action -->
+            <div class="flex items-center justify-between gap-2">
+              <span class="truncate text-[13px] text-[#A0A9B8]" [title]="movie.meta">{{ movie.meta }}</span>
+              <button
+                type="button"
+                (click)="onAddToWatchlist(movie, $event)"
+                [disabled]="isAdded(movie.id)"
+                [attr.aria-label]="'Add ' + movie.title + ' to watchlist'"
+                class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
+              >
+                {{ isAdded(movie.id) ? 'Added' : '+ Watch' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination Bar -->
+      <div class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[#2A3140] pt-6">
+        <span class="text-xs text-[#A0A9B8]">
+          Page {{ currentPage() + 1 }} of {{ totalPages() }} ({{ totalElements() }} movies total)
+        </span>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            (click)="goToPage(currentPage() - 1)"
+            [disabled]="currentPage() === 0"
+            class="min-h-10 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-4 text-xs font-medium text-[#C9D0DC] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span class="px-2 text-xs font-semibold text-white">{{ currentPage() + 1 }}</span>
+          <button
+            type="button"
+            (click)="goToPage(currentPage() + 1)"
+            [disabled]="currentPage() >= totalPages() - 1"
+            class="min-h-10 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-4 text-xs font-medium text-[#C9D0DC] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Movie Details Modal -->
+    @if (selectedMovie(); as movie) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+        <div class="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#2A3140] bg-[#0D1017] shadow-2xl">
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between border-b border-[#2A3140] px-6 py-4">
+            <span class="text-xs font-semibold tracking-wider text-[#A0A9B8] uppercase">Movie Details</span>
+            <button
+              type="button"
+              (click)="closeModal()"
+              class="cursor-pointer text-2xl font-light text-[#A0A9B8] hover:text-white"
+            >
+              &times;
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="flex flex-1 flex-col gap-6 overflow-y-auto p-6 md:flex-row">
+            <!-- Poster -->
+            <div
+              [ngStyle]="{ background: getPosterBg(movie) }"
+              class="aspect-[2/3] w-full md:w-56 flex-none rounded-xl border border-[#2A3140] shadow-md"
+            ></div>
+
+            <!-- Details Content -->
+            <div class="flex flex-1 flex-col justify-between gap-4">
+              <div class="flex flex-col gap-2">
+                <h2 class="m-0 font-display text-2xl font-bold text-white">{{ movie.title }}</h2>
+
+                <!-- Metadata Row -->
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#A0A9B8]">
+                  <span>{{ movie.releaseYear }}</span>
+                  <span>&bull;</span>
+                  <span>{{ movie.durationMinutes }} min</span>
+                  @if (movie.director) {
+                    <span>&bull;</span>
+                    <span>Directed by {{ movie.director }}</span>
+                  }
+                  @if (movie.imdbRating) {
+                    <span>&bull;</span>
+                    <span class="font-semibold text-[#E5A93C]">★ {{ movie.imdbRating }}</span>
+                  }
+                </div>
+
+                <!-- Genre Badges -->
+                <div class="mt-1 flex flex-wrap gap-1.5">
+                  @for (g of movie.genres; track g.id) {
+                    <span class="rounded-md border border-[#2A3140] bg-[#151A23] px-2 py-0.5 text-[11px] font-medium text-[#C9D0DC]">
+                      {{ g.name }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Plot -->
+                <p class="mt-2 text-xs leading-relaxed text-[#C9D0DC]">
+                  {{ movie.description }}
+                </p>
+              </div>
+
+              <!-- Interactive Rating & Action Section -->
+              <div class="flex flex-col gap-3 rounded-xl border border-[#2A3140] bg-[#141923] p-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-white">Your Rating:</span>
+                  <div class="flex items-center gap-1.5">
+                    @for (star of [1, 2, 3, 4, 5]; track star) {
+                      <button
+                        type="button"
+                        (click)="setRating(star)"
+                        [attr.aria-label]="'Rate ' + star + ' stars'"
+                        class="cursor-pointer text-lg transition hover:scale-110"
+                        [ngStyle]="{ color: star <= modalRating() ? '#FF5A5F' : '#5B6579' }"
+                      >
+                        ★
+                      </button>
+                    }
+                    @if (modalRating() > 0) {
+                      <span class="ml-1 text-xs font-bold text-white">{{ modalRating() }}/5</span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Action Buttons in Modal -->
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-[#2A3140]">
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist({ id: movie.id, title: movie.title, meta: '', bg: '', raw: movie })"
+                    [disabled]="isAdded(movie.id)"
+                    class="flex-1 min-h-10 cursor-pointer rounded-lg border border-[#FF5A5F] bg-transparent text-xs font-semibold text-[#FF5A5F] hover:bg-[#FF5A5F] hover:text-[#0D1017] disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'Added to Watchlist' : '+ Add to Watchlist' }}
+                  </button>
+
+                  @if (movie.trailerUrl) {
+                    <a
+                      [href]="movie.trailerUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#38D0B9] bg-[#38D0B9] px-4 text-xs font-semibold text-[#0D1017] transition hover:opacity-90"
+                    >
+                      Watch Trailer ▶
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
   </main>
 </div>
