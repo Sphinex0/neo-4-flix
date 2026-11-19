@@ -2,3 +2,5 @@
 PROJECT_PLAN.md
 scripts/venv
 .idea
+*.dump
+neo4j-backups/

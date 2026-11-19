@@ -1,7 +1,114 @@
 <div class="flex min-h-screen flex-col bg-[#0D1017] font-sans text-[#EEF1F6]">
   <app-navbar />
-  <main class="flex flex-col gap-2 px-12 py-10">
-    <h1 class="m-0 font-display text-[40px] font-bold">For you page</h1>
-    <p class="m-0 text-sm text-[#A0A9B8]">This is just a placeholder for now.</p>
+
+  <main class="flex flex-col gap-7 px-12 py-10 pb-14">
+    <h1 class="m-0 font-display text-[40px] font-bold tracking-[-0.01em]">Recommended</h1>
+
+    <div class="flex gap-2 border-b border-[#2A3140] pb-4">
+      <button
+        type="button"
+        (click)="showForYou()"
+        [attr.aria-pressed]="activeTab() === 'for-you'"
+        [ngStyle]="forYouTabStyle()"
+        class="min-h-11 cursor-pointer rounded-[10px] border px-5 font-sans text-[15px] font-semibold"
+      >
+        For you
+      </button>
+      <button
+        type="button"
+        (click)="showTrending()"
+        [attr.aria-pressed]="activeTab() === 'trending'"
+        [ngStyle]="trendingTabStyle()"
+        class="min-h-11 cursor-pointer rounded-[10px] border px-5 font-sans text-[15px] font-semibold"
+      >
+        Trending
+      </button>
+    </div>
+
+    @if (actionMessage()) {
+      <p class="m-0 text-sm text-[#38D0B9]">{{ actionMessage() }}</p>
+    }
+
+    @if (activeTab() === 'for-you') {
+      <section class="flex flex-col gap-5">
+        <p class="m-0 text-[15px] text-[#A0A9B8]">Picks crafted from your ratings, friend circles, and taste profile.</p>
+
+        @if (isForYouLoading()) {
+          <p class="m-0 text-sm text-[#A0A9B8]">Finding your recommendations...</p>
+        } @else if (forYouError()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ forYouError() }}</p>
+        } @else if (forYouMovies.length === 0) {
+          <p class="m-0 text-sm text-[#A0A9B8]">No recommendations available right now. Rate more movies to teach the engine!</p>
+        } @else {
+          <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-5 gap-y-6">
+            @for (movie of forYouMovies; track movie.id) {
+              <div class="flex flex-col gap-2.5">
+                <div
+                  [ngStyle]="{ background: movie.bg }"
+                  class="box-border flex aspect-[2/3] flex-col justify-between rounded-[10px] border border-[#2A3140] p-3.5"
+                >
+                  <span class="self-start rounded bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-[#38D0B9] backdrop-blur-sm">
+                    {{ movie.reason }}
+                  </span>
+                  <span class="font-display text-xl font-bold leading-[1.05] text-white">{{ movie.title }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist(movie)"
+                    [disabled]="isAdded(movie.id)"
+                    [attr.aria-label]="'Add ' + movie.title + ' to watchlist'"
+                    class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'Added' : '+ Watch' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    } @else {
+      <section class="flex flex-col gap-5">
+        <p class="m-0 text-[15px] text-[#A0A9B8]">Most loved and highest-rated titles across the community.</p>
+
+        @if (isTrendingLoading()) {
+          <p class="m-0 text-sm text-[#A0A9B8]">Loading trending movies...</p>
+        } @else if (trendingError()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ trendingError() }}</p>
+        } @else if (trendingMovies.length === 0) {
+          <p class="m-0 text-sm text-[#A0A9B8]">No trending movies found.</p>
+        } @else {
+          <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-5 gap-y-6">
+            @for (movie of trendingMovies; track movie.id) {
+              <div class="flex flex-col gap-2.5">
+                <div
+                  [ngStyle]="{ background: movie.bg }"
+                  class="box-border flex aspect-[2/3] flex-col justify-between rounded-[10px] border border-[#2A3140] p-3.5"
+                >
+                  <span class="self-start rounded bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-[#FF5A5F] backdrop-blur-sm">
+                    {{ movie.reason }}
+                  </span>
+                  <span class="font-display text-xl font-bold leading-[1.05] text-white">{{ movie.title }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist(movie)"
+                    [disabled]="isAdded(movie.id)"
+                    [attr.aria-label]="'Add ' + movie.title + ' to watchlist'"
+                    class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'Added' : '+ Watch' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
   </main>
 </div>

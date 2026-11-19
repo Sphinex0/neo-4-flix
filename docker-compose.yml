@@ -15,15 +15,6 @@ services:
       timeout: 5s
       retries: 20
 
-  neo4j-load:
-    image: neo4j:5
-    volumes:
-      - neo4j_data:/data
-      - ./neo4j-backups:/backups
-    command: ["neo4j-admin", "database", "load", "neo4j", "--from-path=/backups", "--overwrite-destination=true"]
-    profiles:
-      - load
-
   discovery-service:
     build: ./backend/discovery-service
     ports:
