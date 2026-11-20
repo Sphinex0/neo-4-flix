@@ -1,0 +1,7 @@
+@if (isOwnProfile() === null) {
+  <div class="flex min-h-screen items-center justify-center bg-[#0D1017] text-sm text-[#A0A9B8]">Loading...</div>
+} @else if (isOwnProfile()) {
+  <app-profile />
+} @else {
+  <app-user-profile />
+}
