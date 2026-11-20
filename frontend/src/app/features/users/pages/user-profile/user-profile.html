@@ -9,100 +9,106 @@
       Back to your picks
     </a>
 
-    <section class="flex flex-wrap items-center gap-7 rounded-2xl border border-[#2A3140] bg-[#151A23] p-8">
-      <div
-        aria-hidden="true"
-        class="flex h-28 w-28 flex-none items-center justify-center rounded-full bg-[#F5B357] font-display text-[44px] font-bold tracking-[0.02em] text-[#0D1017]"
-      >
-        {{ initials }}
-      </div>
-
-      <div class="flex min-w-0 flex-1 basis-[300px] flex-col gap-2.5">
-        <h1 class="m-0 font-display text-[40px] font-bold tracking-[-0.01em]">{{ fullName }}</h1>
-        <span class="text-[15px] text-[#A0A9B8]">&#64;{{ username }} &middot; Member since {{ memberSince }}</span>
-        <div class="mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#C9D0DC]">
-          <span><strong class="text-lg text-[#EEF1F6]">{{ ratingsCount }}</strong> ratings</span>
-          <span><strong class="text-lg text-[#EEF1F6]">{{ averageRating }}</strong> average rating</span>
-          <span><strong class="text-lg text-[#EEF1F6]">{{ bothRatedCount }}</strong> movies you both rated</span>
+    @if (isLoading()) {
+      <p class="m-0 text-sm text-[#A0A9B8]">Loading profile...</p>
+    } @else if (loadError()) {
+      <p class="m-0 text-sm text-[#FF5A5F]">{{ loadError() }}</p>
+    } @else {
+      <section class="flex flex-wrap items-center gap-7 rounded-2xl border border-[#2A3140] bg-[#151A23] p-8">
+        <div
+          aria-hidden="true"
+          class="flex h-28 w-28 flex-none items-center justify-center rounded-full bg-[#F5B357] font-display text-[44px] font-bold tracking-[0.02em] text-[#0D1017]"
+        >
+          {{ initials }}
         </div>
-      </div>
 
-      <div class="flex min-w-0 flex-1 basis-[260px] flex-col gap-2 rounded-[14px] bg-[#10302C] px-5 py-[18px]">
-        <span class="font-display text-4xl font-bold text-[#38D0B9]">{{ tasteMatchPercent }}%</span>
-        <span class="text-sm font-semibold">Taste match with you</span>
-        <span class="text-[13px] leading-[1.45] text-[#C9D0DC]">
-          You gave close scores to the same movies. That is why their picks show up in yours.
-        </span>
-      </div>
-    </section>
-
-    <p class="-mt-3 flex items-center gap-2 text-[13px] text-[#A0A9B8]">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="5" y="11" width="14" height="10" rx="2" />
-        <path d="M8 11V7a4 4 0 018 0v4" />
-      </svg>
-      You see only public info. Email, password and 2-step settings stay private.
-    </p>
-
-    <section class="flex flex-col gap-5">
-      <div class="flex flex-col gap-1.5">
-        <h2 class="m-0 font-display text-[28px] font-bold">Movies you both loved</h2>
-        <p class="m-0 text-sm text-[#A0A9B8]">You both gave these 4 or 5 stars.</p>
-      </div>
-
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-5">
-        @for (movie of bothLoved; track movie.title) {
-          <div class="flex flex-col gap-2.5">
-            <div
-              [ngStyle]="{ background: movie.bg }"
-              class="box-border flex aspect-[2/3] items-end rounded-[10px] border border-[#2A3140] p-3.5"
-            >
-              <span class="font-display text-xl font-bold leading-[1.05] text-white">{{ movie.title }}</span>
-            </div>
-            <div class="flex items-center justify-between gap-2 text-[13px] text-[#A0A9B8]">
-              <span>You {{ movie.mine }}</span>
-              <span class="text-[#F5B357]">{{ initials }} {{ movie.theirs }}</span>
-            </div>
+        <div class="flex min-w-0 flex-1 basis-[300px] flex-col gap-2.5">
+          <h1 class="m-0 font-display text-[40px] font-bold tracking-[-0.01em]">{{ fullName }}</h1>
+          <span class="text-[15px] text-[#A0A9B8]">&#64;{{ username }} &middot; Member since {{ memberSince }}</span>
+          <div class="mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#C9D0DC]">
+            <span><strong class="text-lg text-[#EEF1F6]">{{ ratingsCount }}</strong> ratings</span>
+            <span><strong class="text-lg text-[#EEF1F6]">{{ averageRating }}</strong> average rating</span>
+            <span><strong class="text-lg text-[#EEF1F6]">{{ bothRatedCount }}</strong> movies you both rated</span>
           </div>
-        }
-      </div>
-    </section>
+        </div>
 
-    <section class="flex flex-col gap-4">
-      <div class="flex flex-col gap-1.5">
-        <h2 class="m-0 font-display text-[28px] font-bold">Recent ratings</h2>
-        <p class="m-0 text-sm text-[#A0A9B8]">Movies {{ firstName }} rated that you have not seen yet.</p>
-      </div>
+        <div class="flex min-w-0 flex-1 basis-[260px] flex-col gap-2 rounded-[14px] bg-[#10302C] px-5 py-[18px]">
+          <span class="font-display text-4xl font-bold text-[#38D0B9]">{{ tasteMatchPercent }}%</span>
+          <span class="text-sm font-semibold">Taste match with you</span>
+          <span class="text-[13px] leading-[1.45] text-[#C9D0DC]">
+            You gave close scores to the same movies. That is why their picks show up in yours.
+          </span>
+        </div>
+      </section>
 
-      <div class="flex flex-col gap-3">
-        @for (movie of recentRatings; track movie.title) {
-          <div class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5">
-            <div [ngStyle]="{ background: movie.bg }" class="h-21 w-14 flex-none rounded-lg"></div>
+      <p class="-mt-3 flex items-center gap-2 text-[13px] text-[#A0A9B8]">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="5" y="11" width="14" height="10" rx="2" />
+          <path d="M8 11V7a4 4 0 018 0v4" />
+        </svg>
+        You see only public info. Email, password and 2-step settings stay private.
+      </p>
 
-            <div class="flex min-w-0 flex-1 basis-[220px] flex-col gap-1">
-              <span class="font-display text-xl font-bold text-[#EEF1F6]">{{ movie.title }}</span>
-              <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }} &middot; rated {{ movie.when }}</span>
+      <section class="flex flex-col gap-5">
+        <div class="flex flex-col gap-1.5">
+          <h2 class="m-0 font-display text-[28px] font-bold">Movies you both loved</h2>
+          <p class="m-0 text-sm text-[#A0A9B8]">You both gave these 4 or 5 stars.</p>
+        </div>
+
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-5">
+          @for (movie of bothLoved; track movie.title) {
+            <div class="flex flex-col gap-2.5">
+              <div
+                [ngStyle]="{ background: movie.bg }"
+                class="box-border flex aspect-[2/3] items-end rounded-[10px] border border-[#2A3140] p-3.5"
+              >
+                <span class="font-display text-xl font-bold leading-[1.05] text-white">{{ movie.title }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-2 text-[13px] text-[#A0A9B8]">
+                <span>You {{ movie.mine }}</span>
+                <span class="text-[#F5B357]">{{ initials }} {{ movie.theirs }}</span>
+              </div>
             </div>
+          }
+        </div>
+      </section>
 
-            <div class="flex items-center gap-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#F5B357" aria-hidden="true">
-                <path d="M12 3l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 17l-5.6 3 1.3-6.2L3 9.5l6.3-.7z" />
-              </svg>
-              <span class="text-base font-semibold">{{ movie.theirs }} of 5</span>
+      <section class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <h2 class="m-0 font-display text-[28px] font-bold">Recent ratings</h2>
+          <p class="m-0 text-sm text-[#A0A9B8]">Movies {{ firstName }} rated that you have not seen yet.</p>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          @for (movie of recentRatings; track movie.title) {
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5">
+              <div [ngStyle]="{ background: movie.bg }" class="h-21 w-14 flex-none rounded-lg"></div>
+
+              <div class="flex min-w-0 flex-1 basis-[220px] flex-col gap-1">
+                <span class="font-display text-xl font-bold text-[#EEF1F6]">{{ movie.title }}</span>
+                <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }} &middot; rated {{ movie.when }}</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#F5B357" aria-hidden="true">
+                  <path d="M12 3l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 17l-5.6 3 1.3-6.2L3 9.5l6.3-.7z" />
+                </svg>
+                <span class="text-base font-semibold">{{ movie.theirs }} of 5</span>
+              </div>
+
+              <button
+                type="button"
+                class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                Add to watchlist
+              </button>
             </div>
-
-            <button
-              type="button"
-              class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              Add to watchlist
-            </button>
-          </div>
-        }
-      </div>
-    </section>
+          }
+        </div>
+      </section>
+    }
   </main>
 </div>

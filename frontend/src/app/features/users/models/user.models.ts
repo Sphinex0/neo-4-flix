@@ -29,3 +29,12 @@ export interface FriendResponse {
   lastName: string;
   username: string;
 }
+
+export interface PublicUserResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  role: 'USER' | 'ADMIN';
+  createdAt: string;
+}

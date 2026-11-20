@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgStyle } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Navbar } from '../../../../shared/navbar/navbar';
+import { UserApiService } from '../../services/user-api.service';
 
 interface SharedMovie {
   title: string;
@@ -23,13 +24,56 @@ interface RecentRatedMovie {
   imports: [Navbar, RouterLink, NgStyle],
   templateUrl: './user-profile.html',
 })
-export class UserProfile {
-  initials = 'SB';
-  firstName = 'Sara';
-  fullName = 'Sara Benali';
-  username = 'sara.b';
-  memberSince = 'January 2026';
+export class UserProfile implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly userApi = inject(UserApiService);
 
+  isLoading = signal(true);
+  loadError = signal<string | null>(null);
+
+  initials = '?';
+  firstName = '';
+  fullName = '';
+  username = '';
+  memberSince = '';
+
+  ngOnInit(): void {
+    const userId = this.route.snapshot.paramMap.get('userId');
+    if (!userId) {
+      this.isLoading.set(false);
+      this.loadError.set('No user id in the URL.');
+      return;
+    }
+
+    this.userApi.getUserById(userId).subscribe({
+      next: (res) => {
+        const user = res.data;
+        this.firstName = user.firstName;
+        this.fullName = `${user.firstName} ${user.lastName}`.trim() || user.username;
+
+        const first = user.firstName.trim();
+        const last = user.lastName.trim();
+        const computed = `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase();
+        this.initials = computed || (user.username[0] ?? '?').toUpperCase();
+
+        this.username = user.username;
+        this.memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        });
+
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.loadError.set(err.error?.message ?? 'Could not load this profile.');
+      },
+    });
+  }
+
+  // The stats, "both loved" and "recent ratings" below have no backend support yet
+  // (no ratings-count, average-rating, taste-match, or cross-user comparison endpoints exist).
+  // They stay as fake placeholder data until that's built.
   ratingsCount = 148;
   averageRating = 3.9;
   bothRatedCount = 34;

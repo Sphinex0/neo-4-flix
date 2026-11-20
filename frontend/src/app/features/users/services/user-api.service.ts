@@ -9,6 +9,7 @@ import {
   ConfirmTwoFactorRequest,
   FriendResponse,
   ProfileRequest,
+  PublicUserResponse,
   TwoFactorSetupResponse,
   VerifyPasswordRequest,
 } from '../models/user.models';
@@ -19,6 +20,10 @@ export class UserApiService {
 
   getMe(): Observable<ResponseData<UserResponse>> {
     return this.http.get<ResponseData<UserResponse>>(`${API_BASE_URL}/api/users/me`);
+  }
+
+  getUserById(id: string): Observable<ResponseData<PublicUserResponse>> {
+    return this.http.get<ResponseData<PublicUserResponse>>(`${API_BASE_URL}/api/users/${id}`);
   }
 
   updateMe(request: ProfileRequest): Observable<ResponseData<UserResponse>> {
