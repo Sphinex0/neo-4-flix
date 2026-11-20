@@ -8,6 +8,7 @@ import { Browse } from './features/browse/pages/browse/browse';
 import { Home } from './features/home/pages/home/home';
 import { Recommendations } from './features/recommendations/pages/recommendations/recommendations';
 import { Profile } from './features/users/pages/profile/profile';
+import { UserProfile } from './features/users/pages/user-profile/user-profile';
 import { Watchlist } from './features/watchlist/pages/watchlist/watchlist';
 
 export const routes: Routes = [
@@ -19,5 +20,6 @@ export const routes: Routes = [
   { path: 'search', component: Browse, canActivate: [authGuard] },
   { path: 'recommendations', component: Recommendations, canActivate: [authGuard] },
   { path: 'my-list', component: Watchlist, canActivate: [authGuard] },
+  { path: 'u/:userId', component: UserProfile, canActivate: [authGuard] },
   { path: ':userId', component: Profile, canActivate: [authGuard] },
 ];
