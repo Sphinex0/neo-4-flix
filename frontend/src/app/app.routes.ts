@@ -16,8 +16,8 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'secure-account', component: SecureAccount },
   { path: 'verify-2fa', component: Verify2fa },
-  { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'search', component: Browse, canActivate: [authGuard] },
   { path: 'recommendations', component: Recommendations, canActivate: [authGuard] },
   { path: 'my-list', component: Watchlist, canActivate: [authGuard] },
+  { path: ':userId', component: Profile, canActivate: [authGuard] },
 ];

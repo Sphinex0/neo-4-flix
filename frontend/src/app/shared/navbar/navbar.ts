@@ -13,6 +13,7 @@ export class Navbar implements OnInit {
   private readonly userApi = inject(UserApiService);
 
   initials = signal('?');
+  userId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.userApi.getMe().subscribe({
@@ -22,6 +23,7 @@ export class Navbar implements OnInit {
         const last = (user.lastName || '').trim();
         const computed = `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase();
         this.initials.set(computed || (user.username[0] ?? '?').toUpperCase());
+        this.userId.set(user.id);
       },
     });
   }
