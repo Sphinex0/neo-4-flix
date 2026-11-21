@@ -99,7 +99,7 @@ public class UserService {
         return ResponseData.success("Password verified", null);
     }
 
-    public ResponseData<String> deleteMe(String userId) {
+    public ResponseData<String> deleteUser(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 

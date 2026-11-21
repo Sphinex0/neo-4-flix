@@ -40,6 +40,10 @@ export class UserApiService {
     return this.http.delete<ResponseData<string>>(`${API_BASE_URL}/api/users/me`);
   }
 
+  deleteUser(id: string): Observable<ResponseData<string>> {
+    return this.http.delete<ResponseData<string>>(`${API_BASE_URL}/api/users/${id}`);
+  }
+
   verifyPassword(request: VerifyPasswordRequest): Observable<ResponseData<string>> {
     return this.http.post<ResponseData<string>>(`${API_BASE_URL}/api/users/me/verify-password`, request);
   }

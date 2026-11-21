@@ -77,7 +77,7 @@ class UserServiceTest {
     void deleteMe_deletesUser_whenNotAdmin() {
         when(userRepository.findById("user-1")).thenReturn(Optional.of(user));
 
-        userService.deleteMe("user-1");
+        userService.deleteUser("user-1");
 
         verify(userRepository).deleteById("user-1");
     }
@@ -87,7 +87,7 @@ class UserServiceTest {
         user.setRole(UserRole.ADMIN);
         when(userRepository.findById("user-1")).thenReturn(Optional.of(user));
 
-        assertThrows(AdminDeletionNotAllowedException.class, () -> userService.deleteMe("user-1"));
+        assertThrows(AdminDeletionNotAllowedException.class, () -> userService.deleteUser("user-1"));
         verify(userRepository, never()).deleteById(any());
     }
 

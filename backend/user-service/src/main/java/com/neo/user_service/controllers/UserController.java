@@ -79,7 +79,13 @@ public class UserController {
     @DeleteMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseData<String>> deleteMe(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok(userService.deleteMe(userId));
+        return ResponseEntity.ok(userService.deleteUser(userId));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("#id == authentication.name or hasRole('ADMIN')")
+    public ResponseEntity<ResponseData<String>> deleteUser(@PathVariable String id) {
+        return ResponseEntity.ok(userService.deleteUser(id));
     }
 
     @GetMapping("/me/friends")

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgStyle } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Navbar } from '../../../../shared/navbar/navbar';
 import { AddMovieModal } from '../../../movies/components/add-movie-modal/add-movie-modal';
@@ -44,6 +44,7 @@ const FALLBACK_GRADIENTS = [
 })
 export class UserProfile implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly userApi = inject(UserApiService);
   private readonly ratingApi = inject(RatingApiService);
   private readonly movieApi = inject(MovieApiService);
@@ -80,6 +81,11 @@ export class UserProfile implements OnInit {
   movieToDelete = signal<MovieResponse | null>(null);
   isDeletingMovie = signal(false);
   isAdmin = signal(false);
+  isViewedUserAdmin = signal(false);
+
+  showDeleteUserModal = signal(false);
+  isDeletingUser = signal(false);
+  deleteUserError = signal<string | null>(null);
 
   ngOnInit(): void {
     this.userApi.getMe().subscribe({
@@ -130,6 +136,7 @@ export class UserProfile implements OnInit {
           }),
         );
         this.isFriend.set(user.isFriend);
+        this.isViewedUserAdmin.set(user.role === 'ADMIN');
 
         this.isLoading.set(false);
       },
@@ -242,6 +249,30 @@ export class UserProfile implements OnInit {
         },
       });
     }
+  }
+
+  askDeleteUser(): void {
+    this.deleteUserError.set(null);
+    this.showDeleteUserModal.set(true);
+  }
+
+  cancelDeleteUser(): void {
+    this.showDeleteUserModal.set(false);
+  }
+
+  confirmDeleteUser(): void {
+    this.isDeletingUser.set(true);
+    this.deleteUserError.set(null);
+
+    this.userApi.deleteUser(this.userId).subscribe({
+      next: () => {
+        this.router.navigate(['/search']);
+      },
+      error: (err) => {
+        this.isDeletingUser.set(false);
+        this.deleteUserError.set(err.error?.message ?? 'Could not delete this account. Please try again.');
+      },
+    });
   }
 
   onAddToWatchlist(movie: { id: string }): void {

@@ -33,25 +33,37 @@
             <span><strong class="text-lg text-[#EEF1F6]">{{ bothRatedCount() }}</strong> movies you both rated</span>
           </div>
 
-          @if (isFriend()) {
-            <button
-              type="button"
-              (click)="toggleFriend()"
-              [disabled]="isFriendActionLoading()"
-              class="mt-1 inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6] disabled:opacity-60"
-            >
-              Unfriend
-            </button>
-          } @else {
-            <button
-              type="button"
-              (click)="toggleFriend()"
-              [disabled]="isFriendActionLoading()"
-              class="mt-1 inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-[10px] border border-transparent bg-[#F5B357] px-4 text-sm font-semibold text-[#0D1017] disabled:opacity-60"
-            >
-              Add Friend
-            </button>
-          }
+          <div class="mt-1 flex flex-wrap gap-2">
+            @if (isFriend()) {
+              <button
+                type="button"
+                (click)="toggleFriend()"
+                [disabled]="isFriendActionLoading()"
+                class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6] disabled:opacity-60"
+              >
+                Unfriend
+              </button>
+            } @else {
+              <button
+                type="button"
+                (click)="toggleFriend()"
+                [disabled]="isFriendActionLoading()"
+                class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-[10px] border border-transparent bg-[#F5B357] px-4 text-sm font-semibold text-[#0D1017] disabled:opacity-60"
+              >
+                Add Friend
+              </button>
+            }
+
+            @if (isAdmin() && !isViewedUserAdmin()) {
+              <button
+                type="button"
+                (click)="askDeleteUser()"
+                class="inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-[10px] border border-[#FF5A5F] bg-transparent px-4 text-sm font-semibold text-[#FF5A5F] hover:bg-[#FF5A5F] hover:text-[#0D1017]"
+              >
+                Delete user
+              </button>
+            }
+          </div>
         </div>
 
         <div class="flex min-w-0 flex-1 basis-[260px] flex-col gap-2 rounded-[14px] bg-[#10302C] px-5 py-[18px]">
@@ -272,6 +284,38 @@
               type="button"
               (click)="cancelDeleteMovie()"
               [disabled]="isDeletingMovie()"
+              class="min-h-12 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-[18px] text-sm text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Keep it
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (showDeleteUserModal()) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" role="dialog" aria-modal="true" aria-labelledby="deleteUserTitle">
+        <div class="box-border flex w-full max-w-[420px] flex-col gap-4 rounded-2xl border border-[#2A3140] bg-[#151A23] p-8">
+          <span id="deleteUserTitle" class="font-display text-xl font-bold">Delete this user?</span>
+          <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">
+            {{ fullName() }}'s account, ratings and watchlist will be removed. This cannot be undone.
+          </p>
+          @if (deleteUserError()) {
+            <p class="m-0 text-sm text-[#FF5A5F]">{{ deleteUserError() }}</p>
+          }
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              (click)="confirmDeleteUser()"
+              [disabled]="isDeletingUser()"
+              class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] px-[22px] text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {{ isDeletingUser() ? 'Deleting...' : 'Delete user' }}
+            </button>
+            <button
+              type="button"
+              (click)="cancelDeleteUser()"
+              [disabled]="isDeletingUser()"
               class="min-h-12 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-[18px] text-sm text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Keep it
