@@ -52,6 +52,14 @@ export class Watchlist implements OnInit {
   ratingsError = signal<string | null>(null);
   deleteRatingMessage = signal<string | null>(null);
 
+  ratingToDelete = signal<RatedCard | null>(null);
+  isDeletingRating = signal(false);
+
+  editingRating = signal<RatedCard | null>(null);
+  editScore = signal(0);
+  isSavingRating = signal(false);
+  editRatingError = signal<string | null>(null);
+
   watch: WatchlistCard[] = [];
   rated: RatedCard[] = [];
 
@@ -118,15 +126,70 @@ export class Watchlist implements OnInit {
     });
   }
 
-  onDeleteRating(movie: RatedCard): void {
+  askDeleteRating(movie: RatedCard): void {
     this.deleteRatingMessage.set(null);
+    this.ratingToDelete.set(movie);
+  }
+
+  cancelDeleteRating(): void {
+    this.ratingToDelete.set(null);
+  }
+
+  confirmDeleteRating(): void {
+    const movie = this.ratingToDelete();
+    if (!movie) {
+      return;
+    }
+
+    this.isDeletingRating.set(true);
 
     this.ratingApi.deleteRating(movie.movieId).subscribe({
       next: () => {
         this.rated = this.rated.filter((m) => m.movieId !== movie.movieId);
+        this.isDeletingRating.set(false);
+        this.ratingToDelete.set(null);
       },
       error: (err) => {
+        this.isDeletingRating.set(false);
+        this.ratingToDelete.set(null);
         this.deleteRatingMessage.set(err.error?.message ?? 'Could not delete this rating.');
+      },
+    });
+  }
+
+  askChangeRating(movie: RatedCard): void {
+    this.editRatingError.set(null);
+    this.editScore.set(movie.mine);
+    this.editingRating.set(movie);
+  }
+
+  cancelChangeRating(): void {
+    this.editingRating.set(null);
+  }
+
+  setEditScore(score: number): void {
+    this.editScore.set(score);
+  }
+
+  confirmChangeRating(): void {
+    const movie = this.editingRating();
+    if (!movie) {
+      return;
+    }
+
+    const newScore = this.editScore();
+    this.isSavingRating.set(true);
+    this.editRatingError.set(null);
+
+    this.ratingApi.changeRating(movie.movieId, { score: newScore }).subscribe({
+      next: () => {
+        this.rated = this.rated.map((m) => (m.movieId === movie.movieId ? { ...m, mine: newScore } : m));
+        this.isSavingRating.set(false);
+        this.editingRating.set(null);
+      },
+      error: (err) => {
+        this.isSavingRating.set(false);
+        this.editRatingError.set(err.error?.message ?? 'Could not update this rating.');
       },
     });
   }

@@ -100,13 +100,14 @@
                 <div class="flex gap-2">
                   <button
                     type="button"
+                    (click)="askChangeRating(movie)"
                     class="inline-flex min-h-11 cursor-pointer items-center rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
                   >
                     Change
                   </button>
                   <button
                     type="button"
-                    (click)="onDeleteRating(movie)"
+                    (click)="askDeleteRating(movie)"
                     [attr.aria-label]="'Delete my rating for ' + movie.title"
                     class="min-h-11 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#C9D0DC] hover:text-white"
                   >
@@ -120,4 +121,80 @@
       </section>
     }
   </main>
+
+  @if (ratingToDelete()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" role="dialog" aria-modal="true" aria-labelledby="deleteRatingTitle">
+      <div class="box-border flex w-full max-w-[420px] flex-col gap-4 rounded-2xl border border-[#2A3140] bg-[#151A23] p-8">
+        <span id="deleteRatingTitle" class="font-display text-xl font-bold">Delete this rating?</span>
+        <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">
+          You'll remove your {{ ratingToDelete()!.mine }}-star rating for "{{ ratingToDelete()!.title }}". You can rate it again later.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            (click)="confirmDeleteRating()"
+            [disabled]="isDeletingRating()"
+            class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] px-[22px] text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ isDeletingRating() ? 'Deleting...' : 'Delete rating' }}
+          </button>
+          <button
+            type="button"
+            (click)="cancelDeleteRating()"
+            [disabled]="isDeletingRating()"
+            class="min-h-12 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-[18px] text-sm text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Keep it
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (editingRating()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" role="dialog" aria-modal="true" aria-labelledby="editRatingTitle">
+      <div class="box-border flex w-full max-w-[420px] flex-col gap-4 rounded-2xl border border-[#2A3140] bg-[#151A23] p-8">
+        <span id="editRatingTitle" class="font-display text-xl font-bold">Change your rating</span>
+        <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">{{ editingRating()!.title }}</p>
+
+        <div class="flex gap-1">
+          @for (star of [1, 2, 3, 4, 5]; track star) {
+            <button
+              type="button"
+              (click)="setEditScore(star)"
+              [attr.aria-label]="star + ' star' + (star > 1 ? 's' : '')"
+              class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent"
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" [attr.fill]="star <= editScore() ? '#FF5A5F' : 'none'" stroke="#FF5A5F" stroke-width="1.5" aria-hidden="true">
+                <path d="M12 3l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 17l-5.6 3 1.3-6.2L3 9.5l6.3-.7z" />
+              </svg>
+            </button>
+          }
+        </div>
+
+        @if (editRatingError()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ editRatingError() }}</p>
+        }
+
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            (click)="confirmChangeRating()"
+            [disabled]="isSavingRating() || editScore() === 0"
+            class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#38D0B9] px-[22px] text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ isSavingRating() ? 'Saving...' : 'Save rating' }}
+          </button>
+          <button
+            type="button"
+            (click)="cancelChangeRating()"
+            [disabled]="isSavingRating()"
+            class="min-h-12 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-[18px] text-sm text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>
