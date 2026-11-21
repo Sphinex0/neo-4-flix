@@ -106,18 +106,27 @@ export class Recommendations implements OnInit {
   }
 
   onAddToWatchlist(movie: RecommendationCard): void {
+    if (this.isAdded(movie.id)) {
+      return;
+    }
+
     this.actionMessage.set(null);
+    this.addedIds.update((set) => {
+      const next = new Set(set);
+      next.add(movie.id);
+      return next;
+    });
 
     this.watchlistApi.addToWatchlist(movie.id).subscribe({
       next: () => {
-        this.addedIds.update((set) => {
-          const next = new Set(set);
-          next.add(movie.id);
-          return next;
-        });
         this.actionMessage.set(`Added "${movie.title}" to your watchlist.`);
       },
       error: (err) => {
+        this.addedIds.update((set) => {
+          const next = new Set(set);
+          next.delete(movie.id);
+          return next;
+        });
         this.actionMessage.set(err.error?.message ?? 'Could not add movie to watchlist.');
       },
     });

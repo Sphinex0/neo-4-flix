@@ -187,7 +187,7 @@
             <button
               type="button"
               (click)="onUpdatePassword()"
-              [disabled]="isUpdatingPassword()"
+              [disabled]="isUpdatingPassword() || !currentPassword.trim() || !newPassword.trim()"
               class="min-h-12 cursor-pointer self-start rounded-[10px] border border-[#5B6579] bg-transparent px-6 text-[15px] font-semibold text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {{ isUpdatingPassword() ? 'Updating...' : 'Update password' }}

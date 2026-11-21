@@ -77,6 +77,8 @@ export class UserProfile implements OnInit {
 
   selectedMovie = signal<MovieResponse | null>(null);
   editingMovie = signal<MovieResponse | null>(null);
+  movieToDelete = signal<MovieResponse | null>(null);
+  isDeletingMovie = signal(false);
   isAdmin = signal(false);
 
   ngOnInit(): void {
@@ -243,11 +245,21 @@ export class UserProfile implements OnInit {
   }
 
   onAddToWatchlist(movie: { id: string }): void {
+    if (this.isAdded(movie.id)) {
+      return;
+    }
+
+    this.addedWatchlistIds.update((set) => {
+      const next = new Set(set);
+      next.add(movie.id);
+      return next;
+    });
+
     this.watchlistApi.addToWatchlist(movie.id).subscribe({
-      next: () => {
+      error: () => {
         this.addedWatchlistIds.update((set) => {
           const next = new Set(set);
-          next.add(movie.id);
+          next.delete(movie.id);
           return next;
         });
       },
@@ -273,6 +285,37 @@ export class UserProfile implements OnInit {
 
   onEditMovieClosed(): void {
     this.editingMovie.set(null);
+  }
+
+  askDeleteMovie(movie: MovieResponse): void {
+    this.selectedMovie.set(null);
+    this.movieToDelete.set(movie);
+  }
+
+  cancelDeleteMovie(): void {
+    this.movieToDelete.set(null);
+  }
+
+  confirmDeleteMovie(): void {
+    const movie = this.movieToDelete();
+    if (!movie) {
+      return;
+    }
+
+    this.isDeletingMovie.set(true);
+
+    this.movieApi.deleteMovie(movie.id).subscribe({
+      next: () => {
+        this.isDeletingMovie.set(false);
+        this.movieToDelete.set(null);
+        this.bothLoved.update((list) => list.filter((m) => m.raw.id !== movie.id));
+        this.recentRatings.update((list) => list.filter((m) => m.id !== movie.id));
+      },
+      error: () => {
+        this.isDeletingMovie.set(false);
+        this.movieToDelete.set(null);
+      },
+    });
   }
 
   getPosterBg(movie: MovieResponse): string {

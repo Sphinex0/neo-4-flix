@@ -5,7 +5,8 @@
       <button
         type="button"
         (click)="close()"
-        class="cursor-pointer text-2xl font-light text-[#A0A9B8] hover:text-white"
+        [disabled]="isSaving()"
+        class="cursor-pointer text-2xl font-light text-[#A0A9B8] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
         &times;
       </button>
@@ -103,13 +104,14 @@
         <button
           type="button"
           (click)="close()"
-          class="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
+          [disabled]="isSaving()"
+          class="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
         >
           Cancel
         </button>
         <button
           type="submit"
-          [disabled]="isSaving()"
+          [disabled]="isSaving() || !hasRequiredFields() || !hasChanges()"
           class="inline-flex min-h-11 cursor-pointer items-center rounded-[10px] border-0 bg-[#FF5A5F] px-4 text-sm font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {{ movie ? (isSaving() ? 'Saving...' : 'Save changes') : (isSaving() ? 'Adding...' : 'Add movie') }}

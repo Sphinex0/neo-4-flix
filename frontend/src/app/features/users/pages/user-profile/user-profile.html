@@ -233,6 +233,13 @@
                   >
                     Update Movie
                   </button>
+                  <button
+                    type="button"
+                    (click)="askDeleteMovie(movie)"
+                    class="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border border-[#FF5A5F] bg-transparent px-4 text-xs font-semibold text-[#FF5A5F] hover:bg-[#FF5A5F] hover:text-[#0D1017]"
+                  >
+                    Delete Movie
+                  </button>
                 }
               </div>
             </div>
@@ -243,6 +250,35 @@
 
     @if (editingMovie(); as movie) {
       <app-add-movie-modal [movie]="movie" (closed)="onEditMovieClosed()" />
+    }
+
+    @if (movieToDelete(); as movie) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" role="dialog" aria-modal="true" aria-labelledby="deleteMovieTitle">
+        <div class="box-border flex w-full max-w-[420px] flex-col gap-4 rounded-2xl border border-[#2A3140] bg-[#151A23] p-8">
+          <span id="deleteMovieTitle" class="font-display text-xl font-bold">Delete this movie?</span>
+          <p class="m-0 text-sm leading-[1.5] text-[#C9D0DC]">
+            "{{ movie.title }}" will be removed for everyone. This cannot be undone.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              (click)="confirmDeleteMovie()"
+              [disabled]="isDeletingMovie()"
+              class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#FF5A5F] px-[22px] text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {{ isDeletingMovie() ? 'Deleting...' : 'Delete movie' }}
+            </button>
+            <button
+              type="button"
+              (click)="cancelDeleteMovie()"
+              [disabled]="isDeletingMovie()"
+              class="min-h-12 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-[18px] text-sm text-[#EEF1F6] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Keep it
+            </button>
+          </div>
+        </div>
+      </div>
     }
   </main>
 </div>

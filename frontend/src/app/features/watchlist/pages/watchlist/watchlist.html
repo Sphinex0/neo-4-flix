@@ -54,10 +54,11 @@
                   <button
                     type="button"
                     (click)="onRemove(movie)"
+                    [disabled]="isRemoving(movie.id)"
                     [attr.aria-label]="'Remove ' + movie.title + ' from watchlist'"
-                    class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white"
+                    class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Remove
+                    {{ isRemoving(movie.id) ? 'Removing...' : 'Remove' }}
                   </button>
                 </div>
               </div>
@@ -180,7 +181,7 @@
           <button
             type="button"
             (click)="confirmChangeRating()"
-            [disabled]="isSavingRating() || editScore() === 0"
+            [disabled]="isSavingRating() || editScore() === 0 || editScore() === editingRating()?.mine"
             class="min-h-12 cursor-pointer rounded-[10px] border-0 bg-[#38D0B9] px-[22px] text-[15px] font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {{ isSavingRating() ? 'Saving...' : 'Save rating' }}

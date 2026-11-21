@@ -47,6 +47,7 @@ export class Watchlist implements OnInit {
   isLoading = signal(true);
   loadError = signal<string | null>(null);
   removeMessage = signal<string | null>(null);
+  removingIds = signal<Set<string>>(new Set());
 
   isRatingsLoading = signal(true);
   ratingsError = signal<string | null>(null);
@@ -114,16 +115,35 @@ export class Watchlist implements OnInit {
   }
 
   onRemove(movie: WatchlistCard): void {
+    if (this.isRemoving(movie.id)) {
+      return;
+    }
+
     this.removeMessage.set(null);
+    this.removingIds.update((set) => new Set(set).add(movie.id));
 
     this.watchlistApi.removeFromWatchlist(movie.id).subscribe({
       next: () => {
         this.watch = this.watch.filter((m) => m.id !== movie.id);
+        this.removingIds.update((set) => {
+          const next = new Set(set);
+          next.delete(movie.id);
+          return next;
+        });
       },
       error: (err) => {
+        this.removingIds.update((set) => {
+          const next = new Set(set);
+          next.delete(movie.id);
+          return next;
+        });
         this.removeMessage.set(err.error?.message ?? 'Could not remove this movie.');
       },
     });
+  }
+
+  isRemoving(id: string): boolean {
+    return this.removingIds().has(id);
   }
 
   askDeleteRating(movie: RatedCard): void {

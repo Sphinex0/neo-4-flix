@@ -64,4 +64,8 @@ export class MovieApiService {
   updateMovie(id: string, request: MovieCreateRequest): Observable<ResponseData<MovieResponse>> {
     return this.http.put<ResponseData<MovieResponse>>(`${API_BASE_URL}/api/movies/${id}`, request);
   }
+
+  deleteMovie(id: string): Observable<ResponseData<void>> {
+    return this.http.delete<ResponseData<void>>(`${API_BASE_URL}/api/movies/${id}`);
+  }
 }

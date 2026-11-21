@@ -45,6 +45,27 @@ export class AddMovieModal implements OnInit {
     this.closed.emit();
   }
 
+  hasRequiredFields(): boolean {
+    return !!this.title.trim() && !!this.description.trim() && !!this.releaseYear && !!this.durationMinutes;
+  }
+
+  hasChanges(): boolean {
+    if (!this.movie) {
+      return true;
+    }
+
+    return (
+      this.title.trim() !== this.movie.title ||
+      this.description.trim() !== this.movie.description ||
+      this.releaseYear !== this.movie.releaseYear ||
+      this.durationMinutes !== this.movie.durationMinutes ||
+      (this.posterUrl.trim() || null) !== this.movie.posterUrl ||
+      (this.trailerUrl.trim() || null) !== this.movie.trailerUrl ||
+      (this.director.trim() || null) !== this.movie.director ||
+      this.genres !== this.movie.genres.map((genre) => genre.name).join(', ')
+    );
+  }
+
   onSubmit(): void {
     if (!this.title.trim() || !this.description.trim() || !this.releaseYear || !this.durationMinutes) {
       this.errorMessage.set('Please fill in title, description, release year and duration.');

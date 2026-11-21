@@ -38,6 +38,8 @@ export class Browse implements OnInit {
 
   isAdmin = signal(false);
   editingMovie = signal<MovieResponse | null>(null);
+  movieToDelete = signal<MovieResponse | null>(null);
+  isDeletingMovie = signal(false);
 
   // Filters & Search State
   searchQuery = signal<string>('');
@@ -178,18 +180,27 @@ export class Browse implements OnInit {
     if (event) {
       event.stopPropagation();
     }
+    if (this.isAdded(movie.id)) {
+      return;
+    }
+
     this.actionMessage.set(null);
+    this.addedWatchlistIds.update((set) => {
+      const next = new Set(set);
+      next.add(movie.id);
+      return next;
+    });
 
     this.watchlistApi.addToWatchlist(movie.id).subscribe({
       next: () => {
-        this.addedWatchlistIds.update((set) => {
-          const next = new Set(set);
-          next.add(movie.id);
-          return next;
-        });
         this.actionMessage.set(`Added "${movie.title}" to watchlist.`);
       },
       error: (err) => {
+        this.addedWatchlistIds.update((set) => {
+          const next = new Set(set);
+          next.delete(movie.id);
+          return next;
+        });
         this.actionMessage.set(err.error?.message ?? 'Could not add to watchlist.');
       },
     });
@@ -217,6 +228,36 @@ export class Browse implements OnInit {
   onEditMovieClosed(): void {
     this.editingMovie.set(null);
     this.loadMovies();
+  }
+
+  askDeleteMovie(movie: MovieResponse): void {
+    this.selectedMovie.set(null);
+    this.movieToDelete.set(movie);
+  }
+
+  cancelDeleteMovie(): void {
+    this.movieToDelete.set(null);
+  }
+
+  confirmDeleteMovie(): void {
+    const movie = this.movieToDelete();
+    if (!movie) {
+      return;
+    }
+
+    this.isDeletingMovie.set(true);
+
+    this.movieApi.deleteMovie(movie.id).subscribe({
+      next: () => {
+        this.isDeletingMovie.set(false);
+        this.movieToDelete.set(null);
+        this.loadMovies();
+      },
+      error: () => {
+        this.isDeletingMovie.set(false);
+        this.movieToDelete.set(null);
+      },
+    });
   }
 
   setRating(score: number): void {
