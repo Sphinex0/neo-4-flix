@@ -14,9 +14,10 @@ public record PublicUserResponse(
         String lastName,
         String username,
         UserRole role,
-        Instant createdAt
+        Instant createdAt,
+        boolean isFriend
 ) {
-    public static PublicUserResponse from(User user) {
+    public static PublicUserResponse from(User user, boolean isFriend) {
         return PublicUserResponse.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
@@ -24,6 +25,7 @@ public record PublicUserResponse(
                 .username(user.getUsername())
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
+                .isFriend(isFriend)
                 .build();
     }
 }

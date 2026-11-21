@@ -7,6 +7,7 @@ import { MovieResponse } from '../../../movies/models/movie.models';
 import { MovieApiService } from '../../../movies/services/movie-api.service';
 import { OtherUserRatingItem, SharedRatingItem } from '../../../ratings/models/rating.models';
 import { RatingApiService } from '../../../ratings/services/rating-api.service';
+import { WatchlistApiService } from '../../../watchlist/services/watchlist-api.service';
 import { UserApiService } from '../../services/user-api.service';
 
 interface SharedMovie {
@@ -17,6 +18,7 @@ interface SharedMovie {
 }
 
 interface RecentRatedMovie {
+  id: string;
   title: string;
   meta: string;
   theirs: number;
@@ -42,6 +44,7 @@ export class UserProfile implements OnInit {
   private readonly userApi = inject(UserApiService);
   private readonly ratingApi = inject(RatingApiService);
   private readonly movieApi = inject(MovieApiService);
+  private readonly watchlistApi = inject(WatchlistApiService);
 
   isLoading = signal(true);
   loadError = signal<string | null>(null);
@@ -49,43 +52,69 @@ export class UserProfile implements OnInit {
   isComparisonLoading = signal(true);
   comparisonError = signal<string | null>(null);
 
-  initials = '?';
-  firstName = '';
-  fullName = '';
-  username = '';
-  memberSince = '';
-  ratingsCount = 0;
-  averageRating: number | null = null;
+  isFriend = signal(false);
+  isFriendActionLoading = signal(false);
 
-  bothRatedCount = 0;
-  tasteMatchPercent: number | null = null;
-  bothLoved: SharedMovie[] = [];
-  recentRatings: RecentRatedMovie[] = [];
+  private userId = '';
+
+  initials = signal('?');
+  firstName = signal('');
+  fullName = signal('');
+  username = signal('');
+  memberSince = signal('');
+  ratingsCount = signal(0);
+  averageRating = signal<number | null>(null);
+
+  bothRatedCount = signal(0);
+  tasteMatchPercent = signal<number | null>(null);
+  bothLoved = signal<SharedMovie[]>([]);
+  recentRatings = signal<RecentRatedMovie[]>([]);
+
+  addedWatchlistIds = signal<Set<string>>(new Set());
 
   ngOnInit(): void {
-    const userId = this.route.snapshot.paramMap.get('userId');
-    if (!userId) {
-      this.isLoading.set(false);
-      this.loadError.set('No user id in the URL.');
-      return;
-    }
+    this.route.paramMap.subscribe((params) => {
+      const userId = params.get('userId');
+      if (!userId) {
+        this.isLoading.set(false);
+        this.loadError.set('No user id in the URL.');
+        return;
+      }
+
+      this.loadProfile(userId);
+    });
+  }
+
+  private loadProfile(userId: string): void {
+    this.userId = userId;
+
+    this.isLoading.set(true);
+    this.loadError.set(null);
+    this.isComparisonLoading.set(true);
+    this.comparisonError.set(null);
+    this.bothLoved.set([]);
+    this.recentRatings.set([]);
+    this.addedWatchlistIds.set(new Set());
 
     this.userApi.getUserById(userId).subscribe({
       next: (res) => {
         const user = res.data;
-        this.firstName = user.firstName;
-        this.fullName = `${user.firstName} ${user.lastName}`.trim() || user.username;
+        this.firstName.set(user.firstName);
+        this.fullName.set(`${user.firstName} ${user.lastName}`.trim() || user.username);
 
         const first = user.firstName.trim();
         const last = user.lastName.trim();
         const computed = `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase();
-        this.initials = computed || (user.username[0] ?? '?').toUpperCase();
+        this.initials.set(computed || (user.username[0] ?? '?').toUpperCase());
 
-        this.username = user.username;
-        this.memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
-          month: 'long',
-          year: 'numeric',
-        });
+        this.username.set(user.username);
+        this.memberSince.set(
+          new Date(user.createdAt).toLocaleDateString('en-US', {
+            month: 'long',
+            year: 'numeric',
+          }),
+        );
+        this.isFriend.set(user.isFriend);
 
         this.isLoading.set(false);
       },
@@ -97,15 +126,15 @@ export class UserProfile implements OnInit {
 
     this.ratingApi.getUserRatingStats(userId).subscribe({
       next: (res) => {
-        this.ratingsCount = res.data.ratingsCount;
-        this.averageRating = res.data.averageRating;
+        this.ratingsCount.set(res.data.ratingsCount);
+        this.averageRating.set(res.data.averageRating);
       },
     });
 
     this.ratingApi.getComparison(userId).subscribe({
       next: (res) => {
-        this.bothRatedCount = res.data.bothRatedCount;
-        this.tasteMatchPercent = res.data.tasteMatchPercent;
+        this.bothRatedCount.set(res.data.bothRatedCount);
+        this.tasteMatchPercent.set(res.data.tasteMatchPercent);
         this.loadBothLoved(res.data.bothLoved);
         this.loadRecentRatings(res.data.recentRatings);
       },
@@ -118,19 +147,21 @@ export class UserProfile implements OnInit {
 
   private loadBothLoved(items: SharedRatingItem[]): void {
     if (items.length === 0) {
-      this.bothLoved = [];
+      this.bothLoved.set([]);
       this.isComparisonLoading.set(false);
       return;
     }
 
     forkJoin(items.map((item) => this.movieApi.getMovieById(item.movieId))).subscribe({
       next: (movieResponses) => {
-        this.bothLoved = items.map((item, index) => ({
-          title: movieResponses[index].data.title,
-          mine: item.myScore,
-          theirs: item.theirScore,
-          bg: this.posterOrFallback(movieResponses[index].data, index),
-        }));
+        this.bothLoved.set(
+          items.map((item, index) => ({
+            title: movieResponses[index].data.title,
+            mine: item.myScore,
+            theirs: item.theirScore,
+            bg: this.posterOrFallback(movieResponses[index].data, index),
+          })),
+        );
         this.isComparisonLoading.set(false);
       },
       error: () => {
@@ -141,26 +172,75 @@ export class UserProfile implements OnInit {
 
   private loadRecentRatings(items: OtherUserRatingItem[]): void {
     if (items.length === 0) {
-      this.recentRatings = [];
+      this.recentRatings.set([]);
       return;
     }
 
     forkJoin(items.map((item) => this.movieApi.getMovieById(item.movieId))).subscribe({
       next: (movieResponses) => {
-        this.recentRatings = items.map((item, index) => {
-          const movie = movieResponses[index].data;
-          const genreNames = movie.genres.map((g) => g.name).join(', ');
+        this.recentRatings.set(
+          items.map((item, index) => {
+            const movie = movieResponses[index].data;
+            const genreNames = movie.genres.map((g) => g.name).join(', ');
 
-          return {
-            title: movie.title,
-            meta: genreNames ? `${movie.releaseYear} · ${genreNames}` : `${movie.releaseYear}`,
-            theirs: item.theirScore,
-            when: this.relativeTime(item.ratedAt),
-            bg: this.posterOrFallback(movie, index),
-          };
+            return {
+              id: movie.id,
+              title: movie.title,
+              meta: genreNames ? `${movie.releaseYear} · ${genreNames}` : `${movie.releaseYear}`,
+              theirs: item.theirScore,
+              when: this.relativeTime(item.ratedAt),
+              bg: this.posterOrFallback(movie, index),
+            };
+          }),
+        );
+      },
+    });
+  }
+
+  toggleFriend(): void {
+    if (this.isFriendActionLoading()) {
+      return;
+    }
+
+    this.isFriendActionLoading.set(true);
+
+    if (this.isFriend()) {
+      this.userApi.removeFriend(this.userId).subscribe({
+        next: () => {
+          this.isFriend.set(false);
+          this.isFriendActionLoading.set(false);
+        },
+        error: () => {
+          this.isFriendActionLoading.set(false);
+        },
+      });
+    } else {
+      this.userApi.addFriend(this.userId).subscribe({
+        next: () => {
+          this.isFriend.set(true);
+          this.isFriendActionLoading.set(false);
+        },
+        error: () => {
+          this.isFriendActionLoading.set(false);
+        },
+      });
+    }
+  }
+
+  onAddToWatchlist(movie: RecentRatedMovie): void {
+    this.watchlistApi.addToWatchlist(movie.id).subscribe({
+      next: () => {
+        this.addedWatchlistIds.update((set) => {
+          const next = new Set(set);
+          next.add(movie.id);
+          return next;
         });
       },
     });
+  }
+
+  isAdded(id: string): boolean {
+    return this.addedWatchlistIds().has(id);
   }
 
   private posterOrFallback(movie: MovieResponse, index: number): string {

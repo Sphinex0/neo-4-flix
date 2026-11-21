@@ -37,4 +37,5 @@ export interface PublicUserResponse {
   username: string;
   role: 'USER' | 'ADMIN';
   createdAt: string;
+  isFriend: boolean;
 }
