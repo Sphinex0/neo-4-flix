@@ -3,6 +3,7 @@ package com.neo.movie_service.services;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import com.neo.movie_service.dtos.request.MovieUpdateRequest;
 import com.neo.movie_service.dtos.response.GenreResponse;
 import com.neo.movie_service.dtos.response.MovieResponse;
 import com.neo.movie_service.dtos.response.PageResponse;
+import com.neo.movie_service.dtos.response.SharedMovieResponse;
 import com.neo.movie_service.exceptions.movie.MovieAlreadyExistsException;
 import com.neo.movie_service.exceptions.movie.MovieNotFoundException;
 import com.neo.movie_service.exceptions.watchlist.MovieAlreadyInWatchlistException;
@@ -191,6 +193,26 @@ public class MovieService {
                 .totalPages(moviePage.getTotalPages())
                 .last(moviePage.isLast())
                 .build();
+    }
+
+    @Transactional
+    public void shareMovie(String senderId, String movieId, String recipientId) {
+        if (!movieRepository.existsById(movieId)) {
+            throw new MovieNotFoundException("Movie not found!");
+        }
+        movieRepository.shareMovie(recipientId, movieId, senderId, Instant.now());
+        log.info("Movie [id={}] shared by User [id={}] with User [id={}]", movieId, senderId, recipientId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SharedMovieResponse> getSharedWithMe(String userId) {
+        return movieRepository.findSharedWithUser(userId).stream()
+                .map(row -> SharedMovieResponse.builder()
+                        .movieId(row.getMovieId())
+                        .sharedBy(row.getSharedBy())
+                        .sharedAt(row.getSharedAt())
+                        .build())
+                .toList();
     }
 
     private Set<Genre> resolveGenres(Set<String> genreNames) {

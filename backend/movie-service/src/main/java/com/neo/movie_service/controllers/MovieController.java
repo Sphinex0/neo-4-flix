@@ -1,5 +1,7 @@
 package com.neo.movie_service.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +21,7 @@ import com.neo.movie_service.dtos.request.MovieCreateRequest;
 import com.neo.movie_service.dtos.request.MovieUpdateRequest;
 import com.neo.movie_service.dtos.response.MovieResponse;
 import com.neo.movie_service.dtos.response.PageResponse;
+import com.neo.movie_service.dtos.response.SharedMovieResponse;
 import com.neo.movie_service.services.MovieService;
 
 import jakarta.validation.Valid;
@@ -81,6 +84,25 @@ public class MovieController {
     ) {
         movieService.removeFromWatchlist(authentication.getName(), id);
         return ResponseEntity.ok(ResponseData.success("Movie removed from watchlist successfully", null));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}/share/{recipientId}")
+    public ResponseEntity<ResponseData<Void>> shareMovie(
+            @PathVariable String id,
+            @PathVariable String recipientId,
+            Authentication authentication
+    ) {
+        movieService.shareMovie(authentication.getName(), id, recipientId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseData.success("Movie shared successfully", null));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/shared")
+    public ResponseEntity<ResponseData<List<SharedMovieResponse>>> getSharedWithMe(Authentication authentication) {
+        List<SharedMovieResponse> result = movieService.getSharedWithMe(authentication.getName());
+        return ResponseEntity.ok(ResponseData.success("Shared movies retrieved successfully", result));
     }
 
     @PreAuthorize("isAuthenticated()")
