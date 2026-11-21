@@ -19,7 +19,9 @@ import com.neo.rating_service.dtos.request.ChangeRatingRequest;
 import com.neo.rating_service.dtos.request.RatingRequest;
 import com.neo.rating_service.dtos.response.MovieRatingResponse;
 import com.neo.rating_service.dtos.response.MyRatingResponse;
+import com.neo.rating_service.dtos.response.RatingComparisonResponse;
 import com.neo.rating_service.dtos.response.RatingResponse;
+import com.neo.rating_service.dtos.response.UserRatingStatsResponse;
 import com.neo.rating_service.services.RatingService;
 
 import jakarta.validation.Valid;
@@ -61,5 +63,19 @@ public class RatingController {
     @GetMapping("/movie/{movieId}")
     public ResponseEntity<ResponseData<List<MovieRatingResponse>>> getMovieRatings(@PathVariable String movieId) {
         return ResponseEntity.ok(ratingService.getMovieRatings(movieId));
+    }
+
+    @GetMapping("/user/{userId}/stats")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<UserRatingStatsResponse>> getUserRatingStats(@PathVariable String userId) {
+        return ResponseEntity.ok(ratingService.getUserRatingStats(userId));
+    }
+
+    @GetMapping("/user/{userId}/compare")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<RatingComparisonResponse>> getComparison(
+            @AuthenticationPrincipal String viewerId,
+            @PathVariable String userId) {
+        return ResponseEntity.ok(ratingService.getComparison(viewerId, userId));
     }
 }

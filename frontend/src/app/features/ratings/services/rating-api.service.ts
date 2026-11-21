@@ -7,8 +7,10 @@ import {
   ChangeRatingRequest,
   MovieRatingResponse,
   MyRatingResponse,
+  RatingComparisonResponse,
   RatingRequest,
   RatingResponse,
+  UserRatingStatsResponse,
 } from '../models/rating.models';
 
 @Injectable({ providedIn: 'root' })
@@ -33,5 +35,13 @@ export class RatingApiService {
 
   getMovieRatings(movieId: string): Observable<ResponseData<MovieRatingResponse[]>> {
     return this.http.get<ResponseData<MovieRatingResponse[]>>(`${API_BASE_URL}/api/ratings/movie/${movieId}`);
+  }
+
+  getUserRatingStats(userId: string): Observable<ResponseData<UserRatingStatsResponse>> {
+    return this.http.get<ResponseData<UserRatingStatsResponse>>(`${API_BASE_URL}/api/ratings/user/${userId}/stats`);
+  }
+
+  getComparison(userId: string): Observable<ResponseData<RatingComparisonResponse>> {
+    return this.http.get<ResponseData<RatingComparisonResponse>>(`${API_BASE_URL}/api/ratings/user/${userId}/compare`);
   }
 }
