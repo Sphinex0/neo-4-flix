@@ -14,6 +14,12 @@ export interface MovieCreateRequest {
   genres: string[];
 }
 
+export interface SharedMovieResponse {
+  movieId: string;
+  sharedBy: string;
+  sharedAt: string;
+}
+
 export interface MovieResponse {
   id: string;
   title: string;

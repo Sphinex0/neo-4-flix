@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/http/api-config';
 import { PageResponse } from '../../../core/models/page-response';
 import { ResponseData } from '../../../core/models/response-data';
-import { GenreResponse, MovieCreateRequest, MovieResponse } from '../models/movie.models';
+import { GenreResponse, MovieCreateRequest, MovieResponse, SharedMovieResponse } from '../models/movie.models';
 
 export interface MovieSearchParams {
   title?: string;
@@ -67,5 +67,13 @@ export class MovieApiService {
 
   deleteMovie(id: string): Observable<ResponseData<void>> {
     return this.http.delete<ResponseData<void>>(`${API_BASE_URL}/api/movies/${id}`);
+  }
+
+  shareMovie(movieId: string, recipientId: string): Observable<ResponseData<void>> {
+    return this.http.post<ResponseData<void>>(`${API_BASE_URL}/api/movies/${movieId}/share/${recipientId}`, {});
+  }
+
+  getSharedWithMe(): Observable<ResponseData<SharedMovieResponse[]>> {
+    return this.http.get<ResponseData<SharedMovieResponse[]>>(`${API_BASE_URL}/api/movies/shared`);
   }
 }
