@@ -41,11 +41,13 @@ public class UserService {
         return ResponseData.success("User fetched successfully", UserResponse.from(user));
     }
 
-    public ResponseData<PublicUserResponse> getUserById(String id) {
+    public ResponseData<PublicUserResponse> getUserById(String viewerId, String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        return ResponseData.success("User fetched successfully", PublicUserResponse.from(user));
+        boolean isFriend = userRepository.isFriend(viewerId, id);
+
+        return ResponseData.success("User fetched successfully", PublicUserResponse.from(user, isFriend));
     }
 
     public ResponseData<UserResponse> updateMe(String userId, ProfileRequest request) {
@@ -118,6 +120,19 @@ public class UserService {
         return ResponseData.success("Friends fetched successfully", friends);
     }
 
+    public ResponseData<List<PublicUserResponse>> searchUsers(String viewerId, String query) {
+        if (query == null || query.isBlank()) {
+            return ResponseData.success("Users fetched successfully", List.of());
+        }
+
+        List<PublicUserResponse> users = userRepository.searchUsers(query).stream()
+                .filter(user -> !user.getId().equals(viewerId))
+                .map(user -> PublicUserResponse.from(user, userRepository.isFriend(viewerId, user.getId())))
+                .toList();
+
+        return ResponseData.success("Users fetched successfully", users);
+    }
+
     public ResponseData<FriendResponse> addFriend(String userId, String friendId) {
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -125,6 +140,15 @@ public class UserService {
         userRepository.addFriend(userId, friendId);
 
         return ResponseData.success("Friend added successfully", FriendResponse.from(friend));
+    }
+
+    public ResponseData<String> removeFriend(String userId, String friendId) {
+        userRepository.findById(friendId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        userRepository.removeFriend(userId, friendId);
+
+        return ResponseData.success("Friend removed successfully", null);
     }
 
     public ResponseData<TwoFactorSetupResponse> enableTwoFactor(String userId) {

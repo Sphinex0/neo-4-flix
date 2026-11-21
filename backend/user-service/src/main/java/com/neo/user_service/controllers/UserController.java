@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.neo.user_service.common.ResponseData;
@@ -42,8 +43,16 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ResponseData<PublicUserResponse>> getUserById(@PathVariable String id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<ResponseData<PublicUserResponse>> getUserById(@AuthenticationPrincipal String userId,
+            @PathVariable String id) {
+        return ResponseEntity.ok(userService.getUserById(userId, id));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<List<PublicUserResponse>>> searchUsers(@AuthenticationPrincipal String userId,
+            @RequestParam String q) {
+        return ResponseEntity.ok(userService.searchUsers(userId, q));
     }
 
     @PutMapping("/me")
@@ -84,6 +93,13 @@ public class UserController {
     public ResponseEntity<ResponseData<FriendResponse>> addFriend(@AuthenticationPrincipal String userId,
             @PathVariable String id) {
         return ResponseEntity.ok(userService.addFriend(userId, id));
+    }
+
+    @DeleteMapping("/me/friends/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<String>> removeFriend(@AuthenticationPrincipal String userId,
+            @PathVariable String id) {
+        return ResponseEntity.ok(userService.removeFriend(userId, id));
     }
 
     @PostMapping("/me/2fa/enable")

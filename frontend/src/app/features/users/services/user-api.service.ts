@@ -26,6 +26,12 @@ export class UserApiService {
     return this.http.get<ResponseData<PublicUserResponse>>(`${API_BASE_URL}/api/users/${id}`);
   }
 
+  searchUsers(query: string): Observable<ResponseData<PublicUserResponse[]>> {
+    return this.http.get<ResponseData<PublicUserResponse[]>>(`${API_BASE_URL}/api/users/search`, {
+      params: { q: query },
+    });
+  }
+
   updateMe(request: ProfileRequest): Observable<ResponseData<UserResponse>> {
     return this.http.put<ResponseData<UserResponse>>(`${API_BASE_URL}/api/users/me`, request);
   }
@@ -48,6 +54,10 @@ export class UserApiService {
 
   addFriend(friendId: string): Observable<ResponseData<FriendResponse>> {
     return this.http.post<ResponseData<FriendResponse>>(`${API_BASE_URL}/api/users/me/friends/${friendId}`, {});
+  }
+
+  removeFriend(friendId: string): Observable<ResponseData<string>> {
+    return this.http.delete<ResponseData<string>>(`${API_BASE_URL}/api/users/me/friends/${friendId}`);
   }
 
   enableTwoFactor(): Observable<ResponseData<TwoFactorSetupResponse>> {
