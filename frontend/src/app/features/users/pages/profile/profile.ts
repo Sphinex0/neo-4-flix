@@ -1,23 +1,22 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { QRCodeComponent } from 'angularx-qrcode';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { Navbar } from '../../../../shared/navbar/navbar';
 import { UserApiService } from '../../services/user-api.service';
 
 type TwoFactorState = 'off' | 'setup' | 'on';
 
 @Component({
   selector: 'app-profile',
-  imports: [FormsModule, RouterLink, QRCodeComponent],
+  imports: [FormsModule, QRCodeComponent, Navbar],
   templateUrl: './profile.html',
 })
 export class Profile implements OnInit {
   private readonly userApi = inject(UserApiService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-
-  userId = signal<string | null>(null);
   firstName = '';
   lastName = '';
   username = '';
@@ -71,7 +70,6 @@ export class Profile implements OnInit {
     this.userApi.getMe().subscribe({
       next: (res) => {
         const user = res.data;
-        this.userId.set(user.id);
         this.firstName = user.firstName;
         this.lastName = user.lastName;
         this.username = user.username;

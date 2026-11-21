@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/http/api-config';
 import { PageResponse } from '../../../core/models/page-response';
 import { ResponseData } from '../../../core/models/response-data';
-import { GenreResponse, MovieResponse } from '../models/movie.models';
+import { GenreResponse, MovieCreateRequest, MovieResponse } from '../models/movie.models';
 
 export interface MovieSearchParams {
   title?: string;
@@ -55,5 +55,9 @@ export class MovieApiService {
 
   getAllGenres(): Observable<ResponseData<GenreResponse[]>> {
     return this.http.get<ResponseData<GenreResponse[]>>(`${API_BASE_URL}/api/genres`);
+  }
+
+  createMovie(request: MovieCreateRequest): Observable<ResponseData<MovieResponse>> {
+    return this.http.post<ResponseData<MovieResponse>>(`${API_BASE_URL}/api/movies`, request);
   }
 }

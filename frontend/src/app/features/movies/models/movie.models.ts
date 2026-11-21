@@ -3,6 +3,17 @@ export interface GenreResponse {
   name: string;
 }
 
+export interface MovieCreateRequest {
+  title: string;
+  description: string;
+  releaseYear: number;
+  durationMinutes: number;
+  posterUrl: string | null;
+  trailerUrl: string | null;
+  director: string | null;
+  genres: string[];
+}
+
 export interface MovieResponse {
   id: string;
   title: string;

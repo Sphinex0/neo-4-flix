@@ -1,0 +1,120 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+  <div class="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-[#2A3140] bg-[#0D1017] shadow-2xl">
+    <div class="flex items-center justify-between border-b border-[#2A3140] px-6 py-4">
+      <span class="text-xs font-semibold tracking-wider text-[#A0A9B8] uppercase">Add Movie</span>
+      <button
+        type="button"
+        (click)="close()"
+        class="cursor-pointer text-2xl font-light text-[#A0A9B8] hover:text-white"
+      >
+        &times;
+      </button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="flex flex-1 flex-col gap-4 overflow-y-auto p-6">
+      @if (errorMessage()) {
+        <p class="m-0 text-sm text-[#FF5A5F]">{{ errorMessage() }}</p>
+      }
+
+      <label class="flex flex-col gap-1.5 text-sm text-[#C9D0DC]">
+        Title
+        <input
+          type="text"
+          name="title"
+          [(ngModel)]="title"
+          class="min-h-11 rounded-lg border border-[#2A3140] bg-[#151A23] px-3.5 text-sm text-[#EEF1F6] focus:outline-none focus:border-[#5B6579]"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5 text-sm text-[#C9D0DC]">
+        Description
+        <textarea
+          name="description"
+          [(ngModel)]="description"
+          rows="3"
+          class="rounded-lg border border-[#2A3140] bg-[#151A23] px-3.5 py-2.5 text-sm text-[#EEF1F6] focus:outline-none focus:border-[#5B6579]"
+        ></textarea>
+      </label>
+
+      <div class="flex gap-4">
+        <label class="flex flex-1 flex-col gap-1.5 text-sm text-[#C9D0DC]">
+          Release year
+          <input
+            type="number"
+            name="releaseYear"
+            [(ngModel)]="releaseYear"
+            class="min-h-11 rounded-lg border border-[#2A3140] bg-[#151A23] px-3.5 text-sm text-[#EEF1F6] focus:outline-none focus:border-[#5B6579]"
+          />
+        </label>
+
+        <label class="flex flex-1 flex-col gap-1.5 text-sm text-[#C9D0DC]">
+          Duration (minutes)
+          <input
+            type="number"
+            name="durationMinutes"
+            [(ngModel)]="durationMinutes"
+            class="min-h-11 rounded-lg border border-[#2A3140] bg-[#151A23] px-3.5 text-sm text-[#EEF1F6] focus:outline-none focus:border-[#5B6579]"
+          />
+        </label>
+      </div>
+
+      <label class="flex flex-col gap-1.5 text-sm text-[#C9D0DC]">
+        Director
+        <input
+          type="text"
+          name="director"
+          [(ngModel)]="director"
+          class="min-h-11 rounded-lg border border-[#2A3140] bg-[#151A23] px-3.5 text-sm text-[#EEF1F6] focus:outline-none focus:border-[#5B6579]"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5 text-sm text-[#C9D0DC]">
+        Genres (comma separated)
+        <input
+          type="text"
+          name="genres"
+          [(ngModel)]="genres"
+          placeholder="Action, Drama"
+          class="min-h-11 rounded-lg border border-[#2A3140] bg-[#151A23] px-3.5 text-sm text-[#EEF1F6] placeholder:text-[#6B7587] focus:outline-none focus:border-[#5B6579]"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5 text-sm text-[#C9D0DC]">
+        Poster URL
+        <input
+          type="text"
+          name="posterUrl"
+          [(ngModel)]="posterUrl"
+          class="min-h-11 rounded-lg border border-[#2A3140] bg-[#151A23] px-3.5 text-sm text-[#EEF1F6] focus:outline-none focus:border-[#5B6579]"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1.5 text-sm text-[#C9D0DC]">
+        Trailer URL
+        <input
+          type="text"
+          name="trailerUrl"
+          [(ngModel)]="trailerUrl"
+          class="min-h-11 rounded-lg border border-[#2A3140] bg-[#151A23] px-3.5 text-sm text-[#EEF1F6] focus:outline-none focus:border-[#5B6579]"
+        />
+      </label>
+
+      <div class="mt-2 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="close()"
+          class="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="isSaving()"
+          class="inline-flex min-h-11 cursor-pointer items-center rounded-[10px] border-0 bg-[#FF5A5F] px-4 text-sm font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {{ isSaving() ? 'Adding...' : 'Add movie' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
