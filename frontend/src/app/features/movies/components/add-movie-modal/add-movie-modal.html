@@ -1,7 +1,7 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
   <div class="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-[#2A3140] bg-[#0D1017] shadow-2xl">
     <div class="flex items-center justify-between border-b border-[#2A3140] px-6 py-4">
-      <span class="text-xs font-semibold tracking-wider text-[#A0A9B8] uppercase">Add Movie</span>
+      <span class="text-xs font-semibold tracking-wider text-[#A0A9B8] uppercase">{{ movie ? 'Edit Movie' : 'Add Movie' }}</span>
       <button
         type="button"
         (click)="close()"
@@ -112,7 +112,7 @@
           [disabled]="isSaving()"
           class="inline-flex min-h-11 cursor-pointer items-center rounded-[10px] border-0 bg-[#FF5A5F] px-4 text-sm font-semibold text-[#0D1017] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {{ isSaving() ? 'Adding...' : 'Add movie' }}
+          {{ movie ? (isSaving() ? 'Saving...' : 'Save changes') : (isSaving() ? 'Adding...' : 'Add movie') }}
         </button>
       </div>
     </form>

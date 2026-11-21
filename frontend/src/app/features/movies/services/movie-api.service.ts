@@ -60,4 +60,8 @@ export class MovieApiService {
   createMovie(request: MovieCreateRequest): Observable<ResponseData<MovieResponse>> {
     return this.http.post<ResponseData<MovieResponse>>(`${API_BASE_URL}/api/movies`, request);
   }
+
+  updateMovie(id: string, request: MovieCreateRequest): Observable<ResponseData<MovieResponse>> {
+    return this.http.put<ResponseData<MovieResponse>>(`${API_BASE_URL}/api/movies/${id}`, request);
+  }
 }

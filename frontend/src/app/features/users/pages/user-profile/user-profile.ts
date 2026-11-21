@@ -3,6 +3,7 @@ import { NgStyle } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Navbar } from '../../../../shared/navbar/navbar';
+import { AddMovieModal } from '../../../movies/components/add-movie-modal/add-movie-modal';
 import { MovieResponse } from '../../../movies/models/movie.models';
 import { MovieApiService } from '../../../movies/services/movie-api.service';
 import { OtherUserRatingItem, SharedRatingItem } from '../../../ratings/models/rating.models';
@@ -15,6 +16,7 @@ interface SharedMovie {
   mine: number;
   theirs: number;
   bg: string;
+  raw: MovieResponse;
 }
 
 interface RecentRatedMovie {
@@ -24,6 +26,7 @@ interface RecentRatedMovie {
   theirs: number;
   when: string;
   bg: string;
+  raw: MovieResponse;
 }
 
 const FALLBACK_GRADIENTS = [
@@ -36,7 +39,7 @@ const FALLBACK_GRADIENTS = [
 
 @Component({
   selector: 'app-user-profile',
-  imports: [Navbar, RouterLink, NgStyle],
+  imports: [Navbar, RouterLink, NgStyle, AddMovieModal],
   templateUrl: './user-profile.html',
 })
 export class UserProfile implements OnInit {
@@ -72,7 +75,17 @@ export class UserProfile implements OnInit {
 
   addedWatchlistIds = signal<Set<string>>(new Set());
 
+  selectedMovie = signal<MovieResponse | null>(null);
+  editingMovie = signal<MovieResponse | null>(null);
+  isAdmin = signal(false);
+
   ngOnInit(): void {
+    this.userApi.getMe().subscribe({
+      next: (res) => {
+        this.isAdmin.set(res.data.role === 'ADMIN');
+      },
+    });
+
     this.route.paramMap.subscribe((params) => {
       const userId = params.get('userId');
       if (!userId) {
@@ -160,6 +173,7 @@ export class UserProfile implements OnInit {
             mine: item.myScore,
             theirs: item.theirScore,
             bg: this.posterOrFallback(movieResponses[index].data, index),
+            raw: movieResponses[index].data,
           })),
         );
         this.isComparisonLoading.set(false);
@@ -190,6 +204,7 @@ export class UserProfile implements OnInit {
               theirs: item.theirScore,
               when: this.relativeTime(item.ratedAt),
               bg: this.posterOrFallback(movie, index),
+              raw: movie,
             };
           }),
         );
@@ -227,7 +242,7 @@ export class UserProfile implements OnInit {
     }
   }
 
-  onAddToWatchlist(movie: RecentRatedMovie): void {
+  onAddToWatchlist(movie: { id: string }): void {
     this.watchlistApi.addToWatchlist(movie.id).subscribe({
       next: () => {
         this.addedWatchlistIds.update((set) => {
@@ -241,6 +256,27 @@ export class UserProfile implements OnInit {
 
   isAdded(id: string): boolean {
     return this.addedWatchlistIds().has(id);
+  }
+
+  openModal(movie: MovieResponse): void {
+    this.selectedMovie.set(movie);
+  }
+
+  closeModal(): void {
+    this.selectedMovie.set(null);
+  }
+
+  openEditModal(movie: MovieResponse): void {
+    this.selectedMovie.set(null);
+    this.editingMovie.set(movie);
+  }
+
+  onEditMovieClosed(): void {
+    this.editingMovie.set(null);
+  }
+
+  getPosterBg(movie: MovieResponse): string {
+    return this.posterOrFallback(movie, 0);
   }
 
   private posterOrFallback(movie: MovieResponse, index: number): string {

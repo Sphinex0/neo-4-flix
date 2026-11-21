@@ -6,6 +6,8 @@ import { RatingApiService } from '../../../ratings/services/rating-api.service';
 import { WatchlistApiService } from '../../../watchlist/services/watchlist-api.service';
 import { GenreResponse, MovieResponse } from '../../../movies/models/movie.models';
 import { MovieApiService } from '../../../movies/services/movie-api.service';
+import { AddMovieModal } from '../../../movies/components/add-movie-modal/add-movie-modal';
+import { UserApiService } from '../../../users/services/user-api.service';
 
 interface MovieCard {
   id: string;
@@ -25,13 +27,17 @@ const FALLBACK_GRADIENTS = [
 
 @Component({
   selector: 'app-browse',
-  imports: [Navbar, FormsModule, NgStyle],
+  imports: [Navbar, FormsModule, NgStyle, AddMovieModal],
   templateUrl: './browse.html',
 })
 export class Browse implements OnInit {
   private readonly movieApi = inject(MovieApiService);
   private readonly watchlistApi = inject(WatchlistApiService);
   private readonly ratingApi = inject(RatingApiService);
+  private readonly userApi = inject(UserApiService);
+
+  isAdmin = signal(false);
+  editingMovie = signal<MovieResponse | null>(null);
 
   // Filters & Search State
   searchQuery = signal<string>('');
@@ -62,6 +68,12 @@ export class Browse implements OnInit {
     this.loadGenres();
     this.loadMyRatings();
     this.loadMovies();
+
+    this.userApi.getMe().subscribe({
+      next: (res) => {
+        this.isAdmin.set(res.data.role === 'ADMIN');
+      },
+    });
   }
 
   loadGenres(): void {
@@ -195,6 +207,16 @@ export class Browse implements OnInit {
 
   closeModal(): void {
     this.selectedMovie.set(null);
+  }
+
+  openEditModal(movie: MovieResponse): void {
+    this.selectedMovie.set(null);
+    this.editingMovie.set(movie);
+  }
+
+  onEditMovieClosed(): void {
+    this.editingMovie.set(null);
+    this.loadMovies();
   }
 
   setRating(score: number): void {

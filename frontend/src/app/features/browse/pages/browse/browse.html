@@ -260,12 +260,26 @@
                       Watch Trailer ▶
                     </a>
                   }
+
+                  @if (isAdmin()) {
+                    <button
+                      type="button"
+                      (click)="openEditModal(movie)"
+                      class="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border-0 bg-[#FF5A5F] px-4 text-xs font-semibold text-[#0D1017]"
+                    >
+                      Update Movie
+                    </button>
+                  }
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    }
+
+    @if (editingMovie(); as movie) {
+      <app-add-movie-modal [movie]="movie" (closed)="onEditMovieClosed()" />
     }
   </main>
 </div>
