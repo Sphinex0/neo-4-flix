@@ -2,10 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { Navbar } from '../../../../shared/navbar/navbar';
-import { MovieResponse } from '../../../movies/models/movie.models';
+import { MovieResponse, SharedMovieResponse } from '../../../movies/models/movie.models';
 import { MovieApiService } from '../../../movies/services/movie-api.service';
 import { MyRatingResponse } from '../../../ratings/models/rating.models';
 import { RatingApiService } from '../../../ratings/services/rating-api.service';
+import { UserApiService } from '../../../users/services/user-api.service';
 import { WatchlistApiService } from '../../services/watchlist-api.service';
 
 interface WatchlistCard {
@@ -23,7 +24,16 @@ interface RatedCard {
   bg: string;
 }
 
-type Tab = 'watch' | 'ratings';
+interface SharedCard {
+  movieId: string;
+  title: string;
+  meta: string;
+  bg: string;
+  sharedByName: string;
+  sharedWhen: string;
+}
+
+type Tab = 'watch' | 'ratings' | 'shared';
 
 const FALLBACK_GRADIENTS = [
   'linear-gradient(160deg,#6A4423,#120B06)',
@@ -42,6 +52,7 @@ export class Watchlist implements OnInit {
   private readonly watchlistApi = inject(WatchlistApiService);
   private readonly ratingApi = inject(RatingApiService);
   private readonly movieApi = inject(MovieApiService);
+  private readonly userApi = inject(UserApiService);
 
   activeTab = signal<Tab>('watch');
   isLoading = signal(true);
@@ -61,12 +72,17 @@ export class Watchlist implements OnInit {
   isSavingRating = signal(false);
   editRatingError = signal<string | null>(null);
 
+  isSharedLoading = signal(true);
+  sharedError = signal<string | null>(null);
+
   watch: WatchlistCard[] = [];
   rated: RatedCard[] = [];
+  shared: SharedCard[] = [];
 
   ngOnInit(): void {
     this.loadWatchlist();
     this.loadMyRatings();
+    this.loadShared();
   }
 
   private loadWatchlist(): void {
@@ -110,6 +126,48 @@ export class Watchlist implements OnInit {
       error: (err) => {
         this.isRatingsLoading.set(false);
         this.ratingsError.set(err.error?.message ?? 'Could not load your ratings from the server.');
+      },
+    });
+  }
+
+  private loadShared(): void {
+    this.movieApi.getSharedWithMe().subscribe({
+      next: (res) => {
+        const rows = res.data ?? [];
+
+        if (rows.length === 0) {
+          this.shared = [];
+          this.isSharedLoading.set(false);
+          return;
+        }
+
+        const movieCalls = rows.map((row) => this.movieApi.getMovieById(row.movieId));
+        const sharerIds = [...new Set(rows.map((row) => row.sharedBy))];
+        const userCalls = sharerIds.map((id) => this.userApi.getUserById(id));
+
+        forkJoin([forkJoin(movieCalls), forkJoin(userCalls)]).subscribe({
+          next: ([movieResponses, userResponses]) => {
+            const sharerNames = new Map(
+              sharerIds.map((id, index) => {
+                const user = userResponses[index].data;
+                return [id, `${user.firstName} ${user.lastName}`.trim() || user.username];
+              }),
+            );
+
+            this.shared = rows.map((row, index) =>
+              this.toSharedCard(row, movieResponses[index].data, sharerNames.get(row.sharedBy) ?? 'Someone', index),
+            );
+            this.isSharedLoading.set(false);
+          },
+          error: (err) => {
+            this.isSharedLoading.set(false);
+            this.sharedError.set(err.error?.message ?? 'Could not load the movies shared with you.');
+          },
+        });
+      },
+      error: (err) => {
+        this.isSharedLoading.set(false);
+        this.sharedError.set(err.error?.message ?? 'Could not load the movies shared with you.');
       },
     });
   }
@@ -241,12 +299,42 @@ export class Watchlist implements OnInit {
     };
   }
 
+  private toSharedCard(row: SharedMovieResponse, movie: MovieResponse, sharedByName: string, index: number): SharedCard {
+    const genreNames = movie.genres.map((g) => g.name).join(', ');
+
+    return {
+      movieId: row.movieId,
+      title: movie.title,
+      meta: genreNames ? `${movie.releaseYear} · ${genreNames}` : `${movie.releaseYear}`,
+      bg: movie.posterUrl
+        ? `center / cover url('${movie.posterUrl}')`
+        : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length],
+      sharedByName,
+      sharedWhen: this.relativeTime(row.sharedAt),
+    };
+  }
+
+  private relativeTime(iso: string): string {
+    const days = Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
+
+    if (days <= 0) return 'today';
+    if (days === 1) return 'yesterday';
+    if (days < 7) return `${days} days ago`;
+    if (days < 14) return 'last week';
+    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+    return `${Math.floor(days / 30)} months ago`;
+  }
+
   showWatch(): void {
     this.activeTab.set('watch');
   }
 
   showRatings(): void {
     this.activeTab.set('ratings');
+  }
+
+  showShared(): void {
+    this.activeTab.set('shared');
   }
 
   watchTabStyle(): Record<string, string> {
@@ -260,6 +348,15 @@ export class Watchlist implements OnInit {
 
   ratingsTabStyle(): Record<string, string> {
     const active = this.activeTab() === 'ratings';
+    return {
+      background: active ? '#FF5A5F' : 'transparent',
+      color: active ? '#0D1017' : '#C9D0DC',
+      'border-color': active ? '#FF5A5F' : '#5B6579',
+    };
+  }
+
+  sharedTabStyle(): Record<string, string> {
+    const active = this.activeTab() === 'shared';
     return {
       background: active ? '#FF5A5F' : 'transparent',
       color: active ? '#0D1017' : '#C9D0DC',

@@ -23,6 +23,15 @@
       >
         My ratings
       </button>
+      <button
+        type="button"
+        (click)="showShared()"
+        [attr.aria-pressed]="activeTab() === 'shared'"
+        [ngStyle]="sharedTabStyle()"
+        class="min-h-11 cursor-pointer rounded-[10px] border px-5 font-sans text-[15px] font-semibold"
+      >
+        Shared
+      </button>
     </div>
 
     @if (activeTab() === 'watch') {
@@ -66,7 +75,7 @@
           </div>
         }
       </section>
-    } @else {
+    } @else if (activeTab() === 'ratings') {
       <section class="flex flex-col gap-4">
         <p class="m-0 text-[15px] text-[#A0A9B8]">Your ratings train your picks. Change them when your taste changes.</p>
 
@@ -115,6 +124,35 @@
                     Delete
                   </button>
                 </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    } @else {
+      <section class="flex flex-col gap-4">
+        <p class="m-0 text-[15px] text-[#A0A9B8]">Movies your friends thought you'd like.</p>
+
+        @if (isSharedLoading()) {
+          <p class="m-0 text-sm text-[#A0A9B8]">Loading movies shared with you...</p>
+        } @else if (sharedError()) {
+          <p class="m-0 text-sm text-[#FF5A5F]">{{ sharedError() }}</p>
+        } @else if (shared.length === 0) {
+          <p class="m-0 text-sm text-[#A0A9B8]">No one has shared a movie with you yet.</p>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (movie of shared; track movie.movieId) {
+              <div class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5">
+                <div [ngStyle]="{ background: movie.bg }" class="h-21 w-14 flex-none rounded-lg"></div>
+
+                <div class="flex min-w-0 flex-1 basis-[220px] flex-col gap-1">
+                  <span class="font-display text-xl font-bold text-[#EEF1F6]">{{ movie.title }}</span>
+                  <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
+                </div>
+
+                <span class="text-sm text-[#C9D0DC]">
+                  Shared by <strong class="text-[#EEF1F6]">{{ movie.sharedByName }}</strong> &middot; {{ movie.sharedWhen }}
+                </span>
               </div>
             }
           </div>
