@@ -16,15 +16,17 @@ export class ProfileGate implements OnInit {
   isOwnProfile = signal<boolean | null>(null);
 
   ngOnInit(): void {
-    const routeUserId = this.route.snapshot.paramMap.get('userId');
+    this.route.paramMap.subscribe((params) => {
+      const routeUserId = params.get('userId');
 
-    this.userApi.getMe().subscribe({
-      next: (res) => {
-        this.isOwnProfile.set(res.data.id === routeUserId);
-      },
-      error: () => {
-        this.isOwnProfile.set(false);
-      },
+      this.userApi.getMe().subscribe({
+        next: (res) => {
+          this.isOwnProfile.set(res.data.id === routeUserId);
+        },
+        error: () => {
+          this.isOwnProfile.set(false);
+        },
+      });
     });
   }
 }

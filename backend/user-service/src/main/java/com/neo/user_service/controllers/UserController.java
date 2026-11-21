@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.neo.user_service.common.ResponseData;
@@ -45,6 +46,13 @@ public class UserController {
     public ResponseEntity<ResponseData<PublicUserResponse>> getUserById(@AuthenticationPrincipal String userId,
             @PathVariable String id) {
         return ResponseEntity.ok(userService.getUserById(userId, id));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<List<PublicUserResponse>>> searchUsers(@AuthenticationPrincipal String userId,
+            @RequestParam String q) {
+        return ResponseEntity.ok(userService.searchUsers(userId, q));
     }
 
     @PutMapping("/me")

@@ -31,4 +31,10 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
     @Query("RETURN EXISTS((:User {id: $userId})-[:FRIEND_OF]->(:User {id: $friendId}))")
     boolean isFriend(@Param("userId") String userId, @Param("friendId") String friendId);
+
+    @Query("MATCH (u:User) WHERE toLower(u.firstName) CONTAINS toLower($query) " +
+            "OR toLower(u.lastName) CONTAINS toLower($query) " +
+            "OR toLower(u.username) CONTAINS toLower($query) " +
+            "RETURN u LIMIT 10")
+    List<User> searchUsers(@Param("query") String query);
 }

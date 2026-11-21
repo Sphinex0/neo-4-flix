@@ -120,6 +120,19 @@ public class UserService {
         return ResponseData.success("Friends fetched successfully", friends);
     }
 
+    public ResponseData<List<PublicUserResponse>> searchUsers(String viewerId, String query) {
+        if (query == null || query.isBlank()) {
+            return ResponseData.success("Users fetched successfully", List.of());
+        }
+
+        List<PublicUserResponse> users = userRepository.searchUsers(query).stream()
+                .filter(user -> !user.getId().equals(viewerId))
+                .map(user -> PublicUserResponse.from(user, userRepository.isFriend(viewerId, user.getId())))
+                .toList();
+
+        return ResponseData.success("Users fetched successfully", users);
+    }
+
     public ResponseData<FriendResponse> addFriend(String userId, String friendId) {
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));

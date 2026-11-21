@@ -26,6 +26,12 @@ export class UserApiService {
     return this.http.get<ResponseData<PublicUserResponse>>(`${API_BASE_URL}/api/users/${id}`);
   }
 
+  searchUsers(query: string): Observable<ResponseData<PublicUserResponse[]>> {
+    return this.http.get<ResponseData<PublicUserResponse[]>>(`${API_BASE_URL}/api/users/search`, {
+      params: { q: query },
+    });
+  }
+
   updateMe(request: ProfileRequest): Observable<ResponseData<UserResponse>> {
     return this.http.put<ResponseData<UserResponse>>(`${API_BASE_URL}/api/users/me`, request);
   }
