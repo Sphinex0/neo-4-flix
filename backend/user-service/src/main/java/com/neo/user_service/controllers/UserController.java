@@ -42,8 +42,9 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ResponseData<PublicUserResponse>> getUserById(@PathVariable String id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<ResponseData<PublicUserResponse>> getUserById(@AuthenticationPrincipal String userId,
+            @PathVariable String id) {
+        return ResponseEntity.ok(userService.getUserById(userId, id));
     }
 
     @PutMapping("/me")
@@ -84,6 +85,13 @@ public class UserController {
     public ResponseEntity<ResponseData<FriendResponse>> addFriend(@AuthenticationPrincipal String userId,
             @PathVariable String id) {
         return ResponseEntity.ok(userService.addFriend(userId, id));
+    }
+
+    @DeleteMapping("/me/friends/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<String>> removeFriend(@AuthenticationPrincipal String userId,
+            @PathVariable String id) {
+        return ResponseEntity.ok(userService.removeFriend(userId, id));
     }
 
     @PostMapping("/me/2fa/enable")

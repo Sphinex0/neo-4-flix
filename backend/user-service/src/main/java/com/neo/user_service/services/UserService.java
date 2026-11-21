@@ -41,11 +41,13 @@ public class UserService {
         return ResponseData.success("User fetched successfully", UserResponse.from(user));
     }
 
-    public ResponseData<PublicUserResponse> getUserById(String id) {
+    public ResponseData<PublicUserResponse> getUserById(String viewerId, String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        return ResponseData.success("User fetched successfully", PublicUserResponse.from(user));
+        boolean isFriend = userRepository.isFriend(viewerId, id);
+
+        return ResponseData.success("User fetched successfully", PublicUserResponse.from(user, isFriend));
     }
 
     public ResponseData<UserResponse> updateMe(String userId, ProfileRequest request) {
@@ -125,6 +127,15 @@ public class UserService {
         userRepository.addFriend(userId, friendId);
 
         return ResponseData.success("Friend added successfully", FriendResponse.from(friend));
+    }
+
+    public ResponseData<String> removeFriend(String userId, String friendId) {
+        userRepository.findById(friendId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        userRepository.removeFriend(userId, friendId);
+
+        return ResponseData.success("Friend removed successfully", null);
     }
 
     public ResponseData<TwoFactorSetupResponse> enableTwoFactor(String userId) {

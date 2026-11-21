@@ -32,6 +32,26 @@
             }
             <span><strong class="text-lg text-[#EEF1F6]">{{ bothRatedCount }}</strong> movies you both rated</span>
           </div>
+
+          @if (isFriend()) {
+            <button
+              type="button"
+              (click)="toggleFriend()"
+              [disabled]="isFriendActionLoading()"
+              class="mt-1 inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6] disabled:opacity-60"
+            >
+              Unfriend
+            </button>
+          } @else {
+            <button
+              type="button"
+              (click)="toggleFriend()"
+              [disabled]="isFriendActionLoading()"
+              class="mt-1 inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-[10px] border border-transparent bg-[#F5B357] px-4 text-sm font-semibold text-[#0D1017] disabled:opacity-60"
+            >
+              Add Friend
+            </button>
+          }
         </div>
 
         <div class="flex min-w-0 flex-1 basis-[260px] flex-col gap-2 rounded-[14px] bg-[#10302C] px-5 py-[18px]">

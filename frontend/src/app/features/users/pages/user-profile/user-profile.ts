@@ -49,6 +49,11 @@ export class UserProfile implements OnInit {
   isComparisonLoading = signal(true);
   comparisonError = signal<string | null>(null);
 
+  isFriend = signal(false);
+  isFriendActionLoading = signal(false);
+
+  private userId = '';
+
   initials = '?';
   firstName = '';
   fullName = '';
@@ -70,6 +75,8 @@ export class UserProfile implements OnInit {
       return;
     }
 
+    this.userId = userId;
+
     this.userApi.getUserById(userId).subscribe({
       next: (res) => {
         const user = res.data;
@@ -86,6 +93,7 @@ export class UserProfile implements OnInit {
           month: 'long',
           year: 'numeric',
         });
+        this.isFriend.set(user.isFriend);
 
         this.isLoading.set(false);
       },
@@ -161,6 +169,36 @@ export class UserProfile implements OnInit {
         });
       },
     });
+  }
+
+  toggleFriend(): void {
+    if (this.isFriendActionLoading()) {
+      return;
+    }
+
+    this.isFriendActionLoading.set(true);
+
+    if (this.isFriend()) {
+      this.userApi.removeFriend(this.userId).subscribe({
+        next: () => {
+          this.isFriend.set(false);
+          this.isFriendActionLoading.set(false);
+        },
+        error: () => {
+          this.isFriendActionLoading.set(false);
+        },
+      });
+    } else {
+      this.userApi.addFriend(this.userId).subscribe({
+        next: () => {
+          this.isFriend.set(true);
+          this.isFriendActionLoading.set(false);
+        },
+        error: () => {
+          this.isFriendActionLoading.set(false);
+        },
+      });
+    }
   }
 
   private posterOrFallback(movie: MovieResponse, index: number): string {

@@ -50,6 +50,10 @@ export class UserApiService {
     return this.http.post<ResponseData<FriendResponse>>(`${API_BASE_URL}/api/users/me/friends/${friendId}`, {});
   }
 
+  removeFriend(friendId: string): Observable<ResponseData<string>> {
+    return this.http.delete<ResponseData<string>>(`${API_BASE_URL}/api/users/me/friends/${friendId}`);
+  }
+
   enableTwoFactor(): Observable<ResponseData<TwoFactorSetupResponse>> {
     return this.http.post<ResponseData<TwoFactorSetupResponse>>(`${API_BASE_URL}/api/users/me/2fa/enable`, {});
   }
