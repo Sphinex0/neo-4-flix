@@ -12,6 +12,7 @@ import com.neo.user_service.dtos.request.ConfirmTwoFactorRequest;
 import com.neo.user_service.dtos.request.ProfileRequest;
 import com.neo.user_service.dtos.request.VerifyPasswordRequest;
 import com.neo.user_service.dtos.response.FriendResponse;
+import com.neo.user_service.dtos.response.PublicUserResponse;
 import com.neo.user_service.dtos.response.TwoFactorSetupResponse;
 import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.exceptions.auth.IncorrectPasswordException;
@@ -38,6 +39,13 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         return ResponseData.success("User fetched successfully", UserResponse.from(user));
+    }
+
+    public ResponseData<PublicUserResponse> getUserById(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        return ResponseData.success("User fetched successfully", PublicUserResponse.from(user));
     }
 
     public ResponseData<UserResponse> updateMe(String userId, ProfileRequest request) {

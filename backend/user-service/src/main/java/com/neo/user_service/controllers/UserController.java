@@ -20,6 +20,7 @@ import com.neo.user_service.dtos.request.ConfirmTwoFactorRequest;
 import com.neo.user_service.dtos.request.ProfileRequest;
 import com.neo.user_service.dtos.request.VerifyPasswordRequest;
 import com.neo.user_service.dtos.response.FriendResponse;
+import com.neo.user_service.dtos.response.PublicUserResponse;
 import com.neo.user_service.dtos.response.TwoFactorSetupResponse;
 import com.neo.user_service.dtos.response.UserResponse;
 import com.neo.user_service.services.UserService;
@@ -37,6 +38,12 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResponseData<UserResponse>> getMe(@AuthenticationPrincipal String userId) {
         return ResponseEntity.ok(userService.getMe(userId));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResponseData<PublicUserResponse>> getUserById(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @PutMapping("/me")

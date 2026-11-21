@@ -27,3 +27,28 @@ export interface RatingRequest {
 export interface ChangeRatingRequest {
   score: number;
 }
+
+export interface UserRatingStatsResponse {
+  userId: string;
+  ratingsCount: number;
+  averageRating: number | null;
+}
+
+export interface SharedRatingItem {
+  movieId: string;
+  myScore: number;
+  theirScore: number;
+}
+
+export interface OtherUserRatingItem {
+  movieId: string;
+  theirScore: number;
+  ratedAt: string;
+}
+
+export interface RatingComparisonResponse {
+  bothRatedCount: number;
+  tasteMatchPercent: number | null;
+  bothLoved: SharedRatingItem[];
+  recentRatings: OtherUserRatingItem[];
+}

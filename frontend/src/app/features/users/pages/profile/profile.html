@@ -19,7 +19,7 @@
 
     <div class="flex items-center gap-2">
       <a
-        routerLink="/profile"
+        [routerLink]="['/', userId() ?? '']"
         aria-label="Your profile"
         aria-current="page"
         class="flex h-11 w-11 items-center justify-center rounded-full bg-[#38D0B9] text-[15px] font-bold text-[#0D1017] shadow-[0_0_0_2px_#0D1017,0_0_0_4px_#38D0B9]"

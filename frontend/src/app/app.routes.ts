@@ -7,7 +7,7 @@ import { Verify2fa } from './features/auth/pages/verify-2fa/verify-2fa';
 import { Browse } from './features/browse/pages/browse/browse';
 import { Home } from './features/home/pages/home/home';
 import { Recommendations } from './features/recommendations/pages/recommendations/recommendations';
-import { Profile } from './features/users/pages/profile/profile';
+import { ProfileGate } from './features/users/pages/profile-gate/profile-gate';
 import { Watchlist } from './features/watchlist/pages/watchlist/watchlist';
 
 export const routes: Routes = [
@@ -16,8 +16,8 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'secure-account', component: SecureAccount },
   { path: 'verify-2fa', component: Verify2fa },
-  { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'search', component: Browse, canActivate: [authGuard] },
   { path: 'recommendations', component: Recommendations, canActivate: [authGuard] },
   { path: 'my-list', component: Watchlist, canActivate: [authGuard] },
+  { path: ':userId', component: ProfileGate, canActivate: [authGuard] },
 ];

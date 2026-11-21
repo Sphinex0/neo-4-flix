@@ -17,6 +17,7 @@ export class Profile implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
+  userId = signal<string | null>(null);
   firstName = '';
   lastName = '';
   username = '';
@@ -70,6 +71,7 @@ export class Profile implements OnInit {
     this.userApi.getMe().subscribe({
       next: (res) => {
         const user = res.data;
+        this.userId.set(user.id);
         this.firstName = user.firstName;
         this.lastName = user.lastName;
         this.username = user.username;
