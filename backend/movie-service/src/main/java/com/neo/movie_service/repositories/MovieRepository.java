@@ -1,7 +1,6 @@
 package com.neo.movie_service.repositories;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -93,11 +92,4 @@ public interface MovieRepository extends Neo4jRepository<Movie, String> {
             @Param("sharedBy") String sharedBy,
             @Param("sharedAt") Instant sharedAt
     );
-
-    @Query(
-        "MATCH (u:User {id: $userId})-[r:SHARED_WITH]->(m:Movie) " +
-        "RETURN m.movieId AS movieId, r.sharedBy AS sharedBy, r.sharedAt AS sharedAt " +
-        "ORDER BY r.sharedAt DESC"
-    )
-    List<SharedMovieRow> findSharedWithUser(@Param("userId") String userId);
 }

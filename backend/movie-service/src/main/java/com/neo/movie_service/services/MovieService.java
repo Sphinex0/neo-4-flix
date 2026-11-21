@@ -1,6 +1,8 @@
 package com.neo.movie_service.services;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,7 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final GenreService genreService;
+    private final Neo4jClient neo4jClient;
 
     @Transactional
     public MovieResponse createMovie(MovieCreateRequest request) {
@@ -206,13 +210,22 @@ public class MovieService {
 
     @Transactional(readOnly = true)
     public List<SharedMovieResponse> getSharedWithMe(String userId) {
-        return movieRepository.findSharedWithUser(userId).stream()
-                .map(row -> SharedMovieResponse.builder()
-                        .movieId(row.getMovieId())
-                        .sharedBy(row.getSharedBy())
-                        .sharedAt(row.getSharedAt())
+        String cypher =
+                "MATCH (u:User {id: $userId})-[r:SHARED_WITH]->(m:Movie) " +
+                "RETURN m.movieId AS movieId, r.sharedBy AS sharedBy, r.sharedAt AS sharedAt " +
+                "ORDER BY r.sharedAt DESC";
+
+        Collection<SharedMovieResponse> rows = neo4jClient.query(cypher)
+                .bind(userId).to("userId")
+                .fetchAs(SharedMovieResponse.class)
+                .mappedBy((typeSystem, record) -> SharedMovieResponse.builder()
+                        .movieId(record.get("movieId").asString())
+                        .sharedBy(record.get("sharedBy").asString())
+                        .sharedAt(record.get("sharedAt").asZonedDateTime().toInstant())
                         .build())
-                .toList();
+                .all();
+
+        return new ArrayList<>(rows);
     }
 
     private Set<Genre> resolveGenres(Set<String> genreNames) {
