@@ -1,6 +1,7 @@
 package com.neo.rating_service.repositories;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class RatingRepository {
                         "userId", userId,
                         "movieId", movieId,
                         "score", score,
-                        "now", Instant.now()))
+                        "now", Instant.now().atZone(ZoneOffset.UTC)))
                 .fetchAs(Rating.class)
                 .mappedBy((typeSystem, record) -> toRating(record))
                 .one()
