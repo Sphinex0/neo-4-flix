@@ -7,6 +7,7 @@ import { WatchlistApiService } from '../../../watchlist/services/watchlist-api.s
 import { GenreResponse, MovieResponse } from '../../../movies/models/movie.models';
 import { MovieApiService } from '../../../movies/services/movie-api.service';
 import { AddMovieModal } from '../../../movies/components/add-movie-modal/add-movie-modal';
+import { ShareMovieModal } from '../../../movies/components/share-movie-modal/share-movie-modal';
 import { UserApiService } from '../../../users/services/user-api.service';
 
 interface MovieCard {
@@ -27,7 +28,7 @@ const FALLBACK_GRADIENTS = [
 
 @Component({
   selector: 'app-browse',
-  imports: [Navbar, FormsModule, NgStyle, AddMovieModal],
+  imports: [Navbar, FormsModule, NgStyle, AddMovieModal, ShareMovieModal],
   templateUrl: './browse.html',
 })
 export class Browse implements OnInit {
@@ -40,6 +41,7 @@ export class Browse implements OnInit {
   editingMovie = signal<MovieResponse | null>(null);
   movieToDelete = signal<MovieResponse | null>(null);
   isDeletingMovie = signal(false);
+  sharingMovie = signal<MovieResponse | null>(null);
 
   // Filters & Search State
   searchQuery = signal<string>('');
@@ -233,6 +235,15 @@ export class Browse implements OnInit {
   askDeleteMovie(movie: MovieResponse): void {
     this.selectedMovie.set(null);
     this.movieToDelete.set(movie);
+  }
+
+  openShareModal(movie: MovieResponse): void {
+    this.selectedMovie.set(null);
+    this.sharingMovie.set(movie);
+  }
+
+  onShareModalClosed(): void {
+    this.sharingMovie.set(null);
   }
 
   cancelDeleteMovie(): void {

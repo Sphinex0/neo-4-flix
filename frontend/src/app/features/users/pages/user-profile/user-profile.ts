@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Navbar } from '../../../../shared/navbar/navbar';
 import { AddMovieModal } from '../../../movies/components/add-movie-modal/add-movie-modal';
+import { ShareMovieModal } from '../../../movies/components/share-movie-modal/share-movie-modal';
 import { MovieResponse } from '../../../movies/models/movie.models';
 import { MovieApiService } from '../../../movies/services/movie-api.service';
 import { OtherUserRatingItem, SharedRatingItem } from '../../../ratings/models/rating.models';
@@ -39,7 +40,7 @@ const FALLBACK_GRADIENTS = [
 
 @Component({
   selector: 'app-user-profile',
-  imports: [Navbar, RouterLink, NgStyle, AddMovieModal],
+  imports: [Navbar, RouterLink, NgStyle, AddMovieModal, ShareMovieModal],
   templateUrl: './user-profile.html',
 })
 export class UserProfile implements OnInit {
@@ -80,6 +81,7 @@ export class UserProfile implements OnInit {
   editingMovie = signal<MovieResponse | null>(null);
   movieToDelete = signal<MovieResponse | null>(null);
   isDeletingMovie = signal(false);
+  sharingMovie = signal<MovieResponse | null>(null);
   isAdmin = signal(false);
   isViewedUserAdmin = signal(false);
 
@@ -321,6 +323,15 @@ export class UserProfile implements OnInit {
   askDeleteMovie(movie: MovieResponse): void {
     this.selectedMovie.set(null);
     this.movieToDelete.set(movie);
+  }
+
+  openShareModal(movie: MovieResponse): void {
+    this.selectedMovie.set(null);
+    this.sharingMovie.set(movie);
+  }
+
+  onShareModalClosed(): void {
+    this.sharingMovie.set(null);
   }
 
   cancelDeleteMovie(): void {

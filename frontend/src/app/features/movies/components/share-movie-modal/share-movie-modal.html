@@ -1,0 +1,52 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+  <div class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-[#2A3140] bg-[#0D1017] shadow-2xl">
+    <div class="flex items-center justify-between border-b border-[#2A3140] px-6 py-4">
+      <span class="text-xs font-semibold tracking-wider text-[#A0A9B8] uppercase">Share "{{ movieTitle }}"</span>
+      <button
+        type="button"
+        (click)="close()"
+        class="cursor-pointer text-2xl font-light text-[#A0A9B8] hover:text-white"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div class="flex flex-1 flex-col gap-2 overflow-y-auto p-4">
+      @if (errorMessage()) {
+        <p class="m-0 px-2 text-sm text-[#FF5A5F]">{{ errorMessage() }}</p>
+      }
+
+      @if (isLoading()) {
+        <p class="m-0 px-2 py-3 text-sm text-[#A0A9B8]">Loading your friends...</p>
+      } @else if (loadError()) {
+        <p class="m-0 px-2 py-3 text-sm text-[#FF5A5F]">{{ loadError() }}</p>
+      } @else if (friends.length === 0) {
+        <p class="m-0 px-2 py-3 text-sm text-[#A0A9B8]">You don't have any friends yet. Add some from their profile.</p>
+      } @else {
+        @for (friend of friends; track friend.id) {
+          <button
+            type="button"
+            (click)="shareWith(friend)"
+            [disabled]="sharingWithId() === friend.id || hasShared(friend.id)"
+            class="flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2.5 text-left hover:bg-[#1C222D] disabled:cursor-not-allowed"
+          >
+            <span class="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[#38D0B9] text-sm font-bold text-[#0D1017]">
+              {{ (friend.firstName[0] ?? friend.username[0] ?? '?').toUpperCase() }}
+            </span>
+            <span class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-sm font-medium text-[#EEF1F6]">{{ friend.firstName }} {{ friend.lastName }}</span>
+              <span class="truncate text-xs text-[#A0A9B8]">&#64;{{ friend.username }}</span>
+            </span>
+            @if (hasShared(friend.id)) {
+              <span class="flex-none text-xs font-semibold text-[#38D0B9]">Shared</span>
+            } @else {
+              <span class="flex-none text-xs font-semibold text-[#C9D0DC]">
+                {{ sharingWithId() === friend.id ? 'Sharing...' : 'Share' }}
+              </span>
+            }
+          </button>
+        }
+      }
+    </div>
+  </div>
+</div>
