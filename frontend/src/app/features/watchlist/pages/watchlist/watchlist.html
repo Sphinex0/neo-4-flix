@@ -51,7 +51,7 @@
         } @else {
           <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-5 gap-y-6">
             @for (movie of watch; track movie.id) {
-              <div class="flex flex-col gap-2.5">
+              <div class="flex cursor-pointer flex-col gap-2.5" (click)="openModal(movie.raw)">
                 <div
                   [ngStyle]="{ background: movie.bg }"
                   class="box-border flex aspect-[2/3] items-end rounded-[10px] border border-[#2A3140] p-3.5"
@@ -62,7 +62,7 @@
                   <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
                   <button
                     type="button"
-                    (click)="onRemove(movie)"
+                    (click)="onRemove(movie); $event.stopPropagation()"
                     [disabled]="isRemoving(movie.id)"
                     [attr.aria-label]="'Remove ' + movie.title + ' from watchlist'"
                     class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -92,7 +92,10 @@
         } @else {
           <div class="flex flex-col gap-3">
             @for (movie of rated; track movie.movieId) {
-              <div class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5">
+              <div
+                (click)="openModal(movie.raw)"
+                class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5 cursor-pointer"
+              >
                 <div [ngStyle]="{ background: movie.bg }" class="h-21 w-14 flex-none rounded-lg"></div>
 
                 <div class="flex min-w-0 flex-1 basis-[220px] flex-col gap-1">
@@ -110,14 +113,14 @@
                 <div class="flex gap-2">
                   <button
                     type="button"
-                    (click)="askChangeRating(movie)"
+                    (click)="askChangeRating(movie); $event.stopPropagation()"
                     class="inline-flex min-h-11 cursor-pointer items-center rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#EEF1F6]"
                   >
                     Change
                   </button>
                   <button
                     type="button"
-                    (click)="askDeleteRating(movie)"
+                    (click)="askDeleteRating(movie); $event.stopPropagation()"
                     [attr.aria-label]="'Delete my rating for ' + movie.title"
                     class="min-h-11 cursor-pointer rounded-[10px] border border-[#5B6579] bg-transparent px-4 text-sm font-medium text-[#C9D0DC] hover:text-white"
                   >
@@ -142,7 +145,10 @@
         } @else {
           <div class="flex flex-col gap-3">
             @for (movie of shared; track movie.movieId) {
-              <div class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5">
+              <div
+                (click)="openModal(movie.raw)"
+                class="flex flex-wrap items-center gap-x-5 gap-y-4 rounded-2xl border border-[#2A3140] bg-[#151A23] px-[18px] py-3.5 cursor-pointer"
+              >
                 <div [ngStyle]="{ background: movie.bg }" class="h-21 w-14 flex-none rounded-lg"></div>
 
                 <div class="flex min-w-0 flex-1 basis-[220px] flex-col gap-1">
@@ -235,5 +241,19 @@
         </div>
       </div>
     </div>
+  }
+
+  @if (selectedMovie(); as movie) {
+    <app-movie-detail-modal
+      [movie]="movie"
+      [isAdded]="isInWatchlist(movie.id)"
+      (closed)="closeModal()"
+      (addToWatchlist)="onAddToWatchlist(movie)"
+      (share)="openShareModal(movie)"
+    />
+  }
+
+  @if (sharingMovie(); as movie) {
+    <app-share-movie-modal [movieId]="movie.id" [movieTitle]="movie.title" (closed)="onShareModalClosed()" />
   }
 </div>

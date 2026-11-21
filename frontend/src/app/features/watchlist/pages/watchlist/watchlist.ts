@@ -2,6 +2,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { Navbar } from '../../../../shared/navbar/navbar';
+import { MovieDetailModal } from '../../../movies/components/movie-detail-modal/movie-detail-modal';
+import { ShareMovieModal } from '../../../movies/components/share-movie-modal/share-movie-modal';
 import { MovieResponse, SharedMovieResponse } from '../../../movies/models/movie.models';
 import { MovieApiService } from '../../../movies/services/movie-api.service';
 import { MyRatingResponse } from '../../../ratings/models/rating.models';
@@ -14,6 +16,7 @@ interface WatchlistCard {
   title: string;
   meta: string;
   bg: string;
+  raw: MovieResponse;
 }
 
 interface RatedCard {
@@ -22,6 +25,7 @@ interface RatedCard {
   meta: string;
   mine: number;
   bg: string;
+  raw: MovieResponse;
 }
 
 interface SharedCard {
@@ -31,6 +35,7 @@ interface SharedCard {
   bg: string;
   sharedByName: string;
   sharedWhen: string;
+  raw: MovieResponse;
 }
 
 type Tab = 'watch' | 'ratings' | 'shared';
@@ -45,7 +50,7 @@ const FALLBACK_GRADIENTS = [
 
 @Component({
   selector: 'app-watchlist',
-  imports: [Navbar, NgStyle],
+  imports: [Navbar, NgStyle, MovieDetailModal, ShareMovieModal],
   templateUrl: './watchlist.html',
 })
 export class Watchlist implements OnInit {
@@ -74,6 +79,10 @@ export class Watchlist implements OnInit {
 
   isSharedLoading = signal(true);
   sharedError = signal<string | null>(null);
+
+  selectedMovie = signal<MovieResponse | null>(null);
+  sharingMovie = signal<MovieResponse | null>(null);
+  addedToWatchlistIds = signal<Set<string>>(new Set());
 
   watch: WatchlistCard[] = [];
   rated: RatedCard[] = [];
@@ -204,6 +213,45 @@ export class Watchlist implements OnInit {
     return this.removingIds().has(id);
   }
 
+  openModal(movie: MovieResponse): void {
+    this.selectedMovie.set(movie);
+  }
+
+  closeModal(): void {
+    this.selectedMovie.set(null);
+  }
+
+  openShareModal(movie: MovieResponse): void {
+    this.selectedMovie.set(null);
+    this.sharingMovie.set(movie);
+  }
+
+  onShareModalClosed(): void {
+    this.sharingMovie.set(null);
+  }
+
+  isInWatchlist(id: string): boolean {
+    return this.watch.some((movie) => movie.id === id) || this.addedToWatchlistIds().has(id);
+  }
+
+  onAddToWatchlist(movie: { id: string }): void {
+    if (this.isInWatchlist(movie.id)) {
+      return;
+    }
+
+    this.addedToWatchlistIds.update((set) => new Set(set).add(movie.id));
+
+    this.watchlistApi.addToWatchlist(movie.id).subscribe({
+      error: () => {
+        this.addedToWatchlistIds.update((set) => {
+          const next = new Set(set);
+          next.delete(movie.id);
+          return next;
+        });
+      },
+    });
+  }
+
   askDeleteRating(movie: RatedCard): void {
     this.deleteRatingMessage.set(null);
     this.ratingToDelete.set(movie);
@@ -282,6 +330,7 @@ export class Watchlist implements OnInit {
       bg: movie.posterUrl
         ? `center / cover url('${movie.posterUrl}')`
         : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length],
+      raw: movie,
     };
   }
 
@@ -296,6 +345,7 @@ export class Watchlist implements OnInit {
       bg: movie.posterUrl
         ? `center / cover url('${movie.posterUrl}')`
         : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length],
+      raw: movie,
     };
   }
 
@@ -311,6 +361,7 @@ export class Watchlist implements OnInit {
         : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length],
       sharedByName,
       sharedWhen: this.relativeTime(row.sharedAt),
+      raw: movie,
     };
   }
 

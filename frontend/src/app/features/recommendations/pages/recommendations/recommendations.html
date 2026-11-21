@@ -42,7 +42,7 @@
         } @else {
           <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-5 gap-y-6">
             @for (movie of forYouMovies; track movie.id) {
-              <div class="flex flex-col gap-2.5">
+              <div class="flex cursor-pointer flex-col gap-2.5" (click)="openModal(movie.raw)">
                 <div
                   [ngStyle]="{ background: movie.bg }"
                   class="box-border flex aspect-[2/3] flex-col justify-between rounded-[10px] border border-[#2A3140] p-3.5"
@@ -56,7 +56,7 @@
                   <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
                   <button
                     type="button"
-                    (click)="onAddToWatchlist(movie)"
+                    (click)="onAddToWatchlist(movie); $event.stopPropagation()"
                     [disabled]="isAdded(movie.id)"
                     [attr.aria-label]="'Add ' + movie.title + ' to watchlist'"
                     class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
@@ -82,7 +82,7 @@
         } @else {
           <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-x-5 gap-y-6">
             @for (movie of trendingMovies; track movie.id) {
-              <div class="flex flex-col gap-2.5">
+              <div class="flex cursor-pointer flex-col gap-2.5" (click)="openModal(movie.raw)">
                 <div
                   [ngStyle]="{ background: movie.bg }"
                   class="box-border flex aspect-[2/3] flex-col justify-between rounded-[10px] border border-[#2A3140] p-3.5"
@@ -96,7 +96,7 @@
                   <span class="text-[13px] text-[#A0A9B8]">{{ movie.meta }}</span>
                   <button
                     type="button"
-                    (click)="onAddToWatchlist(movie)"
+                    (click)="onAddToWatchlist(movie); $event.stopPropagation()"
                     [disabled]="isAdded(movie.id)"
                     [attr.aria-label]="'Add ' + movie.title + ' to watchlist'"
                     class="min-h-11 cursor-pointer rounded-lg border border-[#5B6579] bg-transparent px-3 text-[13px] font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
@@ -109,6 +109,20 @@
           </div>
         }
       </section>
+    }
+
+    @if (selectedMovie(); as movie) {
+      <app-movie-detail-modal
+        [movie]="movie"
+        [isAdded]="isAdded(movie.id)"
+        (closed)="closeModal()"
+        (addToWatchlist)="onAddToWatchlist(movie)"
+        (share)="openShareModal(movie)"
+      />
+    }
+
+    @if (sharingMovie(); as movie) {
+      <app-share-movie-modal [movieId]="movie.id" [movieTitle]="movie.title" (closed)="onShareModalClosed()" />
     }
   </main>
 </div>

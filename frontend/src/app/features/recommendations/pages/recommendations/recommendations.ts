@@ -1,6 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import { Navbar } from '../../../../shared/navbar/navbar';
+import { MovieDetailModal } from '../../../movies/components/movie-detail-modal/movie-detail-modal';
+import { ShareMovieModal } from '../../../movies/components/share-movie-modal/share-movie-modal';
+import { MovieResponse } from '../../../movies/models/movie.models';
 import { WatchlistApiService } from '../../../watchlist/services/watchlist-api.service';
 import { RecommendedMovie } from '../../models/recommendation.models';
 import { RecommendationApiService } from '../../services/recommendation-api.service';
@@ -11,6 +14,7 @@ interface RecommendationCard {
   meta: string;
   reason: string;
   bg: string;
+  raw: MovieResponse;
 }
 
 type Tab = 'for-you' | 'trending';
@@ -25,7 +29,7 @@ const FALLBACK_GRADIENTS = [
 
 @Component({
   selector: 'app-recommendations',
-  imports: [Navbar, NgStyle],
+  imports: [Navbar, NgStyle, MovieDetailModal, ShareMovieModal],
   templateUrl: './recommendations.html',
 })
 export class Recommendations implements OnInit {
@@ -33,6 +37,9 @@ export class Recommendations implements OnInit {
   private readonly watchlistApi = inject(WatchlistApiService);
 
   activeTab = signal<Tab>('for-you');
+
+  selectedMovie = signal<MovieResponse | null>(null);
+  sharingMovie = signal<MovieResponse | null>(null);
 
   isForYouLoading = signal(true);
   forYouError = signal<string | null>(null);
@@ -105,7 +112,7 @@ export class Recommendations implements OnInit {
     });
   }
 
-  onAddToWatchlist(movie: RecommendationCard): void {
+  onAddToWatchlist(movie: { id: string; title: string }): void {
     if (this.isAdded(movie.id)) {
       return;
     }
@@ -136,18 +143,50 @@ export class Recommendations implements OnInit {
     return this.addedIds().has(id);
   }
 
+  openModal(movie: MovieResponse): void {
+    this.selectedMovie.set(movie);
+  }
+
+  closeModal(): void {
+    this.selectedMovie.set(null);
+  }
+
+  openShareModal(movie: MovieResponse): void {
+    this.selectedMovie.set(null);
+    this.sharingMovie.set(movie);
+  }
+
+  onShareModalClosed(): void {
+    this.sharingMovie.set(null);
+  }
+
   private toCard(movie: RecommendedMovie, index: number): RecommendationCard {
     const genreNames = movie.genres?.length ? movie.genres.join(', ') : '';
     const meta = genreNames ? `${movie.releaseYear} · ${genreNames}` : `${movie.releaseYear}`;
+    const bg = movie.posterUrl
+      ? `center / cover url('${movie.posterUrl}')`
+      : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length];
 
     return {
       id: movie.id,
       title: movie.title,
       meta,
       reason: movie.recommendationReason ?? 'Recommended',
-      bg: movie.posterUrl
-        ? `center / cover url('${movie.posterUrl}')`
-        : FALLBACK_GRADIENTS[index % FALLBACK_GRADIENTS.length],
+      bg,
+      raw: {
+        id: movie.id,
+        title: movie.title,
+        description: movie.description,
+        releaseYear: movie.releaseYear,
+        durationMinutes: movie.durationMinutes,
+        posterUrl: movie.posterUrl,
+        trailerUrl: movie.trailerUrl,
+        director: movie.director,
+        imdbRating: movie.imdbRating,
+        genres: movie.genres?.map((name) => ({ id: name, name })) ?? [],
+        createdAt: '',
+        updatedAt: '',
+      },
     };
   }
 }

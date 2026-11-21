@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/2fa/verify").permitAll()
                         .requestMatchers("/api/movies/watchlist", "/api/movies/{id}/watchlist").authenticated()
+                        .requestMatchers("/api/movies/shared", "/api/movies/{id}/share/{recipientId}").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/movies/**", "/api/genres/**").permitAll()
                         .requestMatchers("/api/movies/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/ratings/movie/**").permitAll()
