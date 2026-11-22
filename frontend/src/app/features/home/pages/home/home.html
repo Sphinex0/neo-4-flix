@@ -1,6 +1,585 @@
 <div class="flex min-h-screen flex-col bg-[#0D1017] font-sans text-[#EEF1F6]">
   <app-navbar />
-  <main class="flex flex-1 flex-col items-center justify-center gap-4">
-    <h1 class="font-display text-[40px] font-bold">Hello Neo</h1>
-  </main>
+
+  @if (isLoading()) {
+    <div class="flex flex-1 flex-col items-center justify-center py-40 text-[#A0A9B8]">
+      <div class="h-10 w-10 animate-spin rounded-full border-2 border-[#FF5A5F] border-t-transparent"></div>
+      <p class="mt-4 text-base">Loading your movie universe...</p>
+    </div>
+  } @else {
+    <!-- HERO SPOTLIGHT BANNER -->
+    @if (heroMovie(); as hero) {
+      <section class="relative min-h-[520px] w-full overflow-hidden border-b border-[#2A3140] bg-[#12161F]">
+        <!-- Background Backdrop / Poster with dramatic gradient -->
+        <div
+          [ngStyle]="{ background: getPosterBg(hero.posterUrl) }"
+          class="absolute inset-0 bg-cover bg-top opacity-35 filter blur-[1px] md:opacity-40"
+        ></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0D1017] via-[#0D1017]/80 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#0D1017] via-[#0D1017]/90 to-transparent"></div>
+
+        <!-- Hero Content Container -->
+        <div class="relative z-10 flex min-h-[520px] max-w-5xl flex-col justify-end px-8 py-14 md:px-14">
+          <div class="flex flex-col gap-3">
+            <!-- Spotlight Tag -->
+            <div class="flex items-center gap-2">
+              <span class="rounded bg-[#FF5A5F] px-2.5 py-0.5 text-xs font-bold tracking-wider text-[#0D1017] uppercase">
+                Spotlight
+              </span>
+              @if (hero.imdbRating) {
+                <span class="flex items-center gap-1 rounded bg-black/60 px-2 py-0.5 text-xs font-bold text-[#E5A93C] backdrop-blur-sm">
+                  ★ {{ hero.imdbRating }} IMDb
+                </span>
+              }
+              <span class="text-xs text-[#A0A9B8]">{{ hero.releaseYear }} &bull; {{ hero.durationMinutes }} min</span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="m-0 font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">
+              {{ hero.title }}
+            </h1>
+
+            <!-- Genres -->
+            <div class="flex flex-wrap gap-2">
+              @for (g of hero.genres; track g.id) {
+                <span class="rounded-full border border-[#2A3140] bg-[#141923]/80 px-3 py-1 text-xs font-medium text-[#C9D0DC] backdrop-blur-sm">
+                  {{ g.name }}
+                </span>
+              }
+            </div>
+
+            <!-- Description -->
+            <p class="max-w-2xl text-sm leading-relaxed text-[#C9D0DC] line-clamp-3 md:text-base">
+              {{ hero.description }}
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              @if (hero.trailerUrl) {
+                <a
+                  [href]="hero.trailerUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] bg-[#FF5A5F] px-6 text-sm font-bold text-[#0D1017] shadow-lg transition hover:bg-[#ff7377]"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                  Watch Trailer
+                </a>
+              }
+
+              <button
+                type="button"
+                (click)="onAddToWatchlist(hero.id, hero.title)"
+                [disabled]="isAdded(hero.id)"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[#5B6579] bg-[#151A23]/80 px-5 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-[#38D0B9] hover:text-[#38D0B9] disabled:opacity-60"
+              >
+                {{ isAdded(hero.id) ? '✓ In Watchlist' : '+ Add to Watchlist' }}
+              </button>
+
+              <button
+                type="button"
+                (click)="openModal(hero)"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-[10px] border border-[#2A3140] bg-black/40 px-4 text-sm font-medium text-[#C9D0DC] backdrop-blur-sm transition hover:text-white"
+              >
+                Details & Info ℹ
+              </button>
+
+              <button
+                type="button"
+                (click)="openShareModal(hero)"
+                class="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-[10px] border border-[#2A3140] bg-black/40 px-4 text-sm font-medium text-[#C9D0DC] backdrop-blur-sm transition hover:text-white"
+              >
+                Share ↗
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Notification Toast / Feedback -->
+    @if (actionMessage()) {
+      <div class="mx-8 mt-4 rounded-lg border border-[#38D0B9]/40 bg-[#38D0B9]/10 px-5 py-3 text-sm text-[#38D0B9] md:mx-14">
+        {{ actionMessage() }}
+      </div>
+    }
+
+    <!-- MAIN CAROUSEL ROWS -->
+    <main class="flex flex-col gap-10 px-8 py-8 md:px-14">
+
+      <!-- ROW 1: RECOMMENDED FOR YOU -->
+      @if (recommendedMovies().length > 0) {
+        <section class="flex flex-col gap-3">
+          <div class="flex items-end justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="inline-block h-2.5 w-2.5 rounded-full bg-[#38D0B9]"></span>
+                <h2 class="m-0 font-display text-2xl font-bold text-white">Recommended For You</h2>
+              </div>
+              <p class="m-0 text-xs text-[#A0A9B8]">Tailored using collaborative filtering, friend tastes, and your profile</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <a routerLink="/recommendations" class="text-xs font-semibold text-[#38D0B9] hover:underline">
+                View All &rarr;
+              </a>
+              <button
+                type="button"
+                (click)="scrollRow('row-recommended', 'left')"
+                aria-label="Scroll left"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &lsaquo;
+              </button>
+              <button
+                type="button"
+                (click)="scrollRow('row-recommended', 'right')"
+                aria-label="Scroll right"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &rsaquo;
+              </button>
+            </div>
+          </div>
+
+          <!-- Cards Carousel Container -->
+          <div id="row-recommended" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2">
+            @for (movie of recommendedMovies(); track movie.id) {
+              <div class="group flex w-[185px] sm:w-[205px] flex-none flex-col gap-2">
+                <!-- Poster Card -->
+                <div
+                  (click)="openModal(movie.raw)"
+                  [ngStyle]="{ background: movie.bg }"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View details for ' + movie.title"
+                  class="relative flex aspect-[2/3] w-full cursor-pointer flex-col justify-between overflow-hidden rounded-[10px] border border-[#2A3140] p-3 text-white transition hover:scale-[1.03] hover:border-[#38D0B9]/70"
+                >
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                  @if (movie.reason) {
+                    <span class="relative z-10 self-start rounded bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-[#38D0B9] backdrop-blur-sm">
+                      {{ movie.reason }}
+                    </span>
+                  }
+                  <div class="relative z-10 flex items-end justify-between">
+                    <span class="font-display text-base font-bold leading-tight text-white drop-shadow">{{ movie.title }}</span>
+                    @if (movie.imdbRating) {
+                      <span class="rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-[#E5A93C] backdrop-blur-sm">
+                        ★ {{ movie.imdbRating }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Footer / Action -->
+                <div class="flex items-center justify-between gap-2">
+                  <span class="truncate text-xs text-[#A0A9B8]" [title]="movie.meta">{{ movie.meta }}</span>
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist(movie.id, movie.title, $event)"
+                    [disabled]="isAdded(movie.id)"
+                    class="cursor-pointer rounded-md border border-[#5B6579] bg-transparent px-2.5 py-1 text-xs font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'Added' : '+ Watch' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ROW 2: SHARED WITH YOU (Only if user has received shared movies) -->
+      @if (sharedWithMeMovies().length > 0) {
+        <section class="flex flex-col gap-3 rounded-2xl border border-[#2A3140] bg-[#121620] p-5">
+          <div class="flex items-end justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="inline-block h-2.5 w-2.5 rounded-full bg-[#FF5A5F]"></span>
+                <h2 class="m-0 font-display text-2xl font-bold text-white">Shared With You</h2>
+              </div>
+              <p class="m-0 text-xs text-[#A0A9B8]">Movies sent to you by friends</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <a routerLink="/my-list" class="text-xs font-semibold text-[#FF5A5F] hover:underline">
+                My List &rarr;
+              </a>
+              <button
+                type="button"
+                (click)="scrollRow('row-shared', 'left')"
+                aria-label="Scroll left"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &lsaquo;
+              </button>
+              <button
+                type="button"
+                (click)="scrollRow('row-shared', 'right')"
+                aria-label="Scroll right"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &rsaquo;
+              </button>
+            </div>
+          </div>
+
+          <div id="row-shared" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2">
+            @for (movie of sharedWithMeMovies(); track movie.id) {
+              <div class="group flex w-[185px] sm:w-[205px] flex-none flex-col gap-2">
+                <div
+                  (click)="openModal(movie.raw)"
+                  [ngStyle]="{ background: movie.bg }"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View details for ' + movie.title"
+                  class="relative flex aspect-[2/3] w-full cursor-pointer flex-col justify-between overflow-hidden rounded-[10px] border border-[#2A3140] p-3 text-white transition hover:scale-[1.03] hover:border-[#FF5A5F]/70"
+                >
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                  <span class="relative z-10 self-start rounded bg-[#FF5A5F] px-2 py-0.5 text-[10px] font-bold text-[#0D1017]">
+                    From {{ movie.sharedBy }}
+                  </span>
+                  <div class="relative z-10">
+                    <span class="font-display text-base font-bold leading-tight text-white drop-shadow">{{ movie.title }}</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-2">
+                  <span class="truncate text-xs text-[#A0A9B8]">{{ movie.meta }}</span>
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist(movie.id, movie.title, $event)"
+                    [disabled]="isAdded(movie.id)"
+                    class="cursor-pointer rounded-md border border-[#5B6579] bg-transparent px-2.5 py-1 text-xs font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'Added' : '+ Watch' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ROW 3: TRENDING ON NEO4FLIX -->
+      @if (trendingMovies().length > 0) {
+        <section class="flex flex-col gap-3">
+          <div class="flex items-end justify-between">
+            <div>
+              <h2 class="m-0 font-display text-2xl font-bold text-white">Trending on Neo4flix</h2>
+              <p class="m-0 text-xs text-[#A0A9B8]">Highest rated and most popular titles across the community</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="scrollRow('row-trending', 'left')"
+                aria-label="Scroll left"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &lsaquo;
+              </button>
+              <button
+                type="button"
+                (click)="scrollRow('row-trending', 'right')"
+                aria-label="Scroll right"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &rsaquo;
+              </button>
+            </div>
+          </div>
+
+          <div id="row-trending" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2">
+            @for (movie of trendingMovies(); track movie.id) {
+              <div class="group flex w-[185px] sm:w-[205px] flex-none flex-col gap-2">
+                <div
+                  (click)="openModal(movie.raw)"
+                  [ngStyle]="{ background: movie.bg }"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View details for ' + movie.title"
+                  class="relative flex aspect-[2/3] w-full cursor-pointer flex-col justify-between overflow-hidden rounded-[10px] border border-[#2A3140] p-3 text-white transition hover:scale-[1.03] hover:border-[#FF5A5F]/70"
+                >
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                  @if (movie.imdbRating) {
+                    <span class="relative z-10 self-end rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-[#E5A93C] backdrop-blur-sm">
+                      ★ {{ movie.imdbRating }}
+                    </span>
+                  }
+                  <div class="relative z-10">
+                    <span class="font-display text-base font-bold leading-tight text-white drop-shadow">{{ movie.title }}</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-2">
+                  <span class="truncate text-xs text-[#A0A9B8]" [title]="movie.meta">{{ movie.meta }}</span>
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist(movie.id, movie.title, $event)"
+                    [disabled]="isAdded(movie.id)"
+                    class="cursor-pointer rounded-md border border-[#5B6579] bg-transparent px-2.5 py-1 text-xs font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'Added' : '+ Watch' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ROW 4: ACTION & ADVENTURE -->
+      @if (actionMovies().length > 0) {
+        <section class="flex flex-col gap-3">
+          <div class="flex items-end justify-between">
+            <div>
+              <h2 class="m-0 font-display text-2xl font-bold text-white">Action & Adventure Blockbusters</h2>
+              <p class="m-0 text-xs text-[#A0A9B8]">High octane thrills and cinematic adventures</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <a routerLink="/search" class="text-xs font-semibold text-[#A0A9B8] hover:text-white">
+                Browse Category &rarr;
+              </a>
+              <button
+                type="button"
+                (click)="scrollRow('row-action', 'left')"
+                aria-label="Scroll left"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &lsaquo;
+              </button>
+              <button
+                type="button"
+                (click)="scrollRow('row-action', 'right')"
+                aria-label="Scroll right"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &rsaquo;
+              </button>
+            </div>
+          </div>
+
+          <div id="row-action" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2">
+            @for (movie of actionMovies(); track movie.id) {
+              <div class="group flex w-[185px] sm:w-[205px] flex-none flex-col gap-2">
+                <div
+                  (click)="openModal(movie.raw)"
+                  [ngStyle]="{ background: movie.bg }"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View details for ' + movie.title"
+                  class="relative flex aspect-[2/3] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[10px] border border-[#2A3140] p-3 text-white transition hover:scale-[1.03] hover:border-[#FF5A5F]/70"
+                >
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                  @if (movie.imdbRating) {
+                    <span class="absolute top-2.5 right-2.5 z-10 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-[#E5A93C] backdrop-blur-sm">
+                      ★ {{ movie.imdbRating }}
+                    </span>
+                  }
+                  <span class="relative z-10 font-display text-base font-bold leading-tight text-white drop-shadow">{{ movie.title }}</span>
+                </div>
+
+                <div class="flex items-center justify-between gap-2">
+                  <span class="truncate text-xs text-[#A0A9B8]" [title]="movie.meta">{{ movie.meta }}</span>
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist(movie.id, movie.title, $event)"
+                    [disabled]="isAdded(movie.id)"
+                    class="cursor-pointer rounded-md border border-[#5B6579] bg-transparent px-2.5 py-1 text-xs font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'Added' : '+ Watch' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ROW 5: GRIPPING DRAMAS -->
+      @if (dramaMovies().length > 0) {
+        <section class="flex flex-col gap-3">
+          <div class="flex items-end justify-between">
+            <div>
+              <h2 class="m-0 font-display text-2xl font-bold text-white">Acclaimed Dramas</h2>
+              <p class="m-0 text-xs text-[#A0A9B8]">Deep stories, powerful performances, and emotional journeys</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <a routerLink="/search" class="text-xs font-semibold text-[#A0A9B8] hover:text-white">
+                Browse Category &rarr;
+              </a>
+              <button
+                type="button"
+                (click)="scrollRow('row-drama', 'left')"
+                aria-label="Scroll left"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &lsaquo;
+              </button>
+              <button
+                type="button"
+                (click)="scrollRow('row-drama', 'right')"
+                aria-label="Scroll right"
+                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[#2A3140] bg-[#151A23] text-sm text-[#A0A9B8] hover:text-white"
+              >
+                &rsaquo;
+              </button>
+            </div>
+          </div>
+
+          <div id="row-drama" class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2">
+            @for (movie of dramaMovies(); track movie.id) {
+              <div class="group flex w-[185px] sm:w-[205px] flex-none flex-col gap-2">
+                <div
+                  (click)="openModal(movie.raw)"
+                  [ngStyle]="{ background: movie.bg }"
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-label]="'View details for ' + movie.title"
+                  class="relative flex aspect-[2/3] w-full cursor-pointer flex-col justify-end overflow-hidden rounded-[10px] border border-[#2A3140] p-3 text-white transition hover:scale-[1.03] hover:border-[#FF5A5F]/70"
+                >
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+                  @if (movie.imdbRating) {
+                    <span class="absolute top-2.5 right-2.5 z-10 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-[#E5A93C] backdrop-blur-sm">
+                      ★ {{ movie.imdbRating }}
+                    </span>
+                  }
+                  <span class="relative z-10 font-display text-base font-bold leading-tight text-white drop-shadow">{{ movie.title }}</span>
+                </div>
+
+                <div class="flex items-center justify-between gap-2">
+                  <span class="truncate text-xs text-[#A0A9B8]" [title]="movie.meta">{{ movie.meta }}</span>
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist(movie.id, movie.title, $event)"
+                    [disabled]="isAdded(movie.id)"
+                    class="cursor-pointer rounded-md border border-[#5B6579] bg-transparent px-2.5 py-1 text-xs font-medium text-[#C9D0DC] hover:text-white disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'Added' : '+ Watch' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+    </main>
+
+    <!-- MOVIE DETAILS MODAL -->
+    @if (selectedMovie(); as movie) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+        <div class="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#2A3140] bg-[#0D1017] shadow-2xl">
+          <div class="flex items-center justify-between border-b border-[#2A3140] px-6 py-4">
+            <span class="text-xs font-semibold tracking-wider text-[#A0A9B8] uppercase">Movie Details</span>
+            <button
+              type="button"
+              (click)="closeModal()"
+              class="cursor-pointer text-2xl font-light text-[#A0A9B8] hover:text-white"
+            >
+              &times;
+            </button>
+          </div>
+
+          <div class="flex flex-1 flex-col gap-6 overflow-y-auto p-6 md:flex-row">
+            <div
+              [ngStyle]="{ background: getPosterBg(movie.posterUrl) }"
+              class="aspect-[2/3] w-full md:w-56 flex-none rounded-xl border border-[#2A3140] shadow-md"
+            ></div>
+
+            <div class="flex flex-1 flex-col justify-between gap-4">
+              <div class="flex flex-col gap-2">
+                <h2 class="m-0 font-display text-2xl font-bold text-white">{{ movie.title }}</h2>
+
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#A0A9B8]">
+                  <span>{{ movie.releaseYear }}</span>
+                  <span>&bull;</span>
+                  <span>{{ movie.durationMinutes }} min</span>
+                  @if (movie.director) {
+                    <span>&bull;</span>
+                    <span>Dir. {{ movie.director }}</span>
+                  }
+                  @if (movie.imdbRating) {
+                    <span>&bull;</span>
+                    <span class="font-semibold text-[#E5A93C]">★ {{ movie.imdbRating }}</span>
+                  }
+                </div>
+
+                <div class="mt-1 flex flex-wrap gap-1.5">
+                  @for (g of movie.genres; track g.id) {
+                    <span class="rounded-md border border-[#2A3140] bg-[#151A23] px-2 py-0.5 text-[11px] font-medium text-[#C9D0DC]">
+                      {{ g.name }}
+                    </span>
+                  }
+                </div>
+
+                <p class="mt-2 text-xs leading-relaxed text-[#C9D0DC]">
+                  {{ movie.description }}
+                </p>
+              </div>
+
+              <!-- Rating & Actions -->
+              <div class="flex flex-col gap-3 rounded-xl border border-[#2A3140] bg-[#141923] p-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-white">Your Rating:</span>
+                  <div class="flex items-center gap-1.5">
+                    @for (star of [1, 2, 3, 4, 5]; track star) {
+                      <button
+                        type="button"
+                        (click)="setRating(star)"
+                        [disabled]="isRatingSaving() || star === modalRating()"
+                        [attr.aria-label]="'Rate ' + star + ' stars'"
+                        class="cursor-pointer text-lg transition hover:scale-110 disabled:cursor-not-allowed"
+                        [ngStyle]="{ color: star <= modalRating() ? '#FF5A5F' : '#5B6579' }"
+                      >
+                        ★
+                      </button>
+                    }
+                    @if (modalRating() > 0) {
+                      <span class="ml-1 text-xs font-bold text-white">{{ modalRating() }}/5</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-[#2A3140]">
+                  <button
+                    type="button"
+                    (click)="onAddToWatchlist(movie.id, movie.title)"
+                    [disabled]="isAdded(movie.id)"
+                    class="flex-1 min-h-10 cursor-pointer rounded-lg border border-[#FF5A5F] bg-transparent text-xs font-semibold text-[#FF5A5F] hover:bg-[#FF5A5F] hover:text-[#0D1017] disabled:opacity-50"
+                  >
+                    {{ isAdded(movie.id) ? 'In Watchlist' : '+ Watchlist' }}
+                  </button>
+
+                  @if (movie.trailerUrl) {
+                    <a
+                      [href]="movie.trailerUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#38D0B9] bg-[#38D0B9] px-4 text-xs font-semibold text-[#0D1017] transition hover:opacity-90"
+                    >
+                      Trailer ▶
+                    </a>
+                  }
+
+                  <button
+                    type="button"
+                    (click)="openShareModal(movie)"
+                    class="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border border-[#5B6579] bg-transparent px-4 text-xs font-semibold text-[#EEF1F6] hover:text-white"
+                  >
+                    Share ↗
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- SHARE MOVIE MODAL -->
+    @if (sharingMovie(); as movie) {
+      <app-share-movie-modal [movieId]="movie.id" [movieTitle]="movie.title" (closed)="closeShareModal()" />
+    }
+  }
 </div>
