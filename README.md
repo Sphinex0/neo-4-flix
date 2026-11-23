@@ -24,6 +24,7 @@ The backend is a set of **Spring Boot microservices** that share a single **Neo4
 - [Seed scripts](#seed-scripts)
 - [Configuration](#configuration)
 - [Running the project](#running-the-project)
+- [HTTPS for the frontend](#https-for-the-frontend)
 - [Testing](#testing)
 - [Response format](#response-format)
 
@@ -172,6 +173,21 @@ Errors from the gateway's security layer come back as JSON: `401 {"success":fals
 | `/api/recommendations/**` | `recommendation-service` |
 
 **CORS** allows the origins listed in `CORS_ALLOWED_ORIGINS` (comma-separated), the methods `GET, POST, PUT, PATCH, DELETE, OPTIONS`, and the headers `Authorization, Content-Type, Accept`.
+
+**Generating the keystore** (already done once — regenerate if needed):
+
+```bash
+keytool -genkeypair \
+  -alias gateway \
+  -keyalg RSA \
+  -keysize 2048 \
+  -storetype PKCS12 \
+  -keystore keystore.p12 \
+  -validity 3650 \
+  -dname "CN=localhost, OU=Dev, O=Vendify" \
+  -storepass changeit \
+  -keypass changeit
+```
 
 ### user-service
 
@@ -340,7 +356,7 @@ Copy `.env.example` to `.env` at the project root and fill it in:
 |---|---|---|
 | `NEO4J_PASSWORD` | Neo4j, all data services, scripts | Password for the `neo4j` user |
 | `JWT_SECRET_KEY` | api-gateway, user-service | Shared HS256 signing secret. **At least 32 bytes**; it must be identical in both services |
-| `CORS_ALLOWED_ORIGINS` | api-gateway | Comma-separated list, for example `http://localhost:4200` |
+| `CORS_ALLOWED_ORIGINS` | api-gateway | Comma-separated list, for example `https://localhost:4200` (the frontend is served over HTTPS, see [HTTPS for the frontend](#https-for-the-frontend)) |
 | `TMDB_API_KEY` | `generate_movies.py` | TMDB v3 API key |
 | `HAMZA_PASSWORD`, `ADNANE_PASSWORD` | `generate_users.py` | Passwords for the two seeded admin accounts |
 | `USERS_PASSWORD` | `generate_users.py` | Shared password for the 498 generated users |
@@ -355,12 +371,13 @@ Inside Docker Compose, each service also gets `SPRING_NEO4J_URI=bolt://neo4j:768
 
 ```bash
 cp .env.example .env        # then fill in the values
+# create frontend/certs/frontend.crt + frontend.key first, see "HTTPS for the frontend"
 docker compose up --build
 ```
 
 | URL | What |
 |---|---|
-| http://localhost:4200 | Frontend (static build served by `serve` on port 4000 inside the container) |
+| https://localhost:4200 | Frontend over HTTPS (static build served by `serve` on port 4000 inside the container) |
 | http://localhost:8080 | API gateway |
 | http://localhost:8761 | Eureka dashboard |
 | http://localhost:7474 | Neo4j Browser (log in as `neo4j` / `NEO4J_PASSWORD`, Bolt `bolt://localhost:7687`) |
@@ -398,9 +415,94 @@ cd backend/recommendation-service && ./mvnw spring-boot:run
 
 # 4. Frontend
 cd frontend && npm install && npm start   # http://localhost:4200
+# or, over HTTPS (needs frontend/certs, see below):
+cd frontend && npm run start:ssl         # https://localhost:4200
 ```
 
 `user-service` and `rating-service` have no Neo4j settings in their `application.yaml`, so they depend on the `SPRING_NEO4J_*` environment variables above.
+
+## HTTPS for the frontend
+
+The frontend is served over HTTPS with a regular SSL/TLS certificate (no Let's Encrypt / ACME). The container runs `serve` with `--ssl-cert` and `--ssl-key`, reading two files that Docker Compose mounts read-only from `frontend/certs/`:
+
+| File | Content |
+|---|---|
+| `frontend/certs/frontend.crt` | The certificate in PEM format (for a CA-issued certificate: your certificate followed by the intermediate chain) |
+| `frontend/certs/frontend.key` | The matching private key in PEM format, **unencrypted** |
+
+`frontend/certs/` is in `.gitignore` and `.dockerignore`, so the key is never committed or baked into the image. If the files are missing, the frontend container will not start.
+
+### Option 1: self-signed certificate (local development)
+
+```bash
+mkdir -p frontend/certs
+openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
+  -keyout frontend/certs/frontend.key \
+  -out    frontend/certs/frontend.crt \
+  -subj "/CN=localhost" \
+  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+chmod 600 frontend/certs/frontend.key
+```
+
+The browser will show a warning because no trusted CA signed the certificate. Either click through it, or trust the certificate once on your machine:
+
+```bash
+# Debian / Ubuntu (system store, used by curl and most CLI tools)
+sudo cp frontend/certs/frontend.crt /usr/local/share/ca-certificates/neo4flix-frontend.crt
+sudo update-ca-certificates
+```
+
+Chrome and Firefox keep their own stores: import `frontend.crt` under *Settings → Privacy and security → Security → Manage certificates → Authorities* (Chrome) or *Settings → Privacy & Security → Certificates → View Certificates → Authorities* (Firefox).
+
+### Option 2: certificate from a certificate authority (real domain)
+
+1. Generate a private key and a certificate signing request (CSR) for your domain:
+
+   ```bash
+   mkdir -p frontend/certs
+   openssl req -new -newkey rsa:2048 -nodes \
+     -keyout frontend/certs/frontend.key \
+     -out    frontend/certs/frontend.csr \
+     -subj "/CN=neo4flix.example.com" \
+     -addext "subjectAltName=DNS:neo4flix.example.com"
+   chmod 600 frontend/certs/frontend.key
+   ```
+
+2. Submit `frontend.csr` to your CA (DigiCert, Sectigo, GoDaddy, your company's internal CA, ...) and complete their domain validation.
+3. The CA sends back your certificate and an intermediate/CA bundle. Concatenate them, **your certificate first**:
+
+   ```bash
+   cat your_domain.crt ca_bundle.crt > frontend/certs/frontend.crt
+   ```
+
+   If you received a `.pfx`/`.p12` file instead, extract the two PEM files from it:
+
+   ```bash
+   openssl pkcs12 -in cert.pfx -nokeys -out frontend/certs/frontend.crt
+   openssl pkcs12 -in cert.pfx -nocerts -nodes -out frontend/certs/frontend.key
+   ```
+
+4. Check that the key matches the certificate (both commands must print the same hash):
+
+   ```bash
+   openssl x509 -noout -modulus -in frontend/certs/frontend.crt | openssl sha256
+   openssl rsa  -noout -modulus -in frontend/certs/frontend.key | openssl sha256
+   ```
+
+### Running it
+
+```bash
+docker compose up --build frontend     # https://localhost:4200
+```
+
+To serve on the standard HTTPS port, change the mapping in `docker-compose.yml` to `"443:4000"`. When the certificate is renewed, replace the two files and run `docker compose restart frontend`; no rebuild is needed.
+
+For local development without Docker, `npm run start:ssl` in `frontend/` starts `ng serve` with the same two files.
+
+### Things to update when switching to HTTPS
+
+- **`CORS_ALLOWED_ORIGINS`** in `.env` must list the HTTPS origin (for example `https://localhost:4200` or `https://neo4flix.example.com`), otherwise the gateway rejects every request from the frontend. Restart `api-gateway` after changing it.
+- **`API_BASE_URL`** in `frontend/src/app/core/http/api-config.ts` is `http://localhost:8080`. Browsers allow an HTTPS page to call `http://localhost`, so this works locally. On a real domain an HTTPS page cannot call a plain-HTTP API (mixed content), so the gateway must also be served over HTTPS and `API_BASE_URL` changed to its `https://` URL.
 
 ## Testing
 
