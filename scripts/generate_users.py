@@ -94,15 +94,19 @@ def build_users():
 
 def build_friendships(users):
     ids = [u["id"] for u in users]
+    seen = set()
     pairs = []
 
     for user_id in ids:
         others = [uid for uid in ids if uid != user_id]
         chosen = random.sample(others, min(FRIENDS_PER_USER, len(others)))
         for friend_id in chosen:
-            # friendship goes both ways
+            # friendship is mutual but stored once: the API queries FRIEND_OF without direction
+            key = frozenset((user_id, friend_id))
+            if key in seen:
+                continue
+            seen.add(key)
             pairs.append({"from": user_id, "to": friend_id})
-            pairs.append({"from": friend_id, "to": user_id})
 
     return pairs
 

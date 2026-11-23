@@ -20,10 +20,14 @@ public interface UserRepository extends Neo4jRepository<User, String> {
 
     boolean existsByEmail(String email);
 
-    @Query("MATCH (:User {id: $userId})-[:FRIEND_OF]-(friend:User) RETURN friend")
+    // FRIEND_OF is undirected in meaning, so a pair may be linked in both directions: DISTINCT avoids duplicates
+    @Query("MATCH (:User {id: $userId})-[:FRIEND_OF]-(friend:User) RETURN DISTINCT friend")
     List<User> findFriends(@Param("userId") String userId);
 
-    @Query("MATCH (u:User {id: $userId}), (f:User {id: $friendId}) MERGE (u)-[:FRIEND_OF]->(f)")
+    // Only create the link if no FRIEND_OF exists in either direction
+    @Query("MATCH (u:User {id: $userId}), (f:User {id: $friendId}) " +
+            "WHERE u <> f AND NOT (u)-[:FRIEND_OF]-(f) " +
+            "CREATE (u)-[:FRIEND_OF]->(f)")
     void addFriend(@Param("userId") String userId, @Param("friendId") String friendId);
 
     @Query("MATCH (:User {id: $userId})-[r:FRIEND_OF]-(:User {id: $friendId}) DELETE r")
