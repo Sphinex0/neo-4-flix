@@ -37,37 +37,12 @@ public class RecommendationService {
             return recommendationRepository.recommendTrending(userId, normalizedGenre, boundedLimit);
         }
 
+        // Primary: Collaborative filtering (users with similar taste)
         List<RecommendedMovieResponse> results = new ArrayList<>(
                 recommendationRepository.recommendCollaborative(userId, normalizedGenre, boundedLimit)
         );
 
-        // Augment with friend recommendations if more are needed
-        if (results.size() < boundedLimit) {
-            Set<String> alreadyIncluded = results.stream().map(RecommendedMovieResponse::getId).collect(Collectors.toSet());
-            List<RecommendedMovieResponse> friendRecs = recommendationRepository.recommendFromFriends(
-                    userId, normalizedGenre, boundedLimit - results.size()
-            );
-            for (var m : friendRecs) {
-                if (alreadyIncluded.add(m.getId())) {
-                    results.add(m);
-                }
-            }
-        }
-
-        // Augment with genre-based recommendations if more are needed
-        if (results.size() < boundedLimit) {
-            Set<String> alreadyIncluded = results.stream().map(RecommendedMovieResponse::getId).collect(Collectors.toSet());
-            List<RecommendedMovieResponse> genreRecs = recommendationRepository.recommendByFavoriteGenres(
-                    userId, normalizedGenre, boundedLimit - results.size()
-            );
-            for (var m : genreRecs) {
-                if (alreadyIncluded.add(m.getId())) {
-                    results.add(m);
-                }
-            }
-        }
-
-        // Final fallback: fill remaining slots with top rated movies
+        // Fallback: fill remaining slots with top rated movies
         if (results.size() < boundedLimit) {
             Set<String> alreadyIncluded = results.stream().map(RecommendedMovieResponse::getId).collect(Collectors.toSet());
             List<RecommendedMovieResponse> trending = recommendationRepository.recommendTrending(

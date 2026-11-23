@@ -94,8 +94,8 @@ class RecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("Should augment with genre recommendations if collaborative is below limit")
-    void shouldAugmentWithGenreRecommendations() {
+    @DisplayName("Should augment with trending recommendations if collaborative is below limit")
+    void shouldAugmentWithTrendingRecommendations() {
         when(recommendationRepository.countUserRatings("user-1")).thenReturn(3L);
 
         RecommendedMovieResponse movie1 = RecommendedMovieResponse.builder()
@@ -109,9 +109,7 @@ class RecommendationServiceTest {
 
         when(recommendationRepository.recommendCollaborative("user-1", null, 2))
                 .thenReturn(List.of(movie1));
-        when(recommendationRepository.recommendFromFriends("user-1", null, 1))
-                .thenReturn(List.of());
-        when(recommendationRepository.recommendByFavoriteGenres("user-1", null, 1))
+        when(recommendationRepository.recommendTrending("user-1", null, 1))
                 .thenReturn(List.of(movie2));
 
         List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations("user-1", null, 2);
