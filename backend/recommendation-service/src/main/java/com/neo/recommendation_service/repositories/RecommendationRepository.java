@@ -31,7 +31,7 @@ public class RecommendationRepository {
                 .orElse(0L);
     }
 
-    public List<RecommendedMovieResponse> recommendCollaborative(String userId, String genre, int limit) {
+    public List<RecommendedMovieResponse> recommendCollaborative(String userId, String genre, Integer year, int limit) {
         String cypher = """
                 MATCH (u:User {id: $userId})-[r1:RATED]->(m:Movie)<-[r2:RATED]-(other:User)-[r3:RATED]->(rec:Movie)
                 WHERE r1.score >= 4 AND r2.score >= 4 AND r3.score >= 4
@@ -39,6 +39,7 @@ public class RecommendationRepository {
                   AND NOT (u)-[:RATED]->(rec)
                   AND NOT (u)-[:WANTS_TO_WATCH]->(rec)
                   AND ($genre IS NULL OR EXISTS { MATCH (rec)-[:IN_GENRE]->(g:Genre) WHERE toLower(g.name) = toLower($genre) })
+                  AND ($year IS NULL OR rec.year = $year)
                 OPTIONAL MATCH (rec)-[:IN_GENRE]->(genre:Genre)
                 RETURN rec.movieId AS id, rec.title AS title, rec.plot AS description,
                        rec.year AS releaseYear, rec.runtime AS durationMinutes,
@@ -53,6 +54,7 @@ public class RecommendationRepository {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         params.put("genre", genre);
+        params.put("year", year);
         params.put("limit", limit);
 
         return neo4jClient.query(cypher)
@@ -64,12 +66,13 @@ public class RecommendationRepository {
                 .toList();
     }
 
-    public List<RecommendedMovieResponse> recommendTrending(String userId, String genre, int limit) {
+    public List<RecommendedMovieResponse> recommendTrending(String userId, String genre, Integer year, int limit) {
         String cypher = """
                 MATCH (rec:Movie)
                 WHERE ($userId IS NULL OR (NOT EXISTS { MATCH (:User {id: $userId})-[:RATED]->(rec) }
                                       AND NOT EXISTS { MATCH (:User {id: $userId})-[:WANTS_TO_WATCH]->(rec) }))
                   AND ($genre IS NULL OR EXISTS { MATCH (rec)-[:IN_GENRE]->(g:Genre) WHERE toLower(g.name) = toLower($genre) })
+                  AND ($year IS NULL OR rec.year = $year)
                 OPTIONAL MATCH (rec)-[:IN_GENRE]->(genre:Genre)
                 RETURN rec.movieId AS id, rec.title AS title, rec.plot AS description,
                        rec.year AS releaseYear, rec.runtime AS durationMinutes,
@@ -84,6 +87,7 @@ public class RecommendationRepository {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         params.put("genre", genre);
+        params.put("year", year);
         params.put("limit", limit);
 
         return neo4jClient.query(cypher)

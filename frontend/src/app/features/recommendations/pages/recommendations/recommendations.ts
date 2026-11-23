@@ -1,9 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { NgStyle } from '@angular/common';
 import { Navbar } from '../../../../shared/navbar/navbar';
 import { MovieDetailModal } from '../../../movies/components/movie-detail-modal/movie-detail-modal';
 import { ShareMovieModal } from '../../../movies/components/share-movie-modal/share-movie-modal';
 import { MovieResponse } from '../../../movies/models/movie.models';
+import { MovieApiService } from '../../../movies/services/movie-api.service';
 import { WatchlistApiService } from '../../../watchlist/services/watchlist-api.service';
 import { RecommendedMovie } from '../../models/recommendation.models';
 import { RecommendationApiService } from '../../services/recommendation-api.service';
@@ -29,14 +31,20 @@ const FALLBACK_GRADIENTS = [
 
 @Component({
   selector: 'app-recommendations',
-  imports: [Navbar, NgStyle, MovieDetailModal, ShareMovieModal],
+  imports: [Navbar, FormsModule, NgStyle, MovieDetailModal, ShareMovieModal],
   templateUrl: './recommendations.html',
 })
 export class Recommendations implements OnInit {
   private readonly recApi = inject(RecommendationApiService);
   private readonly watchlistApi = inject(WatchlistApiService);
+  private readonly movieApi = inject(MovieApiService);
 
   activeTab = signal<Tab>('for-you');
+
+  // Filters State
+  genres = signal<string[]>(['All']);
+  selectedGenre = signal<string>('All');
+  selectedYear = signal<number | null>(null);
 
   selectedMovie = signal<MovieResponse | null>(null);
   sharingMovie = signal<MovieResponse | null>(null);
@@ -54,6 +62,38 @@ export class Recommendations implements OnInit {
   trendingMovies: RecommendationCard[] = [];
 
   ngOnInit(): void {
+    this.loadGenres();
+    this.loadForYou();
+    this.loadTrending();
+  }
+
+  loadGenres(): void {
+    this.movieApi.getAllGenres().subscribe({
+      next: (res) => {
+        const names = (res.data ?? []).map((g) => g.name).sort();
+        this.genres.set(['All', ...names]);
+      },
+    });
+  }
+
+  selectGenre(genre: string): void {
+    if (this.selectedGenre() !== genre) {
+      this.selectedGenre.set(genre);
+      this.reload();
+    }
+  }
+
+  onYearChange(): void {
+    this.reload();
+  }
+
+  clearFilters(): void {
+    this.selectedGenre.set('All');
+    this.selectedYear.set(null);
+    this.reload();
+  }
+
+  reload(): void {
     this.loadForYou();
     this.loadTrending();
   }
@@ -85,7 +125,12 @@ export class Recommendations implements OnInit {
   }
 
   private loadForYou(): void {
-    this.recApi.getRecommendations(null, 15).subscribe({
+    this.isForYouLoading.set(true);
+    this.forYouError.set(null);
+    const genre = this.selectedGenre() !== 'All' ? this.selectedGenre() : null;
+    const year = this.selectedYear();
+
+    this.recApi.getRecommendations(genre, year, 15).subscribe({
       next: (res) => {
         const list = res.data ?? [];
         this.forYouMovies = list.map((movie, index) => this.toCard(movie, index));
@@ -99,7 +144,12 @@ export class Recommendations implements OnInit {
   }
 
   private loadTrending(): void {
-    this.recApi.getTrending(null, 15).subscribe({
+    this.isTrendingLoading.set(true);
+    this.trendingError.set(null);
+    const genre = this.selectedGenre() !== 'All' ? this.selectedGenre() : null;
+    const year = this.selectedYear();
+
+    this.recApi.getTrending(genre, year, 15).subscribe({
       next: (res) => {
         const list = res.data ?? [];
         this.trendingMovies = list.map((movie, index) => this.toCard(movie, index));

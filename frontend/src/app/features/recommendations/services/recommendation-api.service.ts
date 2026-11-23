@@ -9,18 +9,24 @@ import { RecommendedMovie } from '../models/recommendation.models';
 export class RecommendationApiService {
   private readonly http = inject(HttpClient);
 
-  getRecommendations(genre?: string | null, limit: number = 12): Observable<ResponseData<RecommendedMovie[]>> {
+  getRecommendations(genre?: string | null, year?: number | null, limit: number = 12): Observable<ResponseData<RecommendedMovie[]>> {
     let params = new HttpParams().set('limit', limit);
     if (genre && genre !== 'All') {
       params = params.set('genre', genre);
     }
+    if (year) {
+      params = params.set('year', year);
+    }
     return this.http.get<ResponseData<RecommendedMovie[]>>(`${API_BASE_URL}/api/recommendations`, { params });
   }
 
-  getTrending(genre?: string | null, limit: number = 12): Observable<ResponseData<RecommendedMovie[]>> {
+  getTrending(genre?: string | null, year?: number | null, limit: number = 12): Observable<ResponseData<RecommendedMovie[]>> {
     let params = new HttpParams().set('limit', limit);
     if (genre && genre !== 'All') {
       params = params.set('genre', genre);
+    }
+    if (year) {
+      params = params.set('year', year);
     }
     return this.http.get<ResponseData<RecommendedMovie[]>>(`${API_BASE_URL}/api/recommendations/trending`, { params });
   }
