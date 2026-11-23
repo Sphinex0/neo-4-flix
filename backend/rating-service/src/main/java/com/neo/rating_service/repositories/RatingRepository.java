@@ -166,7 +166,7 @@ public class RatingRepository {
     private UserRatingStatsResponse toStats(String userId, Record record) {
         long count = record.get("ratingsCount").asLong();
         Value averageVal = record.get("averageRating");
-        Double average = averageVal.isNull() ? null : Math.round(averageVal.asDouble() * 10) / 10.0;
+        Double average = averageVal.isNull() ? null : (double) Math.round(averageVal.asDouble());
 
         return UserRatingStatsResponse.builder()
                 .userId(userId)

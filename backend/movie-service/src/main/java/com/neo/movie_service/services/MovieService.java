@@ -253,7 +253,7 @@ public class MovieService {
                 .posterUrl(movie.getPosterUrl())
                 .trailerUrl(movie.getTrailerUrl())
                 .director(movie.getDirector())
-                .imdbRating(movie.getImdbRating())
+                .imdbRating(movie.getImdbRating() != null ? (double) Math.round(movie.getImdbRating()) : null)
                 .genres(genreResponses)
                 .createdAt(movie.getCreatedAt())
                 .updatedAt(movie.getUpdatedAt())

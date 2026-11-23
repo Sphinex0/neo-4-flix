@@ -108,7 +108,7 @@ class MovieServiceTest {
 
         assertThat(response.getId()).isEqualTo("1");
         assertThat(response.getTitle()).isEqualTo("Toy Story");
-        assertThat(response.getImdbRating()).isEqualTo(8.3);
+        assertThat(response.getImdbRating()).isEqualTo(8.0);
     }
 
     @Test

@@ -146,7 +146,7 @@ public class RecommendationRepository {
                 .posterUrl(!posterVal.isNull() ? posterVal.asString() : null)
                 .trailerUrl(!trailerVal.isNull() ? trailerVal.asString() : null)
                 .director(!directorVal.isNull() ? directorVal.asString() : null)
-                .imdbRating(!imdbVal.isNull() ? imdbVal.asDouble() : null)
+                .imdbRating(!imdbVal.isNull() ? (double) Math.round(imdbVal.asDouble()) : null)
                 .genres(!genresVal.isNull() ? genresVal.asList(Value::asString) : List.of())
                 .recommendationReason(defaultReason)
                 .matchScore(!scoreVal.isNull() ? scoreVal.asDouble() : 0.0)
