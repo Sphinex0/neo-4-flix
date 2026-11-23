@@ -37,10 +37,10 @@ class RecommendationServiceTest {
                 .imdbRating(8.8)
                 .build();
 
-        when(recommendationRepository.recommendTrending(eq(null), eq(null), eq(10)))
+        when(recommendationRepository.recommendTrending(eq(null), eq(null), eq(null), eq(10)))
                 .thenReturn(List.of(movie));
 
-        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations(null, null, 10);
+        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations(null, null, null, 10);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getTitle()).isEqualTo("Inception");
@@ -57,14 +57,14 @@ class RecommendationServiceTest {
                 .imdbRating(8.7)
                 .build();
 
-        when(recommendationRepository.recommendTrending(eq("user-1"), eq(null), eq(10)))
+        when(recommendationRepository.recommendTrending(eq("user-1"), eq(null), eq(null), eq(10)))
                 .thenReturn(List.of(movie));
 
-        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations("user-1", null, 10);
+        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations("user-1", null, null, 10);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getTitle()).isEqualTo("Interstellar");
-        verify(recommendationRepository).recommendTrending(eq("user-1"), eq(null), eq(10));
+        verify(recommendationRepository).recommendTrending(eq("user-1"), eq(null), eq(null), eq(10));
     }
 
     @Test
@@ -83,10 +83,10 @@ class RecommendationServiceTest {
                 .matchScore(3.0)
                 .build();
 
-        when(recommendationRepository.recommendCollaborative(eq("user-1"), eq(null), eq(2)))
+        when(recommendationRepository.recommendCollaborative(eq("user-1"), eq(null), eq(null), eq(2)))
                 .thenReturn(List.of(movie1, movie2));
 
-        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations("user-1", null, 2);
+        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations("user-1", null, null, 2);
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getTitle()).isEqualTo("The Dark Knight");
@@ -107,16 +107,36 @@ class RecommendationServiceTest {
                 .title("Movie 2")
                 .build();
 
-        when(recommendationRepository.recommendCollaborative("user-1", null, 2))
+        when(recommendationRepository.recommendCollaborative("user-1", null, null, 2))
                 .thenReturn(List.of(movie1));
-        when(recommendationRepository.recommendTrending("user-1", null, 1))
+        when(recommendationRepository.recommendTrending("user-1", null, null, 1))
                 .thenReturn(List.of(movie2));
 
-        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations("user-1", null, 2);
+        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations("user-1", null, null, 2);
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getTitle()).isEqualTo("Movie 1");
         assertThat(result.get(1).getTitle()).isEqualTo("Movie 2");
+    }
+
+    @Test
+    @DisplayName("Should filter recommendations by genre and release year")
+    void shouldFilterByGenreAndYear() {
+        when(recommendationRepository.countUserRatings("user-1")).thenReturn(3L);
+
+        RecommendedMovieResponse movie1 = RecommendedMovieResponse.builder()
+                .id("m-1")
+                .title("Dune")
+                .releaseYear(2021)
+                .build();
+
+        when(recommendationRepository.recommendCollaborative("user-1", "sci-fi", 2021, 5))
+                .thenReturn(List.of(movie1));
+
+        List<RecommendedMovieResponse> result = recommendationService.getPersonalizedRecommendations("user-1", "Sci-Fi", 2021, 5);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("Dune");
     }
 
     @Test

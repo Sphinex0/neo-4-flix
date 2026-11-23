@@ -25,6 +25,54 @@
       </button>
     </div>
 
+    <!-- Filters: Genre and Release Year -->
+    <div class="flex flex-col gap-3 rounded-xl border border-[#2A3140] bg-[#151A23] p-4">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <label for="yearInput" class="text-xs font-semibold text-[#A0A9B8]">Release Year:</label>
+          <input
+            id="yearInput"
+            type="number"
+            min="1900"
+            max="2030"
+            placeholder="e.g. 2023"
+            [(ngModel)]="selectedYear"
+            (ngModelChange)="onYearChange()"
+            class="w-32 rounded-lg border border-[#2A3140] bg-[#0D1017] px-3 py-1.5 text-xs font-medium text-[#EEF1F6] outline-none placeholder-[#5B6579] hover:border-[#5B6579] focus:border-[#FF5A5F]"
+          />
+        </div>
+
+        @if (selectedGenre() !== 'All' || selectedYear()) {
+          <button
+            type="button"
+            (click)="clearFilters()"
+            class="cursor-pointer text-xs font-semibold text-[#FF5A5F] hover:underline"
+          >
+            Clear filters
+          </button>
+        }
+      </div>
+
+      <!-- Genre Pills -->
+      <div class="flex flex-wrap items-center gap-2 pt-1">
+        <span class="mr-1 text-xs font-semibold text-[#A0A9B8]">Genre:</span>
+        @for (genre of genres(); track genre) {
+          <button
+            type="button"
+            (click)="selectGenre(genre)"
+            class="cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition"
+            [ngStyle]="{
+              background: selectedGenre() === genre ? '#FF5A5F' : '#1C222D',
+              color: selectedGenre() === genre ? '#0D1017' : '#C9D0DC',
+              border: selectedGenre() === genre ? '1px solid #FF5A5F' : '1px solid #2A3140'
+            }"
+          >
+            {{ genre }}
+          </button>
+        }
+      </div>
+    </div>
+
     @if (actionMessage()) {
       <p class="m-0 text-sm text-[#38D0B9]">{{ actionMessage() }}</p>
     }

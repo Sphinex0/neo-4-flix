@@ -27,19 +27,21 @@ public class RecommendationController {
     public ResponseEntity<ResponseData<List<RecommendedMovieResponse>>> getPersonalizedRecommendations(
             @RequestHeader(value = "Neo-User-Id", required = false) String userId,
             @RequestParam(required = false) String genre,
+            @RequestParam(required = false) Integer year,
             @RequestParam(defaultValue = "10") int limit
     ) {
         List<RecommendedMovieResponse> recommendations =
-                recommendationService.getPersonalizedRecommendations(userId, genre, limit);
+                recommendationService.getPersonalizedRecommendations(userId, genre, year, limit);
         return ResponseEntity.ok(ResponseData.success("Recommendations retrieved successfully", recommendations));
     }
 
     @GetMapping("/trending")
     public ResponseEntity<ResponseData<List<RecommendedMovieResponse>>> getTrendingMovies(
             @RequestParam(required = false) String genre,
+            @RequestParam(required = false) Integer year,
             @RequestParam(defaultValue = "10") int limit
     ) {
-        List<RecommendedMovieResponse> trending = recommendationService.getTrendingMovies(genre, limit);
+        List<RecommendedMovieResponse> trending = recommendationService.getTrendingMovies(genre, year, limit);
         return ResponseEntity.ok(ResponseData.success("Trending movies retrieved successfully", trending));
     }
 
